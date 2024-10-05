@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.7.17">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
-    <mxGraphModel dx="662" dy="343" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="934" dy="485" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
@@ -47,6 +47,14 @@
         <mxCell id="K9RmvqkDkaU8wMu9pPuD-12" value="&lt;span id=&quot;docs-internal-guid-44035d83-7fff-ea7f-9492-5141b80bd1a2&quot;&gt;&lt;span style=&quot;font-size: 9pt; font-family: Arial, sans-serif; background-color: rgb(255, 255, 255); font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-alternates: normal; font-variant-position: normal; vertical-align: baseline; white-space-collapse: preserve;&quot;&gt;Subtract the divisor(r2) from the dividend(r1), keep the difference in &lt;/span&gt;&lt;/span&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255); font-family: Arial, sans-serif; font-size: 9pt; white-space-collapse: preserve;&quot;&gt;r1 as the new dividend.&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
           <mxGeometry x="289" y="560" width="180" height="70" as="geometry" />
         </mxCell>
+        <mxCell id="qwA8c6eQVYafrWKvCbjQ-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="K9RmvqkDkaU8wMu9pPuD-14" target="K9RmvqkDkaU8wMu9pPuD-20">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="665" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="570" y="665" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
         <mxCell id="K9RmvqkDkaU8wMu9pPuD-14" value="Increase the quotient(r3) by 1" style="rounded=1;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
           <mxGeometry x="259" y="650" width="240" height="30" as="geometry" />
         </mxCell>
@@ -73,7 +81,7 @@
           <mxGeometry x="490" y="490" width="159" height="90" as="geometry" />
         </mxCell>
         <mxCell id="qwA8c6eQVYafrWKvCbjQ-0" value="Stop d&lt;span style=&quot;background-color: initial;&quot;&gt;ivision.s&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="690" y="360" width="120" height="80" as="geometry" />
+          <mxGeometry x="660" y="360" width="120" height="80" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
