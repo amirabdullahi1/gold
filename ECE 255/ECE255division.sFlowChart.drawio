@@ -96,7 +96,7 @@
         <mxCell id="0xpmapLkxp66fmtdaelJ-2" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;Error, division by zero.&lt;/font&gt;" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;position2=0.54;size=14;position=0.43;base=10;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
           <mxGeometry x="592" y="350" width="70" height="44" as="geometry" />
         </mxCell>
-        <mxCell id="MsnGlFerflT4_Gc2oFh7-0" value="&amp;nbsp;r3 should contain the quotient of division of the inputs stored in r1 and r2. r4 should contain the modulo of division of the inputs stored in r1 and r2." style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;size=30;position=0.35;base=33;position2=0.46;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+        <mxCell id="MsnGlFerflT4_Gc2oFh7-0" value="&amp;nbsp;r3 should contain the quotient of the division of the inputs stored in r1 and r2. r4 should contain the modulo of division of the inputs stored in r1 and r2." style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;size=30;position=0.35;base=33;position2=0.46;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="660" y="219" width="130" height="140" as="geometry" />
         </mxCell>
         <mxCell id="MsnGlFerflT4_Gc2oFh7-2" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;division.s flow chart&amp;nbsp;&lt;/h1&gt;&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;br&gt;&lt;/h1&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
