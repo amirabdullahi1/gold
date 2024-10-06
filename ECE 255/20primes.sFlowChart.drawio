@@ -67,8 +67,8 @@
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-19" value="&lt;div style=&quot;font-size: 11px;&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;Divide i(r7) by j(r0) to get i mod j. &lt;/font&gt;&lt;font style=&quot;background-color: initial;&quot;&gt;i(r7) is already in r1 so keep j(r0) in r2 (divide function will do r1/r2 and keep the modulo in r4). &lt;/font&gt;&lt;span style=&quot;background-color: initial; text-wrap: nowrap; color: rgba(0, 0, 0, 0); font-family: monospace; text-align: start; font-size: 0px;&quot;&gt;3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22n(r5)%26amp%3Bnbsp%3B%22%20style%3D%22rhombus%3BwhiteSpace%3Dwrap%3Bhtml%3D1%3B%22%20vertex%3D%221%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22480%22%20y%3D%2290%22%20width%3D%2280%22%20height%3D%2280%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=9;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="35" y="400" width="180" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="J-oFv2lPrlL1pE4jfR2Q-26" value="" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="245" y="460" width="80" height="80" as="geometry" />
+        <mxCell id="J-oFv2lPrlL1pE4jfR2Q-26" value="r4(i mod j) == 0" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="235" y="460" width="100" height="100" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
