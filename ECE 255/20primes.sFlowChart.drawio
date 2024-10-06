@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.7.17">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
-    <mxGraphModel dx="1679" dy="919" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="572" dy="313" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
@@ -26,7 +26,9 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-61" value="NO" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-0" target="J-oFv2lPrlL1pE4jfR2Q-60">
-          <mxGeometry relative="1" as="geometry" />
+          <mxGeometry x="-0.5699" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-0" value="n(r5) &amp;lt; 20" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="470" y="165" width="80" height="80" as="geometry" />
@@ -119,7 +121,7 @@
           <mxGeometry x="70" y="525" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-40" value="i might still be composite, loop again." style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;size=30;position=0.44;position2=0.63;base=10;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="309" y="466" width="80" height="80" as="geometry" />
+          <mxGeometry x="307" y="466" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-46" value="See &lt;b&gt;Q3.&lt;/b&gt;&amp;nbsp;for division flow chart." style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;position2=0.7;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="33" y="89" width="70" height="80" as="geometry" />
@@ -158,7 +160,10 @@
           <mxGeometry x="650" y="263" width="160" height="107" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-60" value="Stop 20primes.s" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="629" y="167" width="90" height="75" as="geometry" />
+          <mxGeometry x="689" y="167" width="90" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="J-oFv2lPrlL1pE4jfR2Q-63" value="Succesfully found 1st 20 primes &amp;gt;2" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;size=30;position=0.25;position2=0.17;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="560" y="90" width="120" height="110" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
