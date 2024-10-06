@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.7.17">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
-    <mxGraphModel dx="1145" dy="626" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1259" dy="689" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
@@ -162,8 +162,8 @@
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-60" value="Stop 20primes.s" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="687" y="207" width="90" height="75" as="geometry" />
         </mxCell>
-        <mxCell id="J-oFv2lPrlL1pE4jfR2Q-63" value="prime_array should contain 1st 20 primes &amp;gt;2." style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;size=30;position=0.25;position2=0.29;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="538" y="160" width="140" height="80" as="geometry" />
+        <mxCell id="J-oFv2lPrlL1pE4jfR2Q-63" value="prime_array should contain 1st 20 primes &amp;gt;2." style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;size=30;position=0.25;position2=0.37;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="648" y="137" width="140" height="80" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-64" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;20primes.s flow chart&lt;/h1&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="17" y="46" width="180" height="120" as="geometry" />
