@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.7.17">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
-    <mxGraphModel dx="812" dy="445" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1481" dy="811" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
@@ -8,17 +8,17 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="cQ4_4YdVN7kmOieFbHOs-0" value="Start 20primes.s" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
-          <mxGeometry x="114" y="67.5" width="90" height="75" as="geometry" />
+          <mxGeometry x="112" y="107.5" width="90" height="75" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-45" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="cQ4_4YdVN7kmOieFbHOs-2" target="J-oFv2lPrlL1pE4jfR2Q-0">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="510" y="105" />
+              <mxPoint x="508" y="145" />
             </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="cQ4_4YdVN7kmOieFbHOs-2" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;prime_array = .space 80,&amp;nbsp;&lt;/font&gt;&lt;div style=&quot;font-size: 11px;&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;r5 = n(number of primes found) = 0,&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 11px;&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;r6 = prime-switch = 1,&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 11px;&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;r7 =&amp;nbsp; i(starting number) = 1,&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 11px;&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;r8 = limit(equal to i/2) = 0,&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 11px;&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;r9 = address(first open prime_array spot).&lt;/font&gt;&lt;/div&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
-          <mxGeometry x="224" y="60" width="250" height="90" as="geometry" />
+          <mxGeometry x="222" y="100" width="250" height="90" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-4" value="YES" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-0" target="J-oFv2lPrlL1pE4jfR2Q-3">
           <mxGeometry x="-0.3333" relative="1" as="geometry">
@@ -31,27 +31,27 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-0" value="n(r5) &amp;lt; 20" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="470" y="165" width="80" height="80" as="geometry" />
+          <mxGeometry x="468" y="205" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-3" target="J-oFv2lPrlL1pE4jfR2Q-5">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-3" value="i(r7) += 2&lt;div&gt;(i is at least 3 since we want primes &amp;gt;2).&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="270" y="175" width="120" height="60" as="geometry" />
+          <mxGeometry x="268" y="215" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-5" target="J-oFv2lPrlL1pE4jfR2Q-9">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-5" value="&lt;div style=&quot;font-size: 11px;&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;Divide i(r7) by 2 to get quotient as limit.&lt;/font&gt;&lt;/div&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;keep i(r7) in r1 and keep 2 in r2 (divide function will do r1/r2 and keep the quotient in r3). Keep quotient as limit in r8.&lt;/font&gt;&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start; text-wrap: nowrap; background-color: initial;&quot;&gt;%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22n(r5)%26amp%3Bnbsp%3B%22%20style%3D%22rhombus%3BwhiteSpace%3Dwrap%3Bhtml%3D1%3B%22%20vertex%3D%221%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22480%22%20y%3D%2290%22%20width%3D%2280%22%20height%3D%2280%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=9;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="30" y="170" width="210" height="70" as="geometry" />
+          <mxGeometry x="28" y="210" width="210" height="70" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-9" target="J-oFv2lPrlL1pE4jfR2Q-14">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="320" y="295" as="targetPoint" />
+            <mxPoint x="318" y="335" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-9" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;Keep 2 in r0 as j(inner loop counter).&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="30" y="275" width="210" height="40" as="geometry" />
+          <mxGeometry x="28" y="315" width="210" height="40" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-14" target="J-oFv2lPrlL1pE4jfR2Q-15">
           <mxGeometry relative="1" as="geometry" />
@@ -63,9 +63,9 @@
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-14" target="J-oFv2lPrlL1pE4jfR2Q-49">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="520" y="455" as="targetPoint" />
+            <mxPoint x="518" y="495" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="625" y="375" />
+              <mxPoint x="623" y="415" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -75,19 +75,19 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-14" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;j(r0) &amp;lt; limit(r8)&lt;/font&gt;" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="340" y="325" width="110" height="100" as="geometry" />
+          <mxGeometry x="338" y="365" width="110" height="100" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-15" target="J-oFv2lPrlL1pE4jfR2Q-19">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-15" value="Add 1 to j(r0)." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="97.5" y="357.5" width="75" height="35" as="geometry" />
+          <mxGeometry x="95.5" y="397.5" width="75" height="35" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-19" target="J-oFv2lPrlL1pE4jfR2Q-26">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-19" value="&lt;div style=&quot;font-size: 11px;&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;Divide i(r7) by j(r0) to get i mod j. &lt;/font&gt;&lt;font style=&quot;background-color: initial;&quot;&gt;i(r7) is already in r1 so keep j(r0) in r2 (divide function will do r1/r2 and keep the modulo in r4). &lt;/font&gt;&lt;span style=&quot;background-color: initial; text-wrap: nowrap; color: rgba(0, 0, 0, 0); font-family: monospace; text-align: start; font-size: 0px;&quot;&gt;3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22n(r5)%26amp%3Bnbsp%3B%22%20style%3D%22rhombus%3BwhiteSpace%3Dwrap%3Bhtml%3D1%3B%22%20vertex%3D%221%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22480%22%20y%3D%2290%22%20width%3D%2280%22%20height%3D%2280%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=9;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="45" y="435" width="180" height="70" as="geometry" />
+          <mxGeometry x="43" y="475" width="180" height="70" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-26" target="J-oFv2lPrlL1pE4jfR2Q-28">
           <mxGeometry relative="1" as="geometry" />
@@ -106,32 +106,32 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-26" value="r4(i mod j) == 0" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="240" y="505" width="100" height="100" as="geometry" />
+          <mxGeometry x="238" y="545" width="100" height="100" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-28" target="J-oFv2lPrlL1pE4jfR2Q-49">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="520" y="535" as="targetPoint" />
+            <mxPoint x="518" y="575" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="130" y="615" />
-              <mxPoint x="625" y="615" />
+              <mxPoint x="128" y="655" />
+              <mxPoint x="623" y="655" />
             </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-28" value="i is not prime, set prime-switch(r6) to 0 and exit loop." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="70" y="525" width="120" height="60" as="geometry" />
+          <mxGeometry x="68" y="565" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-40" value="i might still be composite, loop again." style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;size=30;position=0.44;position2=0.63;base=10;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="307" y="466" width="80" height="80" as="geometry" />
+          <mxGeometry x="305" y="506" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-46" value="See &lt;b&gt;Q3.&lt;/b&gt;&amp;nbsp;for division flow chart." style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;position2=0.7;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="33" y="89" width="70" height="80" as="geometry" />
+          <mxGeometry x="31" y="129" width="70" height="80" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-48" value="See &lt;b&gt;Q3.&lt;/b&gt;&amp;nbsp;for division flow chart." style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;position2=0.57;size=35;position=0.29;base=30;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="20" y="348" width="70" height="86" as="geometry" />
+          <mxGeometry x="18" y="388" width="70" height="86" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-52" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=1;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-49" target="J-oFv2lPrlL1pE4jfR2Q-0">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="500" y="290" as="targetPoint" />
+            <mxPoint x="498" y="330" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-53" value="YES" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="J-oFv2lPrlL1pE4jfR2Q-52">
@@ -148,22 +148,25 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-49" value="prime-switch(r6) == 0" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="560" y="447.75" width="130" height="116.5" as="geometry" />
+          <mxGeometry x="558" y="487.75" width="130" height="116.5" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-54" value="i is not prime, loop again." style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;size=30;position=0.29;position2=0.14;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="530" y="410" width="70" height="80" as="geometry" />
+          <mxGeometry x="528" y="450" width="70" height="80" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="J-oFv2lPrlL1pE4jfR2Q-55" target="J-oFv2lPrlL1pE4jfR2Q-0">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-55" value="i is prime. Add 1 to&amp;nbsp;&lt;div&gt;r5(number of primes found), write number i into prime_array and increment r9(address) to next open spot in prime_array.&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="650" y="263" width="160" height="107" as="geometry" />
+          <mxGeometry x="648" y="303" width="160" height="107" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-60" value="Stop 20primes.s" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="689" y="167" width="90" height="75" as="geometry" />
+          <mxGeometry x="687" y="207" width="90" height="75" as="geometry" />
         </mxCell>
         <mxCell id="J-oFv2lPrlL1pE4jfR2Q-63" value="prime_array should contain 1st 20 primes &amp;gt;2." style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;size=30;position=0.25;position2=0.29;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="540" y="120" width="140" height="80" as="geometry" />
+          <mxGeometry x="538" y="160" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="J-oFv2lPrlL1pE4jfR2Q-64" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;20primes.s flow chart&lt;/h1&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="17" y="46" width="180" height="120" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
