@@ -19,7 +19,7 @@
         <mxCell id="80Q0q_pPlhcz2nu9SwjC-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="80Q0q_pPlhcz2nu9SwjC-4" target="80Q0q_pPlhcz2nu9SwjC-6" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="80Q0q_pPlhcz2nu9SwjC-4" value="Push all the numbers in myArray to a stack." style="rounded=1;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+        <mxCell id="80Q0q_pPlhcz2nu9SwjC-4" value="Push the first&amp;nbsp;&lt;div&gt;number in myArray on to the stack.&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
           <mxGeometry x="410" y="160" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="80Q0q_pPlhcz2nu9SwjC-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="80Q0q_pPlhcz2nu9SwjC-6" target="80Q0q_pPlhcz2nu9SwjC-8" edge="1">
