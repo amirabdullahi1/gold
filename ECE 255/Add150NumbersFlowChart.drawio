@@ -28,8 +28,8 @@
         <mxCell id="80Q0q_pPlhcz2nu9SwjC-6" value="Pop the 2 top numbers off the stack then push the sum of the 2 numbers on to the stack." style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="490" y="150" width="170" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="80Q0q_pPlhcz2nu9SwjC-8" value="" style="rhombus;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="535" y="280" width="80" height="80" as="geometry" />
+        <mxCell id="80Q0q_pPlhcz2nu9SwjC-8" value="Stack contains&amp;nbsp;&lt;div&gt;at least&amp;nbsp;&lt;/div&gt;&lt;div&gt;2 numbers?&lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="512.5" y="260" width="125" height="120" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
