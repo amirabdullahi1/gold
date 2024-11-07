@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36" version="24.8.4">
   <diagram name="Page-1" id="WzFi8ONWFbmVDeuxYhoO">
-    <mxGraphModel dx="525" dy="273" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="899" dy="468" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -153,7 +153,7 @@
         </mxCell>
         <mxCell id="yzPpIXYgzV2jEK6DkwBs-25" value="Returns to Content&lt;div&gt;Approval Tab&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="yzPpIXYgzV2jEK6DkwBs-24">
           <mxGeometry x="0.2061" relative="1" as="geometry">
-            <mxPoint x="22" as="offset" />
+            <mxPoint x="17" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="yzPpIXYgzV2jEK6DkwBs-28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;dashed=1;" edge="1" parent="1" source="yzPpIXYgzV2jEK6DkwBs-15" target="yzPpIXYgzV2jEK6DkwBs-27">
@@ -166,7 +166,7 @@
         </mxCell>
         <mxCell id="yzPpIXYgzV2jEK6DkwBs-30" value="Exits Content Approval Tab" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="yzPpIXYgzV2jEK6DkwBs-28">
           <mxGeometry x="-0.1939" y="1" relative="1" as="geometry">
-            <mxPoint x="-28" y="-4" as="offset" />
+            <mxPoint x="-28" y="-1" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="yzPpIXYgzV2jEK6DkwBs-31" value="Alt" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;" vertex="1" parent="1">
