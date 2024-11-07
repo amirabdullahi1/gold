@@ -106,9 +106,9 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="bTBkoyc0kLt1lV2FvMyY-27" value="Deletes&amp;nbsp;&lt;div&gt;Data&lt;/div&gt;&lt;div&gt;Periodically&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-26">
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-27" value="Deletes&amp;nbsp;&lt;div&gt;Over-retained&lt;/div&gt;&lt;div&gt;Data&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-26">
           <mxGeometry x="-0.0902" y="2" relative="1" as="geometry">
-            <mxPoint y="4" as="offset" />
+            <mxPoint x="6" y="4" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="mt74yqtBo2QoQVtlmqhJ-6" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="bTBkoyc0kLt1lV2FvMyY-15" vertex="1">
@@ -130,12 +130,12 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-16" value="Alt" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=39;height=20;snapToPoint=0;fixDash=0;container=0;backgroundOutline=0;collapsible=0;connectable=1;" vertex="1" parent="1">
-          <mxGeometry x="191" y="160" width="359" height="260" as="geometry" />
+          <mxGeometry x="191" y="160" width="369" height="260" as="geometry" />
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-22" value="" style="swimlane;startSize=0;container=0;dashed=1;" vertex="1" parent="1">
-          <mxGeometry x="191" y="280" width="359" height="110" as="geometry" />
+          <mxGeometry x="191" y="280" width="369" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="bTBkoyc0kLt1lV2FvMyY-23" value="[System Deletes Data Periodically]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-22">
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-23" value="[System Deletes Data after Retention Period]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-22">
           <mxGeometry x="128.99969696969697" y="10.00030303030303" as="geometry" />
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;endArrow=open;endFill=0;" edge="1" parent="1" source="bTBkoyc0kLt1lV2FvMyY-33" target="bTBkoyc0kLt1lV2FvMyY-25">
