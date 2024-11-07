@@ -38,7 +38,7 @@
             <mxPoint x="-2" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="L0XvnI_Pm6O_dVxBcAxA-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;" edge="1" parent="1" source="Kk3vLf3-KDLgnlOfN_HX-4" target="Kk3vLf3-KDLgnlOfN_HX-7">
+        <mxCell id="L0XvnI_Pm6O_dVxBcAxA-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;" parent="1" source="Kk3vLf3-KDLgnlOfN_HX-4" target="Kk3vLf3-KDLgnlOfN_HX-7" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="535" y="240" as="targetPoint" />
             <Array as="points">
@@ -47,12 +47,12 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="L0XvnI_Pm6O_dVxBcAxA-3" value="Sends Data Storage&lt;div&gt;Preferences&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="L0XvnI_Pm6O_dVxBcAxA-1">
+        <mxCell id="L0XvnI_Pm6O_dVxBcAxA-3" value="Selects Data Storage&lt;div&gt;Preferences&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="L0XvnI_Pm6O_dVxBcAxA-1" vertex="1" connectable="0">
           <mxGeometry x="-0.2017" relative="1" as="geometry">
             <mxPoint x="10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="L0XvnI_Pm6O_dVxBcAxA-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;dashed=1;" edge="1" parent="1" source="Kk3vLf3-KDLgnlOfN_HX-7" target="Kk3vLf3-KDLgnlOfN_HX-4">
+        <mxCell id="L0XvnI_Pm6O_dVxBcAxA-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;dashed=1;" parent="1" source="Kk3vLf3-KDLgnlOfN_HX-7" target="Kk3vLf3-KDLgnlOfN_HX-4" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="470" y="300" />
@@ -60,7 +60,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="L0XvnI_Pm6O_dVxBcAxA-5" value="Shows&amp;nbsp;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="L0XvnI_Pm6O_dVxBcAxA-4">
+        <mxCell id="L0XvnI_Pm6O_dVxBcAxA-5" value="Shows Selected&amp;nbsp;&lt;div&gt;Data Storage&lt;/div&gt;&lt;div&gt;Preferences&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="L0XvnI_Pm6O_dVxBcAxA-4" vertex="1" connectable="0">
           <mxGeometry x="0.2869" relative="1" as="geometry">
             <mxPoint x="15" as="offset" />
           </mxGeometry>
