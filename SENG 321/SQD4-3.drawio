@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36" version="24.8.4">
   <diagram name="Page-1" id="4Xnhq7FAUNMDCpx05n0X">
-    <mxGraphModel dx="452" dy="219" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="331" dy="160" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -63,7 +63,7 @@
             <mxPoint x="13" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="bTBkoyc0kLt1lV2FvMyY-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;dashed=1;dashPattern=8 8;" edge="1" parent="1" source="mt74yqtBo2QoQVtlmqhJ-6" target="mt74yqtBo2QoQVtlmqhJ-9">
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;dashed=1;" edge="1" parent="1" source="mt74yqtBo2QoQVtlmqhJ-6" target="mt74yqtBo2QoQVtlmqhJ-9">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="410" y="260" />
@@ -80,6 +80,9 @@
               <mxPoint x="280" y="260" />
             </Array>
           </mxGeometry>
+        </mxCell>
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-8" value="Return to Content&amp;nbsp;&lt;div&gt;Approval Tab&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="416" y="260" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
