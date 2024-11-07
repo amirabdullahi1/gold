@@ -133,7 +133,7 @@
           <mxGeometry x="191" y="160" width="369" height="290" as="geometry" />
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-22" value="" style="swimlane;startSize=0;container=0;dashed=1;" vertex="1" parent="1">
-          <mxGeometry x="191" y="280" width="369" height="130" as="geometry" />
+          <mxGeometry x="191" y="280" width="369" height="100" as="geometry" />
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-23" value="[System Deletes Data after Retention Period]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-22">
           <mxGeometry x="128.99969696969697" y="10.00030303030303" as="geometry" />
