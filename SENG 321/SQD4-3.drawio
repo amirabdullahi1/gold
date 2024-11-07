@@ -55,7 +55,7 @@
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-11" value="User" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-7">
           <mxGeometry x="-0.714" y="4" relative="1" as="geometry">
-            <mxPoint x="-105" y="-150" as="offset" />
+            <mxPoint x="-96" y="-150" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-18" value="[User Deletes Data]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-7">
