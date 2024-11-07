@@ -76,7 +76,7 @@
           <mxGeometry x="5" y="90" width="10" height="70" as="geometry" />
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-14" value="" style="group" vertex="1" connectable="0" parent="1">
-          <mxGeometry x="290" y="110" width="120" height="300" as="geometry" />
+          <mxGeometry x="290" y="110" width="249" height="380" as="geometry" />
         </mxCell>
         <mxCell id="mt74yqtBo2QoQVtlmqhJ-3" value="&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;:C&lt;/span&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;ontentApprovalTab&lt;/span&gt;&lt;div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="bTBkoyc0kLt1lV2FvMyY-14" vertex="1">
           <mxGeometry width="120" height="300" as="geometry" />
@@ -109,7 +109,13 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-16" value="Alt" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=39;height=20;snapToPoint=0;fixDash=0;container=0;backgroundOutline=0;collapsible=0;connectable=1;" vertex="1" parent="1">
-          <mxGeometry x="191" y="160" width="349" height="200" as="geometry" />
+          <mxGeometry x="191" y="160" width="349" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-22" value="" style="swimlane;startSize=0;container=0;" vertex="1" parent="1">
+          <mxGeometry x="191" y="280" width="349" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-23" value="[System Deletes Data Periodically]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-22">
+          <mxGeometry x="128.99969696969697" y="10.00030303030303" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
