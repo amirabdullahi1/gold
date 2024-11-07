@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36" version="24.8.4">
   <diagram name="Page-1" id="4Xnhq7FAUNMDCpx05n0X">
-    <mxGraphModel dx="918" dy="362" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="525" dy="207" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -17,7 +17,7 @@
           <mxGeometry x="50" y="60" width="10" height="80" as="geometry" />
         </mxCell>
         <mxCell id="mt74yqtBo2QoQVtlmqhJ-8" value="" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;" parent="1" vertex="1">
-          <mxGeometry x="210" y="140" width="20" height="300" as="geometry" />
+          <mxGeometry x="190" y="140" width="20" height="300" as="geometry" />
         </mxCell>
         <mxCell id="mt74yqtBo2QoQVtlmqhJ-4" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="mt74yqtBo2QoQVtlmqhJ-8" vertex="1">
           <mxGeometry x="5" y="60" width="10" height="80" as="geometry" />
@@ -30,9 +30,22 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="mt74yqtBo2QoQVtlmqhJ-12" value="Content Approval&amp;nbsp;&lt;div&gt;Tab Selected&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="mt74yqtBo2QoQVtlmqhJ-10" vertex="1" connectable="0">
+        <mxCell id="mt74yqtBo2QoQVtlmqhJ-12" value="Navigates to Content&amp;nbsp;&lt;div&gt;Approval Tab&amp;nbsp;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="mt74yqtBo2QoQVtlmqhJ-10" vertex="1" connectable="0">
           <mxGeometry x="0.033" y="3" relative="1" as="geometry">
             <mxPoint x="-6" y="2" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;" edge="1" parent="1" source="mt74yqtBo2QoQVtlmqhJ-9" target="mt74yqtBo2QoQVtlmqhJ-6">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="410" y="210" />
+              <mxPoint x="410" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-2" value="Selects Content&amp;nbsp;&lt;div&gt;Data Folder&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-1">
+          <mxGeometry x="-0.2694" y="1" relative="1" as="geometry">
+            <mxPoint x="13" as="offset" />
           </mxGeometry>
         </mxCell>
       </root>
