@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36" version="24.8.4">
   <diagram name="Page-1" id="4Xnhq7FAUNMDCpx05n0X">
-    <mxGraphModel dx="899" dy="468" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="475" dy="247" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -82,10 +82,10 @@
           <mxGeometry x="416" y="264" as="geometry" />
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-16" value="Alt" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=39;height=20;snapToPoint=0;fixDash=0;container=0;backgroundOutline=0;collapsible=0;connectable=1;" parent="1" vertex="1">
-          <mxGeometry x="191" y="160" width="349" height="340" as="geometry" />
+          <mxGeometry x="150" y="160" width="390" height="340" as="geometry" />
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-22" value="" style="swimlane;startSize=0;container=0;dashed=1;" parent="1" vertex="1">
-          <mxGeometry x="191" y="283" width="349" height="100" as="geometry" />
+          <mxGeometry x="150" y="283" width="390" height="100" as="geometry" />
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-23" value="[System Deletes Data after Expiration Period]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="bTBkoyc0kLt1lV2FvMyY-22" vertex="1" connectable="0">
           <mxGeometry x="153.99969696969697" y="8.00030303030303" as="geometry" />
