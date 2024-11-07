@@ -149,7 +149,7 @@
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-30" value="User Specifies Data Expiration&amp;nbsp;Threshold" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-29">
           <mxGeometry x="0.0979" relative="1" as="geometry">
-            <mxPoint x="-6" as="offset" />
+            <mxPoint x="-15" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;" edge="1" parent="1" source="bTBkoyc0kLt1lV2FvMyY-52" target="bTBkoyc0kLt1lV2FvMyY-61">
