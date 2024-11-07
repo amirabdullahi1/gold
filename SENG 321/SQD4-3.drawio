@@ -106,7 +106,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="bTBkoyc0kLt1lV2FvMyY-27" value="Deletes&amp;nbsp;&lt;div&gt;Over-retained&lt;/div&gt;&lt;div&gt;Data&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-26">
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-27" value="Deletes&amp;nbsp;&lt;div&gt;Expired&lt;/div&gt;&lt;div&gt;Data&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-26">
           <mxGeometry x="-0.0902" y="2" relative="1" as="geometry">
             <mxPoint x="6" y="4" as="offset" />
           </mxGeometry>
@@ -135,7 +135,7 @@
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-22" value="" style="swimlane;startSize=0;container=0;dashed=1;" vertex="1" parent="1">
           <mxGeometry x="191" y="280" width="369" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="bTBkoyc0kLt1lV2FvMyY-23" value="[System Deletes Data after Retention Period]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-22">
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-23" value="[System Deletes Data after Expiration Period]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-22">
           <mxGeometry x="128.99969696969697" y="10.00030303030303" as="geometry" />
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;endArrow=open;endFill=0;" edge="1" parent="1" source="bTBkoyc0kLt1lV2FvMyY-33" target="bTBkoyc0kLt1lV2FvMyY-25">
@@ -147,7 +147,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="bTBkoyc0kLt1lV2FvMyY-30" value="User Specifies Data Retention Period" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-29">
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-30" value="User Specifies Data Expiration&amp;nbsp;Threshold" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-29">
           <mxGeometry x="0.0979" relative="1" as="geometry">
             <mxPoint x="-6" as="offset" />
           </mxGeometry>
