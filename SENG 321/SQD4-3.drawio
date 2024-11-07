@@ -60,7 +60,7 @@
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-18" value="[User Deletes Data]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="bTBkoyc0kLt1lV2FvMyY-7">
           <mxGeometry x="-0.6721" y="1" relative="1" as="geometry">
-            <mxPoint x="-42" y="-91" as="offset" />
+            <mxPoint x="-34" y="-91" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-8" value="Returns to Content&amp;nbsp;&lt;div&gt;Approval Tab&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="1">
