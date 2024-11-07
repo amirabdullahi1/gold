@@ -85,18 +85,19 @@
           <mxGeometry x="191" y="160" width="349" height="340" as="geometry" />
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-22" value="" style="swimlane;startSize=0;container=0;dashed=1;" parent="1" vertex="1">
-          <mxGeometry x="191" y="280" width="349" height="100" as="geometry" />
+          <mxGeometry x="191" y="283" width="349" height="100" as="geometry" />
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-23" value="[System Deletes Data after Expiration Period]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="bTBkoyc0kLt1lV2FvMyY-22" vertex="1" connectable="0">
-          <mxGeometry x="153.99969696969697" y="10.00030303030303" as="geometry" />
+          <mxGeometry x="153.99969696969697" y="8.00030303030303" as="geometry" />
         </mxCell>
-        <mxCell id="bTBkoyc0kLt1lV2FvMyY-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;endArrow=open;endFill=0;" parent="1" source="bTBkoyc0kLt1lV2FvMyY-33" target="bTBkoyc0kLt1lV2FvMyY-25" edge="1">
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;endArrow=open;endFill=0;" parent="1" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="206" y="342.5185185185185" as="sourcePoint" />
+            <mxPoint x="206" y="306.0204081632653" as="sourcePoint" />
             <Array as="points">
-              <mxPoint x="340" y="310" />
-              <mxPoint x="340" y="310" />
+              <mxPoint x="340" y="306" />
+              <mxPoint x="340" y="306" />
             </Array>
+            <mxPoint x="470.9999999999999" y="306.0204081632653" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-30" value="User Specifies Data Expiration&amp;nbsp;Threshold" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="bTBkoyc0kLt1lV2FvMyY-29" vertex="1" connectable="0">
@@ -104,13 +105,14 @@
             <mxPoint x="-11" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="bTBkoyc0kLt1lV2FvMyY-70" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;endArrow=open;endFill=0;dashed=1;" parent="1" source="bTBkoyc0kLt1lV2FvMyY-25" target="bTBkoyc0kLt1lV2FvMyY-33" edge="1">
+        <mxCell id="bTBkoyc0kLt1lV2FvMyY-70" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;endArrow=open;endFill=0;dashed=1;" parent="1" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="220" y="360" as="targetPoint" />
+            <mxPoint x="206" y="365.0204081632653" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="340" y="360" />
-              <mxPoint x="340" y="360" />
+              <mxPoint x="340" y="365" />
+              <mxPoint x="340" y="365" />
             </Array>
+            <mxPoint x="470.9999999999999" y="365.0204081632653" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="bTBkoyc0kLt1lV2FvMyY-72" value="Shows Time Remaining Before Next Deletion" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="bTBkoyc0kLt1lV2FvMyY-70" vertex="1" connectable="0">
