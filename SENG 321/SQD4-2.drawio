@@ -17,15 +17,15 @@
           <mxGeometry x="630" y="125" width="100" height="300" as="geometry" />
         </mxCell>
         <mxCell id="Kk3vLf3-KDLgnlOfN_HX-7" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="Kk3vLf3-KDLgnlOfN_HX-2" vertex="1">
-          <mxGeometry x="45" y="100" width="10" height="90" as="geometry" />
+          <mxGeometry x="45" y="100" width="10" height="80" as="geometry" />
         </mxCell>
         <mxCell id="yzPpIXYgzV2jEK6DkwBs-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;" edge="1" parent="Kk3vLf3-KDLgnlOfN_HX-2">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="55" y="124.99" as="sourcePoint" />
-            <mxPoint x="55" y="174.99" as="targetPoint" />
+            <mxPoint x="55" y="115" as="sourcePoint" />
+            <mxPoint x="55" y="165" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="90" y="124.99" />
-              <mxPoint x="90" y="174.99" />
+              <mxPoint x="90" y="115" />
+              <mxPoint x="90" y="165" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -60,8 +60,8 @@
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="535" y="240" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="480" y="240" />
-              <mxPoint x="480" y="240" />
+              <mxPoint x="540" y="230" />
+              <mxPoint x="540" y="230" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -73,8 +73,8 @@
         <mxCell id="L0XvnI_Pm6O_dVxBcAxA-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;dashed=1;" parent="1" source="Kk3vLf3-KDLgnlOfN_HX-7" target="Kk3vLf3-KDLgnlOfN_HX-4" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="540" y="310" />
-              <mxPoint x="540" y="310" />
+              <mxPoint x="610" y="300" />
+              <mxPoint x="610" y="300" />
             </Array>
           </mxGeometry>
         </mxCell>
