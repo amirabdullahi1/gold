@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36" version="24.8.4">
   <diagram name="Page-1" id="WzFi8ONWFbmVDeuxYhoO">
-    <mxGraphModel dx="681" dy="354" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="400" dy="208" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -15,6 +15,19 @@
         </mxCell>
         <mxCell id="Kk3vLf3-KDLgnlOfN_HX-7" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="Kk3vLf3-KDLgnlOfN_HX-2" vertex="1">
           <mxGeometry x="45" y="80" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzPpIXYgzV2jEK6DkwBs-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;" edge="1" parent="Kk3vLf3-KDLgnlOfN_HX-2" source="Kk3vLf3-KDLgnlOfN_HX-7" target="Kk3vLf3-KDLgnlOfN_HX-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="90" y="90" />
+              <mxPoint x="90" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzPpIXYgzV2jEK6DkwBs-4" value="Selects&lt;div&gt;Data Storage&lt;/div&gt;&lt;div&gt;Preferences&amp;nbsp;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="yzPpIXYgzV2jEK6DkwBs-3">
+          <mxGeometry x="-0.1396" y="1" relative="1" as="geometry">
+            <mxPoint y="8" as="offset" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="Kk3vLf3-KDLgnlOfN_HX-6" value="" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;" parent="1" vertex="1">
           <mxGeometry x="280" y="150" width="20" height="300" as="geometry" />
@@ -47,7 +60,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="L0XvnI_Pm6O_dVxBcAxA-3" value="Selects Data Storage&lt;div&gt;Preferences&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="L0XvnI_Pm6O_dVxBcAxA-1" vertex="1" connectable="0">
+        <mxCell id="L0XvnI_Pm6O_dVxBcAxA-3" value="Send Data Storage&lt;div&gt;Preferences&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="L0XvnI_Pm6O_dVxBcAxA-1" vertex="1" connectable="0">
           <mxGeometry x="-0.2017" relative="1" as="geometry">
             <mxPoint x="10" as="offset" />
           </mxGeometry>
