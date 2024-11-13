@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36" version="24.8.6">
   <diagram name="Page-1" id="WzFi8ONWFbmVDeuxYhoO">
-    <mxGraphModel dx="1224" dy="483" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="526" dy="1014" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -182,7 +182,7 @@
         <mxCell id="yzPpIXYgzV2jEK6DkwBs-40" value="[User Initializes Data Storage Preferences]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1" connectable="0">
           <mxGeometry x="440.00235294117635" y="190" as="geometry" />
         </mxCell>
-        <mxCell id="yzPpIXYgzV2jEK6DkwBs-41" value="[User Adjust Existing Data Storage Preferences]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1" connectable="0">
+        <mxCell id="yzPpIXYgzV2jEK6DkwBs-41" value="[User Adjusts Existing Data Storage Preferences]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1" connectable="0">
           <mxGeometry x="450.00235294117635" y="340" as="geometry" />
         </mxCell>
       </root>
