@@ -7,7 +7,7 @@
         <mxCell id="HwwphGhy5XaLdRf2e_HV-10" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="HwwphGhy5XaLdRf2e_HV-1" target="HwwphGhy5XaLdRf2e_HV-6">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="HwwphGhy5XaLdRf2e_HV-11" value="Content" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="HwwphGhy5XaLdRf2e_HV-10">
+        <mxCell id="HwwphGhy5XaLdRf2e_HV-11" value="Tailored Content" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="HwwphGhy5XaLdRf2e_HV-10">
           <mxGeometry x="-0.1038" y="1" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
@@ -65,7 +65,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="HwwphGhy5XaLdRf2e_HV-6" value="&lt;div&gt;Media Platform&lt;br&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;rounded=1;" vertex="1" parent="1">
-          <mxGeometry x="470" y="60" width="80" height="80" as="geometry" />
+          <mxGeometry x="490" y="60" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="HwwphGhy5XaLdRf2e_HV-8" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.996;entryY=0.869;entryDx=0;entryDy=0;exitX=-0.003;exitY=0.63;exitDx=0;exitDy=0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="HwwphGhy5XaLdRf2e_HV-2" target="HwwphGhy5XaLdRf2e_HV-5">
           <mxGeometry relative="1" as="geometry" />
