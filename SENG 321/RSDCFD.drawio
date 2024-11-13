@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36" version="24.8.4">
   <diagram name="Page-1" id="1wp_3Qv0Npw4YFb5__4A">
-    <mxGraphModel dx="420" dy="218" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="382" dy="198" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -12,7 +12,7 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="HwwphGhy5XaLdRf2e_HV-15" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.996;entryY=0.591;entryDx=0;entryDy=0;entryPerimeter=0;exitX=-0.005;exitY=0.236;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="HwwphGhy5XaLdRf2e_HV-2" target="HwwphGhy5XaLdRf2e_HV-5">
+        <mxCell id="HwwphGhy5XaLdRf2e_HV-15" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.996;entryY=0.591;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.001;exitY=0.246;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="HwwphGhy5XaLdRf2e_HV-2" target="HwwphGhy5XaLdRf2e_HV-5">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="HwwphGhy5XaLdRf2e_HV-16" value="Content" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="HwwphGhy5XaLdRf2e_HV-15">
@@ -20,7 +20,7 @@
             <mxPoint x="13" y="1" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="HwwphGhy5XaLdRf2e_HV-22" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.98;exitY=0.083;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" target="HwwphGhy5XaLdRf2e_HV-5">
+        <mxCell id="HwwphGhy5XaLdRf2e_HV-22" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.98;exitY=0.083;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.993;entryY=0.123;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="HwwphGhy5XaLdRf2e_HV-5">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="270" y="249.94871794871796" as="targetPoint" />
             <mxPoint x="321" y="260" as="sourcePoint" />
@@ -28,7 +28,7 @@
         </mxCell>
         <mxCell id="HwwphGhy5XaLdRf2e_HV-24" value="chat replies" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="HwwphGhy5XaLdRf2e_HV-22">
           <mxGeometry x="0.3412" y="-1" relative="1" as="geometry">
-            <mxPoint x="16" y="1" as="offset" />
+            <mxPoint x="16" y="3" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="HwwphGhy5XaLdRf2e_HV-1" value="0" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;container=1;rounded=1;" vertex="1" parent="1">
@@ -59,7 +59,7 @@
         <mxCell id="HwwphGhy5XaLdRf2e_HV-6" value="&lt;div&gt;Media Consumer&lt;br&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;rounded=1;" vertex="1" parent="1">
           <mxGeometry x="530" y="240" width="80" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="HwwphGhy5XaLdRf2e_HV-8" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.75;entryDx=0;entryDy=0;exitX=-0.003;exitY=0.63;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="HwwphGhy5XaLdRf2e_HV-2" target="HwwphGhy5XaLdRf2e_HV-5">
+        <mxCell id="HwwphGhy5XaLdRf2e_HV-8" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.996;entryY=0.869;entryDx=0;entryDy=0;exitX=-0.003;exitY=0.63;exitDx=0;exitDy=0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="HwwphGhy5XaLdRf2e_HV-2" target="HwwphGhy5XaLdRf2e_HV-5">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="HwwphGhy5XaLdRf2e_HV-20" value="Analytics" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="HwwphGhy5XaLdRf2e_HV-8">
