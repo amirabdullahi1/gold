@@ -34,7 +34,7 @@
         <mxCell id="HwwphGhy5XaLdRf2e_HV-26" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;exitX=0.235;exitY=1.009;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="HwwphGhy5XaLdRf2e_HV-2" target="HwwphGhy5XaLdRf2e_HV-25">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="HwwphGhy5XaLdRf2e_HV-32" value="Prompts" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="HwwphGhy5XaLdRf2e_HV-26">
+        <mxCell id="HwwphGhy5XaLdRf2e_HV-32" value="&lt;div&gt;Derived&lt;/div&gt;&lt;div&gt;Prompts&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="HwwphGhy5XaLdRf2e_HV-26">
           <mxGeometry x="-0.1658" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
@@ -76,7 +76,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="HwwphGhy5XaLdRf2e_HV-25" value="&lt;div&gt;Generative&lt;/div&gt;&lt;div&gt;Model&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;rounded=1;" vertex="1" parent="1">
-          <mxGeometry x="280" y="170" width="80" height="80" as="geometry" />
+          <mxGeometry x="280" y="180" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="HwwphGhy5XaLdRf2e_HV-27" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.699;entryY=0.997;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="HwwphGhy5XaLdRf2e_HV-25" target="HwwphGhy5XaLdRf2e_HV-2">
           <mxGeometry relative="1" as="geometry" />
