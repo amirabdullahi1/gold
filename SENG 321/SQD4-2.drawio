@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36" version="24.8.6">
   <diagram name="Page-1" id="WzFi8ONWFbmVDeuxYhoO">
-    <mxGraphModel dx="526" dy="1014" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="1224" dy="483" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -37,8 +37,8 @@
         <mxCell id="yzPpIXYgzV2jEK6DkwBs-27" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="Kk3vLf3-KDLgnlOfN_HX-6" vertex="1">
           <mxGeometry x="5" y="242.5" width="10" height="97.5" as="geometry" />
         </mxCell>
-        <mxCell id="hKJQPPWY5RA-zDGv6MNC-1" value="&lt;b style=&quot;font-weight:normal;&quot; id=&quot;docs-internal-guid-0b284c03-7fff-8bf4-ce98-43a4f99549da&quot;&gt;&lt;h4 dir=&quot;ltr&quot; style=&quot;line-height:1.38;margin-left: 36pt;margin-top:14pt;margin-bottom:4pt;&quot;&gt;&lt;span style=&quot;font-size:12pt;font-family:&#39;Times New Roman&#39;,serif;color:#666666;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;&quot;&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;span style=&quot;font-size:12pt;font-family:&#39;Times New Roman&#39;,serif;color:#666666;background-color:transparent;font-weight:700;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;&quot;&gt;UC-4-2: Approve Content Data Management&amp;nbsp;&lt;/span&gt;&lt;/h4&gt;&lt;/b&gt;" style="text;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="260" y="30" width="410" height="70" as="geometry" />
+        <mxCell id="hKJQPPWY5RA-zDGv6MNC-1" value="&lt;b style=&quot;font-weight:normal;&quot; id=&quot;docs-internal-guid-0b284c03-7fff-8bf4-ce98-43a4f99549da&quot;&gt;&lt;h4 dir=&quot;ltr&quot; style=&quot;line-height:1.38;margin-left: 36pt;margin-top:14pt;margin-bottom:4pt;&quot;&gt;&lt;span style=&quot;font-size:12pt;font-family:&#39;Times New Roman&#39;,serif;color:#666666;background-color:transparent;font-weight:700;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;&quot;&gt;UC-4-2: Approve Content Data Management&lt;/span&gt;&lt;/h4&gt;&lt;/b&gt;" style="text;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="260" y="10" width="410" height="50" as="geometry" />
         </mxCell>
         <mxCell id="hKJQPPWY5RA-zDGv6MNC-2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;curved=0;" parent="1" source="Kk3vLf3-KDLgnlOfN_HX-3" target="Kk3vLf3-KDLgnlOfN_HX-4" edge="1">
           <mxGeometry relative="1" as="geometry">
@@ -184,6 +184,9 @@
         </mxCell>
         <mxCell id="yzPpIXYgzV2jEK6DkwBs-41" value="[User Adjusts Existing Data Storage Preferences]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1" connectable="0">
           <mxGeometry x="450.00235294117635" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="LL7bTWd30xKj3nhOCg_0-1" value="Approve Content Data Management" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=220;height=30;" vertex="1" parent="1">
+          <mxGeometry x="260" y="90" width="520" height="400" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
