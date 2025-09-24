@@ -23,12 +23,12 @@ int main() {
     *PCONT = 0x40;                              /* Enable Port B input interrupts */
     *CTCON = 0x01;                              /* Disable Timer interrupts and start counting */
     
-    while(1) {
-        while((*CTSTAT & 0x1) == 0);
+    while (1) {
+        while ((*CTSTAT & 0x1) == 0);
 
         *CTSTAT = 0x0;                      /* Clear “reached 0” flag */
 
-        if(increment == 1) {
+        if (increment == 1) {
             digit = (digit + 1)%10;         /* Increment digit */
             *PBOUT = ((digit << 4) | 0x0);  /* Update Port B */
         }
@@ -36,23 +36,11 @@ int main() {
 }
 
 interrupt void intserv() {
-    *PCONT = 0x0;                       /* Disable interrupts before ISR */
-
-    if(increment == 0) {
-        while ((*PBIN & 0x1) != 0);     /* Wait until E is pressed */
-        while ((*PBIN & 0x1) == 0);     /* Wait until E is released */
+    if (increment == 0 && (*PBIN & 0x1) == 0) {       /* E is pressed */
         increment = 1;
-        return;
     }
 
-    else {
-        while ((*PBIN & 0x2) != 0);     /* Wait until D is pressed */
-        while ((*PBIN & 0x2) == 0);     /* Wait until D is released */
+    else if (increment == 1 && (*PBIN & 0x2) == 0) {  /* D is pressed */
         increment = 0;
-        return;
     }
-
-    *PCONT = 0x40;                      /* Enable interrupts after ISR */
 }
-
-// not sure if this is ok
