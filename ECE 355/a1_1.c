@@ -21,21 +21,21 @@ int main() {
     *CTCON = 0x11;                      /* Enable Timer interrupts and start counting */
     
     while(1) {
-        while ((*PBIN & 0x1) != 0  || (*PBIN & 0x2) == 0);      /* Wait until ONLY E is pressed */
-        while ((*PBIN & 0x1) == 0);                             /* Wait until E is released */
+        while ((*PBIN & 0x1) != 0);     /* Wait until E is pressed */
+        while ((*PBIN & 0x1) == 0);     /* Wait until E is released */
         increment = 1;
 
-        while ((*PBIN & 0x2) != 0 || (*PBIN & 0x1) == 0);       /* Wait until ONLY D is pressed */
-        while ((*PBIN & 0x2) == 0);                             /* Wait until D is released */
+        while ((*PBIN & 0x2) != 0);     /* Wait until D is pressed */
+        while ((*PBIN & 0x2) == 0);     /* Wait until D is released */
         increment = 0;
     }
 }
 
 interrupt void intserv() {
-    *CTSTAT = 0x0;                                              /* Clear “reached 0” flag */
+    *CTSTAT = 0x0;                      /* Clear “reached 0” flag */
 
     if(increment == 1) {
-        digit = (digit + 1)%10;                                 /* Increment digit */
-        *PBOUT = ((digit << 4) | 0x0);                          /* Update Port A */
+        digit = (digit + 1)%10;         /* Increment digit */
+        *PBOUT = ((digit << 4) | 0x0);  /* Update Port A */
     }
 }
