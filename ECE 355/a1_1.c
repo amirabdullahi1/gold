@@ -34,7 +34,7 @@ int main() {
 interrupt void intserv() {
     *CTSTAT = 0x0;                      /* Clear “reached 0” flag */
 
-    if(increment == 1) {
+    if (increment == 1) {
         digit = (digit + 1)%10;         /* Increment digit */
         *PBOUT = ((digit << 4) | 0x0);  /* Update Port A */
     }
