@@ -36,6 +36,6 @@ interrupt void intserv() {
 
     if (increment == 1) {
         digit = (digit + 1)%10;         /* Increment digit */
-        *PBOUT = ((digit << 4) | 0x0);  /* Update Port A */
+        *PBOUT = ((digit << 4) | 0x0);  /* Update Port B */
     }
 }
