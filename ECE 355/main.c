@@ -245,8 +245,8 @@ void EXTI2_3_IRQHandler()
 			period = read_out / 48000000.0f;
 			frequency = 1.0f / period;
 			// - Print calculated values to the console.
-			trace_printf("signal period %u us", period * 1000000);
-			trace_printf("signal frequency %u us", frequency * 1000000);
+			trace_printf("signal period %u ms", period * 1000ULL);
+			trace_printf("signal frequency %u ms", frequency * 1000ULL);
 			// NOTE: Function trace_printf does not work
 			// with floating-point numbers: you must use
 			// "unsigned int" type to print your signal
