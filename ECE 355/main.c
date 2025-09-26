@@ -124,12 +124,15 @@ void myGPIOB_Init()
 {
 	/* Enable clock for GPIOB peripheral */
 	// Relevant register: RCC->AHBENR
-
+	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+	
 	/* Configure PB2 as input */
 	// Relevant register: GPIOB->MODER
-
+	GPIOB->MODER &= ~(GPIO_MODER_MODER2);
+	
 	/* Ensure no pull-up/pull-down for PB2 */
 	// Relevant register: GPIOB->PUPDR
+	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR2);
 }
 
 
@@ -137,6 +140,7 @@ void myTIM2_Init()
 {
 	/* Enable clock for TIM2 peripheral */
 	// Relevant register: RCC->APB1ENR
+	RCC->APB1ENR &- ~(RCC_APB1ENR_TIM2EN);
 
 	/* Configure TIM2: buffer auto-reload, count up, stop on overflow,
 	 * enable update events, interrupt on overflow only */
@@ -230,3 +234,4 @@ void EXTI2_3_IRQHandler()
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
+
