@@ -140,7 +140,7 @@ void myTIM2_Init()
 {
 	/* Enable clock for TIM2 peripheral */
 	// Relevant register: RCC->APB1ENR
-	RCC->APB1ENR &- ~(RCC_APB1ENR_TIM2EN);
+	RCC->APB1ENR & ~(RCC_APB1ENR_TIM2EN);
 
 	/* Configure TIM2: buffer auto-reload, count up, stop on overflow,
 	 * enable update events, interrupt on overflow only */
@@ -234,4 +234,5 @@ void EXTI2_3_IRQHandler()
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
+
 
