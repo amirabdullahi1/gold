@@ -156,15 +156,19 @@ void myTIM2_Init()
 
 	/* Update timer registers */
 	// Relevant register: TIM2->EGR
-
+	TIM2->EGR |= TIM_EGR_UG;
+		
 	/* Assign TIM2 interrupt priority = 0 in NVIC */
 	// Relevant register: NVIC->IP[3], or use NVIC_SetPriority
-
+	NVIC_SetPriority(TIM2_IRQn, 0);
+	
 	/* Enable TIM2 interrupts in NVIC */
 	// Relevant register: NVIC->ISER[0], or use NVIC_EnableIRQ
-
+	NVIC_EnableIRQ(TIM2_IRQn);
+	
 	/* Enable update interrupt generation */
 	// Relevant register: TIM2->DIER
+	TIM2->DIER |= TIM_DIER_UIE;
 }
 
 
@@ -237,6 +241,7 @@ void EXTI2_3_IRQHandler()
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
+
 
 
 
