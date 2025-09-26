@@ -241,12 +241,12 @@ void EXTI2_3_IRQHandler()
 			TIM2->CR1 &= ~(TIM_CR1_CEN);
 			// - Read out count register (TIM2->CNT).
 			read_out = TIM2->CNT;
-			// - Calculate signal period and frequency.
+			// - Calculate signal period (ms) and frequency.
 			period = read_out / 48000000.0f;
 			frequency = 1.0f / period;
 			// - Print calculated values to the console.
-			trace_printf("signal period %u ms", period * 1000ULL);
-			trace_printf("signal frequency %u ms", frequency * 1000ULL);
+			trace_printf("signal period %u ms", (unsigned int)(period * 1000));
+			trace_printf("signal frequency %u Hz", (unsigned int)frequency);
 			// NOTE: Function trace_printf does not work
 			// with floating-point numbers: you must use
 			// "unsigned int" type to print your signal
