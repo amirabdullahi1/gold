@@ -140,15 +140,18 @@ void myTIM2_Init()
 {
 	/* Enable clock for TIM2 peripheral */
 	// Relevant register: RCC->APB1ENR
-	RCC->APB1ENR & ~(RCC_APB1ENR_TIM2EN);
+	RCC->APB1ENR |= (RCC_APB1ENR_TIM2EN);
 
 	/* Configure TIM2: buffer auto-reload, count up, stop on overflow,
 	 * enable update events, interrupt on overflow only */
 	// Relevant register: TIM2->CR1
-
+	TIM2->CR1 = ((uint16_t)0x008C);
+		
 	/* Set clock prescaler value */
+	uint16_t myTIM2_PRESCALER = 0x0000; 
 	TIM2->PSC = myTIM2_PRESCALER;
 	/* Set auto-reloaded delay */
+	uint32_t myTIM2_PERIOD = 480000000;
 	TIM2->ARR = myTIM2_PERIOD;
 
 	/* Update timer registers */
@@ -234,5 +237,6 @@ void EXTI2_3_IRQHandler()
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
+
 
 
