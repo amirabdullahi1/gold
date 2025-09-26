@@ -176,6 +176,7 @@ void myEXTI_Init()
 {
 	/* Map EXTI2 line to PB2 */
 	// Relevant register: SYSCFG->EXTICR[0]
+	SYSCFG->EXTICR[0]
 
 	/* EXTI2 line interrupts: set rising-edge trigger */
 	// Relevant register: EXTI->RTSR
@@ -241,6 +242,7 @@ void EXTI2_3_IRQHandler()
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
+
 
 
 
