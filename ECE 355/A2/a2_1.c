@@ -47,9 +47,10 @@ int main() {
       *PBOUT = (unsigned char)((digit_2 << 4) | LED1MASK);          
     }
   }
+
+  exit(0);
 }
 
-interrupt void intserv() {
   if ((*PAIN & SWMASK) != 0) {        /* Only alt when SW releasd */
       if (alt_led == 0) {
         *PBOUT |= LED1MASK;         /* Turn off Led1 */
