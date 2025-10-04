@@ -16,7 +16,8 @@ interrupt void intserv();
 
 unsigned char digit_1 = 0;	            /* 1st Digit to be displayed */ 
 unsigned char digit_2 = 0;	            /* 2nd Digit to be displayed */ 
-unsigned int alt_led = 0;               /* 0 for Led1 and 1 for Led2 */
+volatile unsigned int sw_rel = 0;       /* 1 if sw pressed->released */
+volatile unsigned int alt_led = 0;      /* 0 for Led1 and 1 for Led2 */
 
 int main() {
   *PADIR = 0x78;                        /* Set Port A direction */
@@ -28,7 +29,7 @@ int main() {
   asm("MoveControl PSR,#0x40");         /* CPU IRQ enabled */
   *PCONT = 0x10;                        /* Enable port A interrupts */
   *CTCON = 0x01;                        /* Start counting w/o timer interrupt enable */
-  *PAOUT &= SWMASK;                     /* Init Port A w/ &ing SWMASK so Dig1 = 0 */
+  *PAOUT = digit_1;                     /* Init Port A w/ Dig1 = 0 */
   *PBOUT = LED2MASK;                    /* Init Port B w/ LED2MASK so Led1 on, Led2 off and Dig2 = 0 */
     
   while (1) {
@@ -38,12 +39,12 @@ int main() {
     if (alt_led == 0) {
       /* Increment digit_1 */
       digit_1 = (digit_1 + 1)%10;    
-      /* Update Port A w/o changing SW */                
-      *PAOUT = (unsigned char)((digit_1 << 3) | (*PAOUT & SWMASK)); 
+      /* Update Port A */                
+      *PAOUT = digit_1 << 3; 
     } else {
       /* Increment digit_2 */
       digit_2 = (digit_2 + 1)%10;
-      /* Update Port B so Led1 is off and Led2 is on */                               
+      /* Update Port B w/ Led1 off and Led2 on */                               
       *PBOUT = (unsigned char)((digit_2 << 4) | LED1MASK);          
     }
   }
@@ -52,15 +53,19 @@ int main() {
 }
 
 interrupt void intserv() {
-  if ((*PAIN & SWMASK) != 0) {        /* Only alt when SW releasd */
-      if (alt_led == 0) {
-        *PBOUT |= LED1MASK;         /* Turn off Led1 */
-        *PBOUT &= ~LED2MASK;        /* Turn on Led2 */
-        alt_led = 1;
-      } else {
-        *PBOUT &= ~LED1MASK;        /* Turn on Led1 */
-        *PBOUT |= LED2MASK;         /* Turn off Led2 */
-        alt_led = 0;
-      }
+  /* Only alt when SW releasd */
+  if ((*PAIN & SWMASK) != 0 && sw_rel ) {  
+    sw_rel = 0;
+    if (alt_led == 0) {
+      *PBOUT |= LED1MASK;   /* Turn off Led1 */
+      *PBOUT &= ~LED2MASK;  /* Turn on Led2 */
+      alt_led = 1;
+    } else {
+      *PBOUT &= ~LED1MASK;  /* Turn on Led1 */
+      *PBOUT |= LED2MASK;   /* Turn off Led2 */
+      alt_led = 0;
+    }
+  } else {                 
+    if((*PAIN & SWMASK) == 0) sw_rel = 1;
   }
 }
