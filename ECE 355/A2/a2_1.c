@@ -51,6 +51,7 @@ int main() {
   exit(0);
 }
 
+interrupt void intserv() {
   if ((*PAIN & SWMASK) != 0) {        /* Only alt when SW releasd */
       if (alt_led == 0) {
         *PBOUT |= LED1MASK;         /* Turn off Led1 */
