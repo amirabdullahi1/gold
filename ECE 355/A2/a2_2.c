@@ -25,13 +25,13 @@ int main() {
   *CNTM = 100000000;                    /* Initialize Timer */
   *IVECT = (unsigned int *) &intserv;   /* Set interrupt vector */
   asm("MoveControl PSR,#0x40");         /* CPU IRQ enabled */
-	*CTCON = 0x11;                      	/* Enable Timer interrupts and start counting */
+	*CTCON = 0x11;                      	/* Enable Timer interrupts and start count */
   *PAOUT = 0x0;        									/* Init Port A w/ Dig1 = 0 and Led1 on */
 	*PBOUT |= LED2MASK;										/* Init Port B w/ Led2 off and Dig2 = 0 */
 
 	while (1) {
-		while((*PBIN & SWMASK) != 0);				/* Wait until SW is pressed */
-		while((*PBIN & SWMASK) == 0);				/* Wait until SW is released */
+		while((*PBIN & SWMASK) != 0);		/* Wait until SW is pressed */
+		while((*PBIN & SWMASK) == 0);		/* Wait until SW is released */
 		
 		if (alt_led == 0) {
 			*PAOUT |= LED1MASK;         /* Turn off Led1 */
