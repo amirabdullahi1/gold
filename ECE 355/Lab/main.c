@@ -245,8 +245,8 @@ void EXTI2_3_IRQHandler()
 			period = read_out / 48000000.0f;
 			frequency = 1.0f / period;
 			// - Print calculated values to the console.
-			// Cannot detect too low frequencies (<?kHz)
-			// -> TIM2 will time out
+			// Cannot detect too low frequencies (<200 mHz)
+			// -> TIM2 will time out between edges (overflow)
 			// Cannot detect too high frequencies (>?kHz)
 			// -> CPU gets overloaded and cannot process all interrupts
 			// -> frequency gets inaccurate since CPU misses interrupts
@@ -271,4 +271,5 @@ void EXTI2_3_IRQHandler()
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
+
 
