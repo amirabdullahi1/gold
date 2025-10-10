@@ -252,6 +252,7 @@ void EXTI2_3_IRQHandler()
 			// -> frequency gets inaccurate since CPU misses interrupts
 			trace_printf("signal period %u us\n", (unsigned int)(period * 1000000));
 			trace_printf("signal frequency %u Hz\n", (unsigned int)frequency);
+			trace_printf("signal frequency %u mHz\n", (unsigned int)(frequency * 1000));
 			// NOTE: Function trace_printf does not work
 			// with floating-point numbers: you must use
 			// "unsigned int" type to print your signal
@@ -270,3 +271,4 @@ void EXTI2_3_IRQHandler()
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
+
