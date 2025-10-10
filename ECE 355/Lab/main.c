@@ -249,7 +249,7 @@ void EXTI2_3_IRQHandler()
 				// - Print calculated values to the console.
 				// Cannot detect too low frequencies (<100 mHz)
 				// -> TIM2 will time out between edges (overflow)
-				// Cannot detect too high frequencies (>220 kHz)
+				// Cannot detect too high frequencies accurately (>220 kHz)
 				// -> CPU gets overloaded and cannot process all interrupts
 				// -> frequency gets inaccurate since CPU misses interrupts
 				trace_printf("signal period %u us\n", (unsigned int)(period * 1000000));
@@ -273,6 +273,7 @@ void EXTI2_3_IRQHandler()
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
+
 
 
 
