@@ -95,8 +95,7 @@ void SystemClock48MHz( void )
 /*****************************************************************/
 
 
-int
-main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 
 	SystemClock48MHz();
@@ -274,5 +273,6 @@ void EXTI2_3_IRQHandler()
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
+
 
 
