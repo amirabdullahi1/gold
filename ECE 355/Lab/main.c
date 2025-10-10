@@ -241,7 +241,7 @@ void EXTI2_3_IRQHandler()
 			// - Stop timer (TIM2->CR1).
 			TIM2->CR1 &= ~(TIM_CR1_CEN);
 			// - Read out count register (TIM2->CNT).
-				read_out = TIM2->CNT;
+			read_out = TIM2->CNT;
 			if (read_out > 0U) {
 				// - Calculate signal period (s) and frequency.
 				period = (double)read_out / 48000000.0;
@@ -274,4 +274,5 @@ void EXTI2_3_IRQHandler()
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
+
 
