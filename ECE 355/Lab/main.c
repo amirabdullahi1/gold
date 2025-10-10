@@ -218,8 +218,9 @@ void EXTI2_3_IRQHandler()
 {
 	// Declare/initialize your local variables here...
 	unsigned int read_out = 0;
-	float period = 0;
-	float frequency = 0;
+	double period = 0;
+	double frequency_Hz = 0;
+	double frequency_mHz = 0;
 
 
 	/* Check if EXTI2 interrupt pending flag is indeed set */
@@ -229,7 +230,7 @@ void EXTI2_3_IRQHandler()
 		// 1. If this is the first edge:
 		if (!timerTriggered) {
 			// - Clear count register (TIM2->CNT).
-			TIM2->CNT = 0x00000000;
+			TIM2->CNT = 0U;
 			// - Start timer (TIM2->CR1).
 			TIM2->CR1 |= TIM_CR1_CEN;
 			// - indicate that TIM2 has started counting (timertimerTriggered).
@@ -240,25 +241,27 @@ void EXTI2_3_IRQHandler()
 			// - Stop timer (TIM2->CR1).
 			TIM2->CR1 &= ~(TIM_CR1_CEN);
 			// - Read out count register (TIM2->CNT).
-			read_out = TIM2->CNT;
-			// - Calculate signal period (s) and frequency.
-			period = read_out / 48000000.0f;
-			frequency = 1.0f / period;
-			// - Print calculated values to the console.
-			// Cannot detect too low frequencies (<100 mHz)
-			// -> TIM2 will time out between edges (overflow)
-			// Cannot detect too high frequencies (>750 kHz)
-			// -> CPU gets overloaded and cannot process all interrupts
-			// -> frequency gets inaccurate due to delayed interrupt processing
-			trace_printf("signal period %u us\n", (unsigned int)(period * 1000000));
-			trace_printf("signal frequency %u Hz\n", (unsigned int)frequency);
-			trace_printf("signal frequency %u mHz\n", (unsigned int)(frequency * 1000));
-			// NOTE: Function trace_printf does not work
-			// with floating-point numbers: you must use
-			// "unsigned int" type to print your signal
-			// period and frequency.
-			// - indicate that TIM2 has stopped counting (timertimerTriggered).
-			timerTriggered = 0;
+				read_out = TIM2->CNT;
+			if (read_out > 0U) {
+				// - Calculate signal period (s) and frequency.
+				period = (double)read_out / 48000000.0;
+				frequency_Hz = 48000000.0 / (double)read_out;
+				frequency_mHz = 48000000000.0 / (double)read_out;
+				// - Print calculated values to the console.
+				// Cannot detect too low frequencies (<100 mHz)
+				// -> TIM2 will time out between edges (overflow)
+				// Cannot detect too high frequencies (>220 kHz)
+				// -> CPU gets overloaded and cannot process all interrupts
+				// -> frequency gets inaccurate since CPU misses interrupts
+				trace_printf("signal period %u us\n", (unsigned int)(period * 1000000));
+				trace_printf("signal frequency %u Hz %u mHz\n", (unsigned int)frequency_Hz, (unsigned int)frequency_mHz);
+				// NOTE: Function trace_printf does not work
+				// with floating-point numbers: you must use
+				// "unsigned int" type to print your signal
+				// period and frequency.
+				// - indicate that TIM2 has stopped counting (timertimerTriggered).
+				timerTriggered = 0;
+			}
 		}
 		// 2. Clear EXTI2 interrupt pending flag (EXTI->PR).
 		// NOTE: A pending register (PR) bit is cleared
@@ -271,7 +274,4 @@ void EXTI2_3_IRQHandler()
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
-
-
-
 
