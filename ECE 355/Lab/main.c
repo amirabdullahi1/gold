@@ -1,0 +1,372 @@
+//
+// This file is part of the GNU ARM Eclipse distribution.
+// Copyright (c) 2014 Liviu Ionescu.
+//
+
+// ----------------------------------------------------------------------------
+// School: University of Victoria, Canada.
+// Course: ECE 355 "Microprocessor-Based Systems".
+// This is template code for Part 2 of Introductory Lab.
+//
+// See "system/include/cmsis/stm32f051x8.h" for register/bit definitions.
+// See "system/src/cmsis/vectors_stm32f051x8.c" for handler declarations.
+// ----------------------------------------------------------------------------
+
+#include <stdio.h>
+#include "diag/Trace.h"
+#include "cmsis/cmsis_device.h"
+
+// ----------------------------------------------------------------------------
+//
+// STM32F0 empty sample (trace via $(trace)).
+//
+// Trace support is enabled by adding the TRACE macro definition.
+// By default the trace messages are forwarded to the $(trace) output,
+// but can be rerouted to any device or completely suppressed, by
+// changing the definitions required in system/src/diag/trace_impl.c
+// (currently OS_USE_TRACE_ITM, OS_USE_TRACE_SEMIHOSTING_DEBUG/_STDOUT).
+//
+
+// ----- main() ---------------------------------------------------------------
+
+// Sample pragmas to cope with warnings. Please note the related line at
+// the end of this function, used to pop the compiler diagnostics status.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+#pragma GCC diagnostic ignored "-Wreturn-type"
+
+
+/* Definitions of registers and their bits are
+given in system/include/cmsis/stm32f051x8.h */
+
+
+/* Clock prescaler for TIM2 timer: no prescaling */
+#define myTIM2_PRESCALER ((uint16_t)0x0000)
+/* Maximum possible setting for overflow */
+#define myTIM2_PERIOD ((uint32_t)0xFFFFFFFF)
+
+void myGPIOA_Init(void);
+void myGPIOB_Init(void);
+void myTIM2_Init(void);
+void myEXTI0_Init(void);
+void myEXTI2_Init(void);
+void myEXTI3_Init(void);
+
+
+// Declare/initialize your global variables here...
+// NOTE: You'll need at least one global variable
+// (say, timerTriggered = 0 or 1) to indicate
+// whether TIM2 has started counting or not.
+unsigned int timerTriggered = 0;
+
+/*** Call this function to boost the STM32F0xx clock to 48 MHz ***/
+
+void SystemClock48MHz( void )
+{
+	//
+	// Disable the PLL
+	//
+	RCC->CR &= ~(RCC_CR_PLLON);
+	//
+	// Wait for the PLL to unlock
+	//
+	while (( RCC->CR & RCC_CR_PLLRDY ) != 0 );
+	//
+	// Configure the PLL for 48-MHz system clock
+	//
+	RCC->CFGR = 0x00280000;
+	//
+	// Enable the PLL
+	//
+	RCC->CR |= RCC_CR_PLLON;
+	//
+	// Wait for the PLL to lock
+	//
+	while (( RCC->CR & RCC_CR_PLLRDY ) != RCC_CR_PLLRDY );
+	//
+	// Switch the processor to the PLL clock source
+	//
+	RCC->CFGR = ( RCC->CFGR & (~RCC_CFGR_SW_Msk)) | RCC_CFGR_SW_PLL;
+	//
+	// Update the system with the new clock frequency
+	//
+	SystemCoreClockUpdate();
+
+}
+
+/*****************************************************************/
+
+
+int main(int argc, char* argv[])
+{
+
+	SystemClock48MHz();
+
+	trace_printf("This is the Lab...\n");
+	trace_printf("System clock: %u Hz\n", SystemCoreClock);
+
+	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN; /* Enable SYSCFG clock */
+
+	myGPIOA_Init(); /* Initialize I/O port PA */
+	myGPIOB_Init(); /* Initialize I/O port PB */
+	myTIM2_Init(); /* Initialize timer TIM2 */
+	myEXTI0_Init(); /* Initialize EXTI0 */
+	myEXTI2_Init(); /* Initialize EXTI2 */
+	myEXTI3_Init(); /* Initialize EXTI3 */
+
+
+	while (1)
+	{
+		// Nothing is going on here...
+	}
+
+	return 0;
+
+}
+
+
+void myGPIOA_Init()
+{
+	/* Enable clock for GPIOA peripheral */
+	// Relevant register: RCC->AHBENR
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+
+	/* Configure PA0 as input */
+	// Relevant register: GPIOA->MODER
+	GPIOA->MODER &= ~(GPIO_MODER_MODER0);
+
+	/* Ensure no pull-up/pull-down for PB2 */
+	// Relevant register: GPIOA->PUPDR
+	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR0);
+}
+
+void myGPIOB_Init()
+{
+	/* Enable clock for GPIOB peripheral */
+	// Relevant register: RCC->AHBENR
+	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+
+	/* Configure PB2 and PB3 as input */
+	// Relevant register: GPIOB->MODER
+	GPIOB->MODER &= ~(GPIO_MODER_MODER2);
+	GPIOB->MODER &= ~(GPIO_MODER_MODER3);
+
+	/* Ensure no pull-up/pull-down for PB2 and PB3 */
+	// Relevant register: GPIOB->PUPDR
+	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR2);
+	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR3);
+}
+
+
+void myTIM2_Init()
+{
+	/* Enable clock for TIM2 peripheral */
+	// Relevant register: RCC->APB1ENR
+	RCC->APB1ENR |= (RCC_APB1ENR_TIM2EN);
+
+	/* Configure TIM2: buffer auto-reload, count up, stop on overflow,
+	* enable update events, interrupt on overflow only */
+	// Relevant register: TIM2->CR1
+	TIM2->CR1 = ((uint16_t)0x008C);
+
+	/* Set myTIM2_PRESCALER clock prescaler value */
+	TIM2->PSC = (uint16_t)0x0000;
+	/* Set myTIM2_PERIOD auto-reloaded delay */
+	TIM2->ARR = (uint32_t)480000000;
+
+	/* Update timer registers */
+	// Relevant register: TIM2->EGR
+	TIM2->EGR |= TIM_EGR_UG;
+
+	/* Assign TIM2 interrupt priority = 0 in NVIC */
+	// Relevant register: NVIC->IP[3], or use NVIC_SetPriority
+	NVIC_SetPriority(TIM2_IRQn, 0);
+
+	/* Enable TIM2 interrupts in NVIC */
+	// Relevant register: NVIC->ISER[0], or use NVIC_EnableIRQ
+	NVIC_EnableIRQ(TIM2_IRQn);
+
+	/* Enable update interrupt generation */
+	// Relevant register: TIM2->DIER
+	TIM2->DIER |= TIM_DIER_UIE;
+}
+
+void myEXTI0_Init()
+{
+	/* Map EXTI0 line to PA0 */
+	// Relevant register: SYSCFG->EXTICR[0]
+	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA;
+
+	/* EXTI0 line interrupts: set falling-edge trigger */
+	// Relevant register: EXTI->FTSR ??
+	EXTI->FTSR |= EXTI_FTSR_TR0;
+
+	/* Unmask interrupts from EXTI0 line */
+	// Relevant register: EXTI->IMR ??
+	EXTI->IMR |= EXTI_IMR_MR0;
+
+	/* Assign EXTI0 interrupt priority = 64 in NVIC */
+	// Use NVIC_SetPriority
+	NVIC_SetPriority(EXTI0_1_IRQn, 64);
+
+	/* Enable EXTI0 interrupts in NVIC */
+	// Use NVIC_EnableIRQ
+	NVIC_EnableIRQ(EXTI0_1_IRQn);
+
+}
+
+void myEXTI2_Init()
+{
+	/* Map EXTI2 line to PB2 */
+	// Relevant register: SYSCFG->EXTICR[0]
+	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI2_PB;
+
+	/* EXTI2 line interrupts: set rising-edge trigger */
+	// Relevant register: EXTI->RTSR
+	EXTI->RTSR |= EXTI_RTSR_TR2;
+
+	/* Unmask interrupts from EXTI2 line */
+	// Relevant register: EXTI->IMR
+	EXTI->IMR |= EXTI_IMR_MR2;
+
+	/* Assign EXTI2 interrupt priority = 0 in NVIC */
+	// Relevant register: NVIC->IP[2], or use NVIC_SetPriority
+	NVIC_SetPriority(EXTI2_3_IRQn, 0);
+
+	/* Enable EXTI2 interrupts in NVIC */
+	// Relevant register: NVIC->ISER[0], or use NVIC_EnableIRQ
+	NVIC_EnableIRQ(EXTI2_3_IRQn);
+}
+
+
+void myEXTI3_Init()
+{
+	/* Map EXTI3 line to PB3 */
+	// Relevant register: SYSCFG->EXTICR[0]
+	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI3_PB;
+
+	/* EXTI3 line interrupts: set rising-edge trigger */
+	// Relevant register: EXTI->RTSR
+	EXTI->RTSR |= EXTI_RTSR_TR3;
+
+	/* Unmask interrupts from EXTI3 line */
+	// Relevant register: EXTI->IMR
+	EXTI->IMR |= EXTI_IMR_MR3;
+
+	/* Assign EXTI3 interrupt priority = 0 in NVIC */
+	// Use NVIC_SetPriority
+	NVIC_SetPriority(EXTI2_3_IRQn, 0);
+
+	/* Enable EXTI3 interrupts in NVIC */
+	// Use NVIC_EnableIRQ
+	NVIC_EnableIRQ(EXTI2_3_IRQn);
+}
+
+/* This handler is declared in system/src/cmsis/vectors_stm32f051x8.c */
+void EXTI0_1_IRQHandler()
+{
+	/* Check if EXTI0 interrupt pending flag is indeed set */
+	if ((EXTI->PR & EXTI_PR_PR0) != 0) {
+
+		if ((EXTI->IMR & EXTI_IMR_MR2) == 0) {
+			// Clear EXTI2 interrupt pending flag (EXTI->PR).
+			EXTI->PR |= EXTI_PR_PR2;
+			/* Mask interrupts from EXTI3 line */
+			EXTI->IMR &= ~(EXTI_IMR_MR3);
+			/* Unmask interrupts from EXTI2 line */
+			EXTI->IMR |= EXTI_IMR_MR2;
+		} else {
+			// Clear EXTI3 interrupt pending flag (EXTI->PR).
+			EXTI->PR |= EXTI_PR_PR3;
+			/* Mask interrupts from EXTI2 line */
+			EXTI->IMR &= ~(EXTI_IMR_MR2);
+			/* Unmask interrupts from EXTI3 line */
+			EXTI->IMR |= EXTI_IMR_MR3;
+		}
+
+		timerTriggered = 0;
+		EXTI->PR |= EXTI_PR_PR0;
+		trace_printf("User Button Used\n");
+	}
+}
+
+/* This handler is declared in system/src/cmsis/vectors_stm32f051x8.c */
+void TIM2_IRQHandler()
+{
+	/* Check if update interrupt flag is indeed set */
+	if ((TIM2->SR & TIM_SR_UIF) != 0)
+	{
+		trace_printf("\n*** Overflow! ***\n");
+
+		/* Clear update interrupt flag */
+		// Relevant register: TIM2->SR
+		TIM2->SR &= ~(TIM_SR_UIF);
+
+		/* Restart stopped timer */
+		// Relevant register: TIM2->CR1
+		TIM2->CR1 |= TIM_CR1_CEN;
+	}
+}
+
+/* This handler is declared in system/src/cmsis/vectors_stm32f051x8.c */
+void EXTI2_3_IRQHandler()
+{
+	// Declare/initialize your local variables here...
+	unsigned int read_out = 0;
+	double period = 0;
+	double frequency_Hz = 0;
+	double frequency_mHz = 0;
+
+
+	/* Check if EXTI2 interrupt pending flag is indeed set */
+	if ((EXTI->PR & EXTI_PR_PR2) != 0)
+	{
+		//
+		// 1. If this is the first edge:
+		if (!timerTriggered) {
+			// - Clear count register (TIM2->CNT).
+			TIM2->CNT = 0U;
+			// - Start timer (TIM2->CR1).
+			TIM2->CR1 |= TIM_CR1_CEN;
+			// - indicate that TIM2 has started counting (timertimerTriggered).
+			timerTriggered = 1;
+		}
+		// Else (this is the second edge):
+		else {
+			// - Stop timer (TIM2->CR1).
+			TIM2->CR1 &= ~(TIM_CR1_CEN);
+			// - Read out count register (TIM2->CNT).
+			read_out = TIM2->CNT;
+			if (read_out > 0U) {
+				// - Calculate signal period (s) and frequency.
+				period = (double)read_out / 48000000.0;
+				frequency_Hz = 48000000.0 / (double)read_out;
+				frequency_mHz = 48000000000.0 / (double)read_out;
+				// - Print calculated values to the console.
+				// Cannot detect too low frequencies (<100 mHz)
+				// -> TIM2 will time out between edges (overflow)
+				// Cannot detect too high frequencies accurately (>220 kHz)
+				// -> CPU gets overloaded and cannot process all interrupts
+				// -> frequency gets inaccurate since CPU misses interrupts
+				trace_printf("signal period %u us\n", (unsigned int)(period * 1000000));
+				trace_printf("signal frequency %u Hz %u mHz\n", (unsigned int)frequency_Hz, (unsigned int)frequency_mHz);
+				// NOTE: Function trace_printf does not work
+				// with floating-point numbers: you must use
+				// "unsigned int" type to print your signal
+				// period and frequency.
+				// - indicate that TIM2 has stopped counting (timertimerTriggered).
+				timerTriggered = 0;
+			}
+		}
+		// 2. Clear EXTI2 interrupt pending flag (EXTI->PR).
+		// NOTE: A pending register (PR) bit is cleared
+		// by writing 1 to it.
+		EXTI->PR |= EXTI_PR_PR2;
+	}
+}
+
+
+#pragma GCC diagnostic pop
+
+// ----------------------------------------------------------------------------
