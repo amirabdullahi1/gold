@@ -136,7 +136,7 @@ void myGPIOA_Init()
 	// Relevant register: GPIOA->MODER
 	GPIOA->MODER &= ~(GPIO_MODER_MODER0);
 
-	/* Ensure no pull-up/pull-down for PB2 */
+	/* Ensure no pull-up/pull-down for PA0 */
 	// Relevant register: GPIOA->PUPDR
 	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR0);
 }
@@ -199,11 +199,11 @@ void myEXTI0_Init()
 	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA;
 
 	/* EXTI0 line interrupts: set falling-edge trigger */
-	// Relevant register: EXTI->FTSR ??
+	// Relevant register: EXTI->FTSR
 	EXTI->FTSR |= EXTI_FTSR_TR0;
 
 	/* Unmask interrupts from EXTI0 line */
-	// Relevant register: EXTI->IMR ??
+	// Relevant register: EXTI->IMR
 	EXTI->IMR |= EXTI_IMR_MR0;
 
 	/* Assign EXTI0 interrupt priority = 64 in NVIC */
@@ -213,7 +213,6 @@ void myEXTI0_Init()
 	/* Enable EXTI0 interrupts in NVIC */
 	// Use NVIC_EnableIRQ
 	NVIC_EnableIRQ(EXTI0_1_IRQn);
-
 }
 
 void myEXTI2_Init()
@@ -250,9 +249,9 @@ void myEXTI3_Init()
 	// Relevant register: EXTI->RTSR
 	EXTI->RTSR |= EXTI_RTSR_TR3;
 
-	/* Unmask interrupts from EXTI3 line */
+	/* Mask interrupts from EXTI3 line */
 	// Relevant register: EXTI->IMR
-	EXTI->IMR |= EXTI_IMR_MR3;
+	EXTI->IMR &= ~(EXTI_IMR_MR3);
 
 	/* Assign EXTI3 interrupt priority = 0 in NVIC */
 	// Use NVIC_SetPriority
@@ -266,6 +265,9 @@ void myEXTI3_Init()
 /* This handler is declared in system/src/cmsis/vectors_stm32f051x8.c */
 void EXTI0_1_IRQHandler()
 {
+	/* Mask interrupts from EXTI0 line */
+	EXTI->IMR &= ~(EXTI_IMR_MR0);
+
 	/* Check if EXTI0 interrupt pending flag is indeed set */
 	if ((EXTI->PR & EXTI_PR_PR0) != 0) {
 
@@ -289,6 +291,9 @@ void EXTI0_1_IRQHandler()
 		EXTI->PR |= EXTI_PR_PR0;
 		trace_printf("User Button Used\n");
 	}
+
+	/* Unmask interrupts from EXTI0 line */
+	EXTI->IMR |= EXTI_IMR_MR0;
 }
 
 /* This handler is declared in system/src/cmsis/vectors_stm32f051x8.c */
