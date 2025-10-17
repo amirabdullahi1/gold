@@ -320,7 +320,7 @@ void EXTI2_3_IRQHandler()
 
 
 	/* Check if EXTI2 interrupt pending flag is indeed set */
-	if ((EXTI->PR & EXTI_PR_PR2) != 0)
+	if ((EXTI->PR & EXTI_PR_PR2) != 0 || (EXTI->PR & EXTI_PR_PR3) != 0)
 	{
 		//
 		// 1. If this is the first edge:
@@ -359,10 +359,11 @@ void EXTI2_3_IRQHandler()
 				timerTriggered = 0;
 			}
 		}
-		// 2. Clear EXTI2 interrupt pending flag (EXTI->PR).
+		// 2. Clear EXTI2 and EXTI3 interrupt pending flag (EXTI->PR).
 		// NOTE: A pending register (PR) bit is cleared
 		// by writing 1 to it.
 		EXTI->PR |= EXTI_PR_PR2;
+		EXTI->PR |= EXTI_PR_PR3;
 	}
 }
 
