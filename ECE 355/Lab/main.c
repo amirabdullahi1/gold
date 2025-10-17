@@ -50,8 +50,7 @@ void myGPIOA_Init(void);
 void myGPIOB_Init(void);
 void myTIM2_Init(void);
 void myEXTI0_Init(void);
-void myEXTI2_Init(void);
-void myEXTI3_Init(void);
+void myEXTI2_3_Init(void);
 
 
 // Declare/initialize your global variables here...
@@ -112,8 +111,7 @@ int main(int argc, char* argv[])
 	myGPIOB_Init(); /* Initialize I/O port PB */
 	myTIM2_Init(); /* Initialize timer TIM2 */
 	myEXTI0_Init(); /* Initialize EXTI0 */
-	myEXTI2_Init(); /* Initialize EXTI2 */
-	myEXTI3_Init(); /* Initialize EXTI3 */
+	myEXTI2_3_Init(); /* Initialize EXTI2 */
 
 
 	while (1)
@@ -206,59 +204,47 @@ void myEXTI0_Init()
 	// Relevant register: EXTI->IMR
 	EXTI->IMR |= EXTI_IMR_MR0;
 
-	/* Assign EXTI0 interrupt priority = 64 in NVIC */
+	/* Assign EXTI0 interrupt priority = 0 in NVIC */
 	// Use NVIC_SetPriority
-	NVIC_SetPriority(EXTI0_1_IRQn, 64);
+	NVIC_SetPriority(EXTI0_1_IRQn, 0);
 
 	/* Enable EXTI0 interrupts in NVIC */
 	// Use NVIC_EnableIRQ
 	NVIC_EnableIRQ(EXTI0_1_IRQn);
 }
 
-void myEXTI2_Init()
+void myEXTI2_3_Init()
 {
 	/* Map EXTI2 line to PB2 */
 	// Relevant register: SYSCFG->EXTICR[0]
 	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI2_PB;
 
-	/* EXTI2 line interrupts: set rising-edge trigger */
-	// Relevant register: EXTI->RTSR
-	EXTI->RTSR |= EXTI_RTSR_TR2;
-
-	/* Unmask interrupts from EXTI2 line */
-	// Relevant register: EXTI->IMR
-	EXTI->IMR |= EXTI_IMR_MR2;
-
-	/* Assign EXTI2 interrupt priority = 0 in NVIC */
-	// Relevant register: NVIC->IP[2], or use NVIC_SetPriority
-	NVIC_SetPriority(EXTI2_3_IRQn, 0);
-
-	/* Enable EXTI2 interrupts in NVIC */
-	// Relevant register: NVIC->ISER[0], or use NVIC_EnableIRQ
-	NVIC_EnableIRQ(EXTI2_3_IRQn);
-}
-
-
-void myEXTI3_Init()
-{
 	/* Map EXTI3 line to PB3 */
 	// Relevant register: SYSCFG->EXTICR[0]
 	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI3_PB;
+
+	/* EXTI2 line interrupts: set rising-edge trigger */
+	// Relevant register: EXTI->RTSR
+	EXTI->RTSR |= EXTI_RTSR_TR2;
 
 	/* EXTI3 line interrupts: set rising-edge trigger */
 	// Relevant register: EXTI->RTSR
 	EXTI->RTSR |= EXTI_RTSR_TR3;
 
+	/* Unmask interrupts from EXTI2 line */
+	// Relevant register: EXTI->IMR
+	EXTI->IMR |= EXTI_IMR_MR2;
+
 	/* Mask interrupts from EXTI3 line */
 	// Relevant register: EXTI->IMR
 	EXTI->IMR &= ~(EXTI_IMR_MR3);
 
-	/* Assign EXTI3 interrupt priority = 0 in NVIC */
-	// Use NVIC_SetPriority
-	NVIC_SetPriority(EXTI2_3_IRQn, 0);
+	/* Assign EXTI2 and EXTI3 interrupt priority = 1 in NVIC */
+	// Relevant register: NVIC->IP[2], or use NVIC_SetPriority
+	NVIC_SetPriority(EXTI2_3_IRQn, 1);
 
-	/* Enable EXTI3 interrupts in NVIC */
-	// Use NVIC_EnableIRQ
+	/* Enable EXTI2 and EXTI3 interrupts in NVIC */
+	// Relevant register: NVIC->ISER[0], or use NVIC_EnableIRQ
 	NVIC_EnableIRQ(EXTI2_3_IRQn);
 }
 
