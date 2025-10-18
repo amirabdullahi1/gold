@@ -52,7 +52,7 @@ void myTIM2_Init(void);
 void myEXTI0_Init(void);
 void myEXTI2_3_Init(void);
 void myADC1_Init(void);
-
+void myDAC_Init(void);
 
 // Declare/initialize your global variables here...
 // NOTE: You'll need at least one global variable
@@ -113,6 +113,7 @@ int main(int argc, char* argv[])
 	myEXTI0_Init(); 	/* Initialize EXTI0 */
 	myEXTI2_3_Init(); 	/* Initialize EXTI2 */
 	myADC1_Init(); 		/* Initialize ADC1 */
+	myDAC_Init(); 		/* initialize DAC */
 
 	uint16_t ADC_val;
 
@@ -127,6 +128,8 @@ int main(int argc, char* argv[])
 		/* Store converted value */
 		ADC_val = ADC1->DR;
 
+		/* Use converted value */
+		DAC->DHR12R1 = ADC_val;
 
 		// Nothing is going on here...
 	}
@@ -301,6 +304,20 @@ void myADC1_Init()
 
 	/* Wait for the ISR to be ready */
 	while ((ADC1->ISR & ADC_ISR_ADRDY) == 0);
+}
+
+void myDAC_Init() {
+	/* Enable clock for ADC1 peripheral */
+	RCC->APB1ENR |= RCC_APB1ENR_DACEN;
+
+	/* Configure channel1 tri-statebuffer disable */
+	DAC->CR &= ~(DAC_CR_BOFF1);
+
+	/* Configure channel1 trigger enable */
+	DAC->CR &= ~(DAC_CR_TEN1);
+
+	/* Enable DAC */
+	DAC->CR |= DAC_CR_EN1;
 }
 
 /* This handler is declared in system/src/cmsis/vectors_stm32f051x8.c */
