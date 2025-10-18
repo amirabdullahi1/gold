@@ -188,9 +188,9 @@ void myTIM2_Init()
 	TIM2->CR1 = ((uint16_t)0x008C);
 
 	/* Set myTIM2_PRESCALER clock prescaler value */
-	TIM2->PSC = (uint16_t)0x0000;
+	TIM2->PSC = myTIM2_PRESCALER;
 	/* Set myTIM2_PERIOD auto-reloaded delay */
-	TIM2->ARR = (uint32_t)480000000;
+	TIM2->ARR = myTIM2_PERIOD;
 
 	/* Update timer registers */
 	// Relevant register: TIM2->EGR
@@ -375,7 +375,7 @@ void EXTI2_3_IRQHandler()
 			TIM2->CNT = 0U;
 			// - Start timer (TIM2->CR1).
 			TIM2->CR1 |= TIM_CR1_CEN;
-			// - indicate that TIM2 has started counting (timertimerTriggered).
+			// - indicate that TIM2 has started counting (timerTriggered).
 			timerTriggered = 1;
 		}
 		// Else (this is the second edge):
@@ -401,7 +401,7 @@ void EXTI2_3_IRQHandler()
 				// with floating-point numbers: you must use
 				// "unsigned int" type to print your signal
 				// period and frequency.
-				// - indicate that TIM2 has stopped counting (timertimerTriggered).
+				// - indicate that TIM2 has stopped counting (timerTriggered).
 				timerTriggered = 0;
 			}
 		}
