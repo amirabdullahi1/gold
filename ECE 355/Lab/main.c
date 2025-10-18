@@ -48,6 +48,7 @@ given in system/include/cmsis/stm32f051x8.h */
 
 void myGPIOA_Init(void);
 void myGPIOB_Init(void);
+void myADC1_Init(void);
 void myTIM2_Init(void);
 void myEXTI0_Init(void);
 void myEXTI2_3_Init(void);
@@ -99,7 +100,6 @@ void SystemClock48MHz( void )
 
 int main(int argc, char* argv[])
 {
-
 	SystemClock48MHz();
 
 	trace_printf("This is the Lab...\n");
@@ -123,6 +123,35 @@ int main(int argc, char* argv[])
 
 }
 
+void myADC1_Init()
+{
+	/* Enable clock for ADC1 peripheral */
+	RCC->APB2ENR |= RCC_APB2ENR_ADCEN;
+
+	/* Configure ADC1 data resolution */
+	ADC1->CFGR1 &= ~(ADC_CFGR1_RES);
+
+	/* Configure ADC1 data alignment */
+	ADC1->CFGR1 &= ~(ADC_CFGR1_ALIGN);
+
+	/* Configure ADC1 overrun management mode */
+	ADC1->CFGR1 |= ADC_CFGR1_OVRMOD;
+
+	/* Configure ADC1 continuous conversion mode */
+	ADC1->CFGR1 |= ADC_CFGR1_CONT;
+
+	/* Configure ADC1 channel selection register */
+	ADC1->CHSELR |= ADC_CHSELR_CHSEL1;
+
+	/* Configure ADC1 sampling time register  */
+	ADC1->SMPR |= ADC_SMPR_SMP;
+
+	/* Enable ADC */
+	ADC1->CR |= ADC_CR_ADEN;
+
+	/* Wait for the ISR to be ready */
+	while ((ADC1->ISR & ADC_ISR_ADRDY) == 0);
+}
 
 void myGPIOA_Init()
 {
@@ -133,6 +162,14 @@ void myGPIOA_Init()
 	/* Configure PA0 as input */
 	// Relevant register: GPIOA->MODER
 	GPIOA->MODER &= ~(GPIO_MODER_MODER0);
+
+	/* Configure PA1 as analog */
+	// Relevant register: GPIOA->MODER
+	GPIOA->MODER |= GPIO_MODER_MODER1;
+
+	/* Configure PA4 as analog */
+	// Relevant register: GPIOA->MODER
+	GPIOA->MODER |= GPIO_MODER_MODER4;
 
 	/* Ensure no pull-up/pull-down for PA0 */
 	// Relevant register: GPIOA->PUPDR
@@ -155,7 +192,6 @@ void myGPIOB_Init()
 	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR2);
 	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR3);
 }
-
 
 void myTIM2_Init()
 {
