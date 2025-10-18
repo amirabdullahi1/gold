@@ -48,10 +48,10 @@ given in system/include/cmsis/stm32f051x8.h */
 
 void myGPIOA_Init(void);
 void myGPIOB_Init(void);
-void myADC1_Init(void);
 void myTIM2_Init(void);
 void myEXTI0_Init(void);
 void myEXTI2_3_Init(void);
+void myADC1_Init(void);
 
 
 // Declare/initialize your global variables here...
@@ -107,15 +107,27 @@ int main(int argc, char* argv[])
 
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN; /* Enable SYSCFG clock */
 
-	myGPIOA_Init(); /* Initialize I/O port PA */
-	myGPIOB_Init(); /* Initialize I/O port PB */
-	myTIM2_Init(); /* Initialize timer TIM2 */
-	myEXTI0_Init(); /* Initialize EXTI0 */
-	myEXTI2_3_Init(); /* Initialize EXTI2 */
+	myGPIOA_Init(); 	/* Initialize I/O port PA */
+	myGPIOB_Init(); 	/* Initialize I/O port PB */
+	myTIM2_Init(); 		/* Initialize timer TIM2 */
+	myEXTI0_Init(); 	/* Initialize EXTI0 */
+	myEXTI2_3_Init(); 	/* Initialize EXTI2 */
+	myADC1_Init(); 		/* Initialize ADC1 */
 
+	uint16_t ADC_val;
 
 	while (1)
 	{
+		/* Start ADC */
+		ADC1->CR |= ADC_CR_ADSTART;
+
+		/* Wait for conversion to be ready */
+		while ((ADC1->ISR & ADC_ISR_EOC) == 0);
+
+		/* Store converted value */
+		ADC_val = ADC1->DR;
+
+
 		// Nothing is going on here...
 	}
 
@@ -123,35 +135,6 @@ int main(int argc, char* argv[])
 
 }
 
-void myADC1_Init()
-{
-	/* Enable clock for ADC1 peripheral */
-	RCC->APB2ENR |= RCC_APB2ENR_ADCEN;
-
-	/* Configure ADC1 data resolution */
-	ADC1->CFGR1 &= ~(ADC_CFGR1_RES);
-
-	/* Configure ADC1 data alignment */
-	ADC1->CFGR1 &= ~(ADC_CFGR1_ALIGN);
-
-	/* Configure ADC1 overrun management mode */
-	ADC1->CFGR1 |= ADC_CFGR1_OVRMOD;
-
-	/* Configure ADC1 continuous conversion mode */
-	ADC1->CFGR1 |= ADC_CFGR1_CONT;
-
-	/* Configure ADC1 channel selection register */
-	ADC1->CHSELR |= ADC_CHSELR_CHSEL1;
-
-	/* Configure ADC1 sampling time register  */
-	ADC1->SMPR |= ADC_SMPR_SMP;
-
-	/* Enable ADC */
-	ADC1->CR |= ADC_CR_ADEN;
-
-	/* Wait for the ISR to be ready */
-	while ((ADC1->ISR & ADC_ISR_ADRDY) == 0);
-}
 
 void myGPIOA_Init()
 {
@@ -282,6 +265,42 @@ void myEXTI2_3_Init()
 	/* Enable EXTI2 and EXTI3 interrupts in NVIC */
 	// Relevant register: NVIC->ISER[0], or use NVIC_EnableIRQ
 	NVIC_EnableIRQ(EXTI2_3_IRQn);
+}
+
+void myADC1_Init()
+{
+	/* Enable clock for ADC1 peripheral */
+	RCC->APB2ENR |= RCC_APB2ENR_ADCEN;
+
+	/* Enable clock for HSI */
+	RCC->CR2 |= RCC_CR2_HSI14ON;
+
+	/* Wait for the HSI clock to be ready */
+	while ((RCC->CR2 & RCC_CR2_HSI14RDY) == 0);
+
+	/* Configure ADC1 data resolution */
+	ADC1->CFGR1 &= ~(ADC_CFGR1_RES);
+
+	/* Configure ADC1 data alignment */
+	ADC1->CFGR1 &= ~(ADC_CFGR1_ALIGN);
+
+	/* Configure ADC1 overrun management mode */
+	ADC1->CFGR1 |= ADC_CFGR1_OVRMOD;
+
+	/* Configure ADC1 continuous conversion mode */
+	ADC1->CFGR1 |= ADC_CFGR1_CONT;
+
+	/* Configure ADC1 channel selection register */
+	ADC1->CHSELR |= ADC_CHSELR_CHSEL1;
+
+	/* Configure ADC1 sampling time register  */
+	ADC1->SMPR |= ADC_SMPR_SMP;
+
+	/* Enable ADC */
+	ADC1->CR |= ADC_CR_ADEN;
+
+	/* Wait for the ISR to be ready */
+	while ((ADC1->ISR & ADC_ISR_ADRDY) == 0);
 }
 
 /* This handler is declared in system/src/cmsis/vectors_stm32f051x8.c */
