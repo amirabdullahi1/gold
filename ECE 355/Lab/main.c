@@ -119,9 +119,6 @@ int main(int argc, char* argv[])
 
 	while (1)
 	{
-		/* Start ADC */
-		ADC1->CR |= ADC_CR_ADSTART;
-
 		/* Wait for conversion to be ready */
 		while ((ADC1->ISR & ADC_ISR_EOC) == 0);
 
@@ -307,6 +304,9 @@ void myADC1_Init()
 
 	/* Wait for the ISR to be ready */
 	while ((ADC1->ISR & ADC_ISR_ADRDY) == 0);
+
+	/* Start ADC */
+	ADC1->CR |= ADC_CR_ADSTART;
 }
 
 void myDAC_Init() {
