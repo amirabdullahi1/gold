@@ -107,11 +107,11 @@ int main(int argc, char* argv[])
 
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN; /* Enable SYSCFG clock */
 
-	myGPIOA_Init(); 	/* Initialize I/O port PA */
-	myGPIOB_Init(); 	/* Initialize I/O port PB */
+	myGPIOA_Init(); 	/* Initialize I/O ports PA */
+	myGPIOB_Init(); 	/* Initialize I/O ports PB */
 	myTIM2_Init(); 		/* Initialize timer TIM2 */
 	myEXTI0_Init(); 	/* Initialize EXTI0 */
-	myEXTI2_3_Init(); 	/* Initialize EXTI2 */
+	myEXTI2_3_Init(); 	/* Initialize EXTI2 and EXTI3 */
 	myADC1_Init(); 		/* Initialize ADC1 */
 	myDAC_Init(); 		/* initialize DAC */
 
@@ -132,6 +132,7 @@ int main(int argc, char* argv[])
 		DAC->DHR12R1 = ADC_val;
 
 		// Nothing is going on here...
+		// trace_printf("This is the ADC_val: %u\n", ADC_val);
 	}
 
 	return 0;
@@ -157,9 +158,11 @@ void myGPIOA_Init()
 	// Relevant register: GPIOA->MODER
 	GPIOA->MODER |= GPIO_MODER_MODER4;
 
-	/* Ensure no pull-up/pull-down for PA0 */
+	/* Ensure no pull-up/pull-down for PA0, PA1 and PA4 */
 	// Relevant register: GPIOA->PUPDR
 	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR0);
+	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR1);
+	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR4);
 }
 
 void myGPIOB_Init()
