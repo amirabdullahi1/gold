@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
 		while ((ADC1->ISR & ADC_ISR_EOC) == 0);
 
 		/* Store converted value */
-		ADC_val = ADC1->DR;
+		ADC_val = ADC1->DR & 0x0FFF;
 
 		/* Use converted value */
 		DAC->DHR12R1 = ADC_val;
