@@ -116,10 +116,18 @@ int main(int argc, char* argv[])
 	myDAC_Init(); 		/* initialize DAC */
 
 	uint16_t ADC_val;
+	uint16_t DAC_DOR;
+
+	double DAC_out;
+	double voltage_DDA = 3.3f;
+
+	uint16_t voltage_V;
+	uint16_t voltage_mV;
+	uint16_t resistance_Ohms;
 
 	while (1)
 	{
-		/* Wait for conversion to be ready */
+		/* Wait for conversion */
 		while ((ADC1->ISR & ADC_ISR_EOC) == 0);
 
 		/* Store converted value */
@@ -128,8 +136,21 @@ int main(int argc, char* argv[])
 		/* Use converted value */
 		DAC->DHR12R1 = ADC_val;
 
+		/* Store converted value */
+		DAC_DOR = DAC->DOR1 & 0x0FFF;
+
+		/* Store converted value voltage */
+		DAC_out = DAC_DOR / 4095.0f * voltage_DDA;
+		voltage_V = (uint16_t)DAC_out;
+		voltage_mV = (uint16_t)((DAC_out - voltage_V) * 1000);
+
+		/* Store converted value resistance */
+		resistance_Ohms = (voltage_DDA - DAC_out) / voltage_DDA * 5000.0f;
+
 		// Nothing is going on here...
 		// trace_printf("This is the ADC_val: %u\n", ADC_val);
+		trace_printf("This is the resistance: %u Ohms\n", resistance_Ohms);
+		trace_printf("This is the voltage: %u.%03u V\n", voltage_V, voltage_mV);
 	}
 
 	return 0;
@@ -313,7 +334,7 @@ void myDAC_Init() {
 	/* Enable clock for ADC1 peripheral */
 	RCC->APB1ENR |= RCC_APB1ENR_DACEN;
 
-	/* Configure channel1 tri-statebuffer disable */
+	/* Configure channel1 tri-state buffer disable */
 	DAC->CR &= ~(DAC_CR_BOFF1);
 
 	/* Configure channel1 trigger enable */
