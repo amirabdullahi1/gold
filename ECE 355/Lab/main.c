@@ -149,8 +149,8 @@ int main(int argc, char* argv[])
 
 		// Nothing is going on here...
 		// trace_printf("This is the ADC_val: %u\n", ADC_val);
-		trace_printf("This is the resistance: %u Ohms\n", resistance_Ohms);
-		trace_printf("This is the voltage: %u.%03u V\n", voltage_V, voltage_mV);
+		// trace_printf("This is the resistance: %u Ohms\n", resistance_Ohms);
+		// trace_printf("This is the voltage: %u.%03u V\n", voltage_V, voltage_mV);
 	}
 
 	return 0;
