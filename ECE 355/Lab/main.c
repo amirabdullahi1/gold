@@ -245,7 +245,7 @@ void myTIM14_Init()
 
 	/* Configure TIM14: count up, stop on overflow,
 	* enable update events, interrupt on overflow only */
-	// Relevant register: TIM2->CR1
+	// Relevant register: TIM14->CR1
 	TIM14->CR1 = ((uint16_t)0x000C);
 
 	/* Set myTIM14_PRESCALER clock prescaler value */
