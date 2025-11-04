@@ -43,12 +43,15 @@ given in system/include/cmsis/stm32f051x8.h */
 
 /* Clock prescaler for TIM2 timer: no prescaling */
 #define myTIM2_PRESCALER ((uint16_t)0x0000)
+#define myTIM14_PRESCALER ((uint16_t)0xBB7F)
 /* Maximum possible setting for overflow */
 #define myTIM2_PERIOD ((uint32_t)0xFFFFFFFF)
+#define myTIM14_PERIOD ((uint32_t)0x0000001E)
 
 void myGPIOA_Init(void);
 void myGPIOB_Init(void);
 void myTIM2_Init(void);
+void myTIM14_Init(void);
 void myEXTI0_Init(void);
 void myEXTI2_3_Init(void);
 void myADC1_Init(void);
@@ -110,6 +113,7 @@ int main(int argc, char* argv[])
 	myGPIOA_Init(); 	/* Initialize I/O ports PA */
 	myGPIOB_Init(); 	/* Initialize I/O ports PB */
 	myTIM2_Init(); 		/* Initialize timer TIM2 */
+	myTIM14_Init(); 	/* Initialize timer TIM14 */
 	myEXTI0_Init(); 	/* Initialize EXTI0 */
 	myEXTI2_3_Init(); 	/* Initialize EXTI2 and EXTI3 */
 	myADC1_Init(); 		/* Initialize ADC1 */
@@ -233,6 +237,39 @@ void myTIM2_Init()
 	TIM2->DIER |= TIM_DIER_UIE;
 }
 
+void myTIM14_Init()
+{
+	/* Enable clock for TIM14 peripheral */
+	// Relevant register: RCC->APB1ENR
+	RCC->APB1ENR |= (RCC_APB1ENR_TIM14EN);
+
+	/* Configure TIM14: count up, stop on overflow,
+	* enable update events, interrupt on overflow only */
+	// Relevant register: TIM2->CR1
+	TIM14->CR1 = ((uint16_t)0x000C);
+
+	/* Set myTIM14_PRESCALER clock prescaler value */
+	TIM14->PSC = myTIM14_PRESCALER;
+	/* Set myTIM14_PERIOD auto-reloaded delay */
+	TIM14->ARR = myTIM14_PERIOD;
+
+	/* Update timer registers */
+	// Relevant register: TIM14->EGR
+	TIM14->EGR |= TIM_EGR_UG;
+
+	/* Assign TIM14 interrupt priority = 1 in NVIC */
+	// Use NVIC_SetPriority
+	NVIC_SetPriority(TIM14_IRQn, 1);
+
+	/* Enable TIM14 interrupts in NVIC */
+	// Use NVIC_EnableIRQ
+	NVIC_EnableIRQ(TIM14_IRQn);
+
+	/* Enable update interrupt generation */
+	// Relevant register: TIM14->DIER
+	TIM14->DIER |= TIM_DIER_UIE;
+}
+
 void myEXTI0_Init()
 {
 	/* Map EXTI0 line to PA0 */
@@ -352,7 +389,10 @@ void EXTI0_1_IRQHandler()
 
 	/* Check if EXTI0 interrupt pending flag is indeed set */
 	if ((EXTI->PR & EXTI_PR_PR0) != 0) {
-
+		// - Clear count register (TIM14->CNT).
+		TIM14->CNT = 0U;
+		// - Start timer (TIM14->CR1).
+		TIM14->CR1 |= TIM_CR1_CEN;
 		if ((EXTI->IMR & EXTI_IMR_MR2) == 0) {
 			// Clear EXTI2 interrupt pending flag (EXTI->PR).
 			EXTI->PR |= EXTI_PR_PR2;
@@ -370,12 +410,10 @@ void EXTI0_1_IRQHandler()
 		}
 
 		timerTriggered = 0;
+		// Clear EXTI0 interrupt pending flag (EXTI->PR).
 		EXTI->PR |= EXTI_PR_PR0;
 		trace_printf("User Button Used\n");
 	}
-
-	/* Unmask interrupts from EXTI0 line */
-	EXTI->IMR |= EXTI_IMR_MR0;
 }
 
 /* This handler is declared in system/src/cmsis/vectors_stm32f051x8.c */
@@ -393,6 +431,23 @@ void TIM2_IRQHandler()
 		/* Restart stopped timer */
 		// Relevant register: TIM2->CR1
 		TIM2->CR1 |= TIM_CR1_CEN;
+	}
+}
+
+/* This handler is declared in system/src/cmsis/vectors_stm32f051x8.c */
+void TIM14_IRQHandler()
+{
+	/* Check if update interrupt flag is indeed set */
+	if ((TIM14->SR & TIM_SR_UIF) != 0)
+	{
+		/* Clear update interrupt flag */
+		// Relevant register: TIM14->SR
+		TIM14->SR &= ~(TIM_SR_UIF);
+
+		// Clear EXTI0 interrupt pending flag (EXTI->PR).
+		EXTI->PR |= EXTI_PR_PR0;
+		/* Unmask interrupts from EXTI0 line */
+		EXTI->IMR |= EXTI_IMR_MR0;
 	}
 }
 
