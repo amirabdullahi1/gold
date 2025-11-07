@@ -43,14 +43,17 @@ given in system/include/cmsis/stm32f051x8.h */
 
 /* Clock prescaler for TIM2 timer: no prescaling */
 #define myTIM2_PRESCALER ((uint16_t)0x0000)
+#define myTIM3_PRESCALER ((uint16_t)0xBB7F)
 #define myTIM14_PRESCALER ((uint16_t)0xBB7F)
 /* Maximum possible setting for overflow */
 #define myTIM2_PERIOD ((uint32_t)0xFFFFFFFF)
-#define myTIM14_PERIOD ((uint32_t)0x00000064)
+#define myTIM3_PERIOD ((uint16_t)0x000A)
+#define myTIM14_PERIOD ((uint16_t)0x0064)
 
 void myGPIOA_Init(void);
 void myGPIOB_Init(void);
 void myTIM2_Init(void);
+void myTIM3_Init(void);
 void myTIM14_Init(void);
 void myEXTI0_Init(void);
 void myEXTI2_3_Init(void);
@@ -113,6 +116,7 @@ int main(int argc, char* argv[])
 	myGPIOA_Init(); 	/* Initialize I/O ports PA */
 	myGPIOB_Init(); 	/* Initialize I/O ports PB */
 	myTIM2_Init(); 		/* Initialize timer TIM2 */
+	myTIM3_Init(); 		/* Initialize timer TIM3 */
 	myTIM14_Init(); 	/* Initialize timer TIM14 */
 	myEXTI0_Init(); 	/* Initialize EXTI0 */
 	myEXTI2_3_Init(); 	/* Initialize EXTI2 and EXTI3 */
@@ -152,6 +156,11 @@ int main(int argc, char* argv[])
 		resistance_Ohms = (voltage_DDA - DAC_out) / voltage_DDA * 5000.0f;
 
 		// Nothing is going on here...
+		while((TIM3->SR & TIM_SR_UIF) == 0); // refresh adjust
+
+		// Clear TIM3 update interrupt flag (TIM3->SR).
+		TIM3->SR &= ~(TIM_SR_UIF);
+
 		// trace_printf("This is the ADC_val: %u\n", ADC_val);
 		// trace_printf("This is the resistance: %u Ohms\n", resistance_Ohms);
 		// trace_printf("This is the voltage: %u.%03u V\n", voltage_V, voltage_mV);
@@ -237,16 +246,40 @@ void myTIM2_Init()
 	TIM2->DIER |= TIM_DIER_UIE;
 }
 
+void myTIM3_Init()
+{
+	/* Enable clock for TIM3 peripheral */
+	// Relevant register: RCC->APB1ENR
+	RCC->APB1ENR |= (RCC_APB1ENR_TIM3EN);
+
+	/* Configure TIM3: buffer auto-reload, count up
+	* enable update events, interrupt on overflow only */
+	// Relevant register: TIM3->CR1
+	TIM3->CR1 = ((uint16_t)0x0084);
+
+	/* Set myTIM3_PRESCALER clock prescaler value */
+	TIM3->PSC = myTIM3_PRESCALER;
+	/* Set myTIM3_PERIOD auto-reloaded delay */
+	TIM3->ARR = myTIM3_PERIOD;
+
+	/* Update timer registers */
+	// Relevant register: TIM3->EGR
+	TIM3->EGR |= TIM_EGR_UG;
+
+	// - Start timer (TIM3->CR1).
+	TIM3->CR1 |= TIM_CR1_CEN;
+}
+
 void myTIM14_Init()
 {
 	/* Enable clock for TIM14 peripheral */
 	// Relevant register: RCC->APB1ENR
 	RCC->APB1ENR |= (RCC_APB1ENR_TIM14EN);
 
-	/* Configure TIM14: count up, stop on overflow,
+	/* Configure TIM14: buffer auto-reload, count up, stop on overflow,
 	* enable update events, interrupt on overflow only */
 	// Relevant register: TIM14->CR1
-	TIM14->CR1 = ((uint16_t)0x000C);
+	TIM14->CR1 = ((uint16_t)0x008C);
 
 	/* Set myTIM14_PRESCALER clock prescaler value */
 	TIM14->PSC = myTIM14_PRESCALER;
