@@ -69,7 +69,7 @@ void oled_Write_Data(unsigned char);
 
 void oled_config(void);
 
-//void refresh_OLED(void);
+void refresh_OLED(void);
 
 SPI_HandleTypeDef SPI_Handle;
 
@@ -345,7 +345,7 @@ int main(int argc, char* argv[])
 		// trace_printf("This is the resistance: %u Ohms\n", resistance_Ohms);
 		// trace_printf("This is the voltage: %u.%03u V\n", voltage_V, voltage_mV);
 
-		// refresh_OLED();		/* Refresh OLED */
+		refresh_OLED();		/* Refresh OLED */
 	}
 
 	return 0;
@@ -358,6 +358,9 @@ void myGPIOA_Init()
 	/* Enable clock for GPIOA peripheral */
 	// Relevant register: RCC->AHBENR
 	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+
+	/* Clear GPIOA->MODER */
+	GPIOA->MODER = 0x00000000;
 
 	/* Configure PA0 as input */
 	// Relevant register: GPIOA->MODER
@@ -384,6 +387,9 @@ void myGPIOB_Init()
 	// Relevant register: RCC->AHBENR
 	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
 
+	/* Clear GPIOB->MODER */
+	GPIOB->MODER = 0x00000000;
+
 	/* Configure PB2 and PB3 as input */
 	// Relevant register: GPIOB->MODER
 	GPIOB->MODER &= ~(GPIO_MODER_MODER2);
@@ -391,14 +397,17 @@ void myGPIOB_Init()
 
 	/* Configure PB8, PB9 and PB11 as output */
 	// Relevant register: GPIOB->MODER
-	GPIOB->MODER |= GPIO_MODER_MODER8;
-	GPIOB->MODER |= GPIO_MODER_MODER9;
-	GPIOB->MODER |= GPIO_MODER_MODER11;
+	GPIOB->MODER |= GPIO_MODER_MODER8_0;
+	GPIOB->MODER |= GPIO_MODER_MODER9_0;
+	GPIOB->MODER |= GPIO_MODER_MODER11_0;
 
-	/* Ensure no pull-up/pull-down for PB2 and PB3 */
+	/* Ensure no pull-up/pull-down for PB2, PB3, PB8, PB9 and PB11 */
 	// Relevant register: GPIOB->PUPDR
 	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR2);
 	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR3);
+	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR8);
+	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR9);
+	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR11);
 
 	/* Configure PB13 as alternate function */
 	// Relevant register: GPIOB->MODER
@@ -759,7 +768,7 @@ void EXTI2_3_IRQHandler()
 void refresh_OLED( void )
 {
     // Buffer size = at most 16 characters per PAGE + terminating '\0'
-    unsigned char Buffer[17];
+    char Buffer[17];
 
     snprintf( Buffer, sizeof( Buffer ), "R: %5u Ohms", Res );
     /* Buffer now contains your character ASCII codes for LED Display
@@ -767,9 +776,16 @@ void refresh_OLED( void )
        - for each c = ASCII code = Buffer[0], Buffer[1], ...,
            send 8 bytes in Characters[c][0-7] to LED Display
     */
+	oled_Write_Cmd(0xB2);
+	oled_Write_Cmd(0x03);
+	oled_Write_Cmd(0x10);
 
-    // ...
+	for (int i = 0; Buffer[i] != '\0'; i++) {
+		int c = (int)Buffer[i];
 
+		for (int j = 0; j < 8; j++)
+			oled_Write_Data(Characters[c][j]);
+	}
 
     snprintf( Buffer, sizeof( Buffer ), "F: %5u Hz", Freq );
     /* Buffer now contains your character ASCII codes for LED Display
@@ -777,14 +793,21 @@ void refresh_OLED( void )
        - for each c = ASCII code = Buffer[0], Buffer[1], ...,
            send 8 bytes in Characters[c][0-7] to LED Display
     */
+	oled_Write_Cmd(0xB5);
+	oled_Write_Cmd(0x03);
+	oled_Write_Cmd(0x10);
 
-    // ...
+	for (int i = 0; Buffer[i] != '\0'; i++) {
+		int c = (int)Buffer[i];
+		for (int j = 0; j < 8; j++)
+			oled_Write_Data(Characters[c][j]);
+	}
 
 
 	/* Wait for ~100 ms (for example) to get ~10 frames/sec refresh rate
        - Use TIM3 to implement this delay (e.g., via polling)
     */
-	while((TIM3->SR & TIM_SR_UIF) == 0);
+	while ((TIM3->SR & TIM_SR_UIF) == 0);
 
 	// Clear TIM3 update interrupt flag (TIM3->SR).
 	TIM3->SR &= ~(TIM_SR_UIF);
@@ -814,8 +837,7 @@ void oled_Write( unsigned char Value )
 {
 
     /* Wait until SPI2 is ready for writing (TXE = 1 in SPI2_SR) */
-
-    // ...
+	while ((SPI2->SR & SPI_SR_TXE) == 0);
 
     /* Send one 8-bit character:
        - This function also sets BIDIOE = 1 in SPI2_CR1
@@ -824,8 +846,8 @@ void oled_Write( unsigned char Value )
 
 
     /* Wait until transmission is complete (TXE = 1 in SPI2_SR) */
+    while ((SPI2->SR & SPI_SR_TXE) == 0);
 
-    // ...
 
 }
 
@@ -865,10 +887,10 @@ void oled_config( void )
        - make pin PB11 = 1, wait for a few ms
     */
     GPIOB->BSRR = GPIO_BSRR_BS_11;
-    while((TIM3->SR & TIM_SR_UIF) == 0);
+    while ((TIM3->SR & TIM_SR_UIF) == 0);
     TIM3->SR &= ~(TIM_SR_UIF);
     GPIOB->BSRR = GPIO_BSRR_BR_11;
-    while((TIM3->SR & TIM_SR_UIF) == 0);
+    while ((TIM3->SR & TIM_SR_UIF) == 0);
     TIM3->SR &= ~(TIM_SR_UIF);
 
 
