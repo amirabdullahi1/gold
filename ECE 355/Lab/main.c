@@ -306,7 +306,7 @@ int main(int argc, char* argv[])
 	myDAC_Init(); 		/* Initialize DAC */
 	mySPI2_Init(); 		/* Initialize SPI2 */
 
-	oled_config();	/* Configure OLED */
+	oled_config();		/* Configure OLED */
 
 	uint16_t ADC_val;
 	uint16_t DAC_DOR;
@@ -316,7 +316,6 @@ int main(int argc, char* argv[])
 
 	uint16_t voltage_V;
 	uint16_t voltage_mV;
-	uint16_t resistance_Ohms;
 
 	while (1)
 	{
@@ -338,7 +337,7 @@ int main(int argc, char* argv[])
 		voltage_mV = (uint16_t)((DAC_out - voltage_V) * 1000);
 
 		/* Store converted value resistance */
-		resistance_Ohms = (voltage_DDA - DAC_out) / voltage_DDA * 5000.0f;
+		Res = (voltage_DDA - DAC_out) / voltage_DDA * 5000.0f;
 
 		// Nothing is going on here...
 		// trace_printf("This is the ADC_val: %u\n", ADC_val);
@@ -889,10 +888,10 @@ void oled_config( void )
        - make pin PB11 = 0, wait for a few ms
        - make pin PB11 = 1, wait for a few ms
     */
-    GPIOB->BSRR = GPIO_BSRR_BS_11;
+    GPIOB->BSRR = GPIO_BSRR_BR_11;
     while ((TIM3->SR & TIM_SR_UIF) == 0);
     TIM3->SR &= ~(TIM_SR_UIF);
-    GPIOB->BSRR = GPIO_BSRR_BR_11;
+    GPIOB->BSRR = GPIO_BSRR_BS_11;
     while ((TIM3->SR & TIM_SR_UIF) == 0);
     TIM3->SR &= ~(TIM_SR_UIF);
 
