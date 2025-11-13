@@ -49,7 +49,7 @@ given in system/include/cmsis/stm32f051x8.h */
 #define myTIM14_PRESCALER ((uint16_t)0xBB7F)
 /* Maximum possible setting for overflow */
 #define myTIM2_PERIOD ((uint32_t)0xFFFFFFFF)
-#define myTIM3_PERIOD ((uint16_t)0x00064)
+#define myTIM3_PERIOD ((uint16_t)0x0064)
 #define myTIM14_PERIOD ((uint16_t)0x0032)
 
 void myGPIOA_Init(void);
