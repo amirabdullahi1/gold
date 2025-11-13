@@ -49,8 +49,8 @@ given in system/include/cmsis/stm32f051x8.h */
 #define myTIM14_PRESCALER ((uint16_t)0xBB7F)
 /* Maximum possible setting for overflow */
 #define myTIM2_PERIOD ((uint32_t)0xFFFFFFFF)
-#define myTIM3_PERIOD ((uint16_t)0x0064)
-#define myTIM14_PERIOD ((uint16_t)0x0064)
+#define myTIM3_PERIOD ((uint16_t)0x00064)
+#define myTIM14_PERIOD ((uint16_t)0x0032)
 
 void myGPIOA_Init(void);
 void myGPIOB_Init(void);
@@ -82,6 +82,7 @@ unsigned int timerTriggered = 0;
 
 unsigned int Freq = 0;  // Example: measured frequency value (global variable)
 unsigned int Res = 0;   // Example: measured resistance value (global variable)
+unsigned int T = 0;   	// Example: measured period value (global variable)
 
 
 //
@@ -312,8 +313,7 @@ int main(int argc, char* argv[])
 	uint16_t DAC_DOR;
 
 	double DAC_out;
-	double voltage_DDA = 3.3f;
-
+	double voltage_DDA = 3.0f;
 	uint16_t voltage_V;
 	uint16_t voltage_mV;
 
@@ -341,8 +341,17 @@ int main(int argc, char* argv[])
 
 		// Nothing is going on here...
 		// trace_printf("This is the ADC_val: %u\n", ADC_val);
-		// trace_printf("This is the resistance: %u Ohms\n", resistance_Ohms);
-		// trace_printf("This is the voltage: %u.%03u V\n", voltage_V, voltage_mV);
+		// trace_printf("This is the resistance: %u Ohms\n", Res);
+		// trace_printf("signal period %u us\n", (unsigned int)(T * 1000000));
+		// trace_printf("signal frequency %u Hz\n", (unsigned int)Freq);
+
+		// Cannot detect too low voltages (<0.0 V)
+		// -> When POT resistance is highest, the voltage at the ADC input will be: V_min(0.0V)
+		// -> Corresponds to ADC reading = 0 (for a 12-bit ADC)
+		// Cannot detect too high voltages (>3.0 V)
+		// -> When POT resistance is lowest, the voltage at the ADC input will be: Vmax(3.0V)
+		// -> Corresponds to ADC reading = 4095 (for a 12-bit ADC)
+		trace_printf("This is the voltage: %u.%03u V\n", voltage_V, voltage_mV);
 
 		refresh_OLED();		/* Refresh OLED */
 	}
@@ -737,14 +746,15 @@ void EXTI2_3_IRQHandler()
 				frequency_Hz = 48000000.0 / (double)read_out;
 				frequency_mHz = 48000000000.0 / (double)read_out;
 				Freq = frequency_Hz;
+				T = period;
 				// - Print calculated values to the console.
 				// Cannot detect too low frequencies (<100 mHz)
 				// -> TIM2 will time out between edges (overflow)
 				// Cannot detect too high frequencies accurately (>220 kHz)
 				// -> CPU gets overloaded and cannot process all interrupts
 				// -> frequency gets inaccurate since CPU misses interrupts
-				trace_printf("signal period %u us\n", (unsigned int)(period * 1000000));
-				trace_printf("signal frequency %u Hz %u mHz\n", (unsigned int)frequency_Hz, (unsigned int)frequency_mHz);
+				// trace_printf("signal period %u us\n", (unsigned int)(period * 1000000));
+				// trace_printf("signal frequency %u Hz %u mHz\n", (unsigned int)frequency_Hz, (unsigned int)frequency_mHz);
 				// NOTE: Function trace_printf does not work
 				// with floating-point numbers: you must use
 				// "unsigned int" type to print your signal
