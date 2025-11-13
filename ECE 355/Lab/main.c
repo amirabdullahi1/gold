@@ -359,9 +359,6 @@ void myGPIOA_Init()
 	// Relevant register: RCC->AHBENR
 	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
 
-	/* Clear GPIOA->MODER */
-	GPIOA->MODER = 0x00000000;
-
 	/* Configure PA0 as input */
 	// Relevant register: GPIOA->MODER
 	GPIOA->MODER &= ~(GPIO_MODER_MODER0);
@@ -387,19 +384,25 @@ void myGPIOB_Init()
 	// Relevant register: RCC->AHBENR
 	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
 
-	/* Clear GPIOB->MODER */
-	GPIOB->MODER = 0x00000000;
-
 	/* Configure PB2 and PB3 as input */
 	// Relevant register: GPIOB->MODER
 	GPIOB->MODER &= ~(GPIO_MODER_MODER2);
 	GPIOB->MODER &= ~(GPIO_MODER_MODER3);
 
-	/* Configure PB8, PB9 and PB11 as output */
+	/* Configure PB8 as output */
 	// Relevant register: GPIOB->MODER
 	GPIOB->MODER |= GPIO_MODER_MODER8_0;
+	GPIOB->MODER &= ~(GPIO_MODER_MODER8_1);
+
+	/* Configure PB9 as output */
+	// Relevant register: GPIOB->MODER
 	GPIOB->MODER |= GPIO_MODER_MODER9_0;
+	GPIOB->MODER &= ~(GPIO_MODER_MODER9_1);
+
+	/* Configure PB11 as output */
+	// Relevant register: GPIOB->MODER
 	GPIOB->MODER |= GPIO_MODER_MODER11_0;
+	GPIOB->MODER &= ~(GPIO_MODER_MODER11_1);
 
 	/* Ensure no pull-up/pull-down for PB2, PB3, PB8, PB9 and PB11 */
 	// Relevant register: GPIOB->PUPDR
