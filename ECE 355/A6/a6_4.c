@@ -11,7 +11,7 @@ void ParallelFunction (void)
   double s;
   my_id = get_my_thread_id ();                            /* Get unique identifier for this thread. */
   start = (N/P) * my_id;                                  /* Determine start/end using thread identifier. */
-  end = (N/P) * (my_id + 1) – 1;                          /* N is assumed to be evenly divisible by P .* /
+  end = (N/P) * (my_id + 1) – 1;                          /* N is assumed to be evenly divisible by P . */
   s = 0.0;
   for (i = start; i <= end; i++)
     s = s + a[i] * b[i];
