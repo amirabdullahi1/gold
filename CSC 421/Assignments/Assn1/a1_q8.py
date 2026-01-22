@@ -18,6 +18,15 @@ def init_assignment(csp):
         assignment[var] = None
     return assignment
 
+def blue_assignment(csp):
+    assignment = {}
+    for var in csp["VARIABLES"]:
+        if var == "WA": 
+            assignment[var] = "blue"
+        else: 
+            assignment[var] = None
+    return assignment
+
 def add_constraint(csp, constraint): 
     csp['CONSTRAINTS'].append(constraint)
     
@@ -39,7 +48,9 @@ def binary_constraint(var_pair, violations):
     (v1,v2) = var_pair
     return lambda asmt: (asmt[v1], asmt[v2]) in violations
     
-    
+def unary_constraint(var, violations):
+    return lambda asmt: (asmt[var]) in violations
+
 csp1 = {"VARIABLES": ["WA", "NT", "Q", "NSW", "V", "SA", "T"],
         "DOMAINS": ["red", "green", "blue"],
         "CONSTRAINTS": []}
@@ -59,14 +70,12 @@ for (v1,v2) in [('WA', 'NT'), ('WA', 'SA'),
 # in the assignment specification 
 
 
-# result_original = recursive_backtracking(init_assignment(csp1), csp1)    
-# print(result_original)
+result_original = recursive_backtracking(init_assignment(csp1), csp1)    
+print(result_original)
 
-# result_init = recursive_backtracking(blue_assignment(csp1), csp1)
-# print(result_init)
+result_init = recursive_backtracking(blue_assignment(csp1), csp1)
+print(result_init)
 
-# add_constraint(csp1, unary_constraint('WA', ['red','green']))
-# result_unary = recursive_backtracking(init_assignment(csp1), csp1)
-# print(result_unary) 
-    
-    
+add_constraint(csp1, unary_constraint('WA', ['red','green']))
+result_unary = recursive_backtracking(init_assignment(csp1), csp1)
+print(result_unary) 

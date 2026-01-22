@@ -281,7 +281,7 @@ print(path_states(ucs_g1))
 
 g2 = GridProblemMod(initial = (2,2), goal = (8,8), size=10)
 (ucs_g2, reached, frontiers) = uniform_cost_search(g2)
-print(path_states(bfs_g1))
+print(path_states(ucs_g2))
 
 g3 = GridProblemMod(initial = (2,2), goal = (4,4), size=5)
 (ucs_g3, reached, frontiers) = uniform_cost_search(g3)
