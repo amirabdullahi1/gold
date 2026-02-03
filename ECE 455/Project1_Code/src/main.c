@@ -11,7 +11,7 @@
 #include "../FreeRTOS_Source/include/semphr.h"
 #include "../FreeRTOS_Source/include/task.h"
 #include "../FreeRTOS_Source/include/timers.h"
-         
+
 /*-----------------------------------------------------------*/
 // #define GLO_VAR 0
 #define flow_adjust  	0
@@ -55,8 +55,8 @@ void myGPIO_ADC_Init()
 
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 
-    /* Configured as an output */
-    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+    /* Configured as analog  */
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;
 
     /* Set to Push Pull to ensure LEDs are visible and bright */
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP; // Look into this a bit more, need to do testing to 100% know which one is the best to use.
@@ -65,7 +65,7 @@ void myGPIO_ADC_Init()
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // Adjust through testing, not sure currently what setting is good for LEDs (If we have no external resistors will need to turn on).
 
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
-    GPIO_Init(GPIOB, &GPIO_InitStruct);
+    GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 }
 
@@ -73,8 +73,8 @@ void myADC1_Init()
 {
 	ADC_InitTypeDef ADC_InitStruct;
 
-//	/* Enable clock for ADC1 peripheral */
-//    RCC_APB2PeriphClockCmd(RCC_APB2_Periph_ADC1, ENABLE);
+	/* Enable clock for ADC1 peripheral */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
 
     /* Initialize the ADC_Mode member */
     ADC_InitStruct.ADC_Resolution = ADC_Resolution_12b;
@@ -98,7 +98,7 @@ void myADC1_Init()
 
     ADC_Cmd(ADC1, ENABLE);
 
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_3Cycles);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 1, ADC_SampleTime_3Cycles);
 
     ADC_SoftwareStartConv(ADC1);
 }
@@ -131,17 +131,17 @@ int main(void)
     myADC1_Init();
 
 
-    xTaskQueue_handle = xQueueCreate( 	
+    xTaskQueue_handle = xQueueCreate(
         taskQUEUE_LENGTH,		/* The number of items the queue can hold. */
         sizeof( uint16_t )      /* The size of each item the queue holds. */
     );
 	/* Add to the registry, for the benefit of kernel aware debugging. */
     vQueueAddToRegistry( xTaskQueue_handle, "taskQueue" );
 
-	xFlowQueue_handle = xQueueCreate( 	
+	xFlowQueue_handle = xQueueCreate(
         flowQUEUE_LENGTH,		/* The number of items the queue can hold. */
         sizeof( uint16_t )      /* The size of each item the queue holds. */
-    );	
+    );
 	/* Add to the registry, for the benefit of kernel aware debugging. */
     vQueueAddToRegistry( xFlowQueue_handle, "flowQueue" );
 
@@ -177,9 +177,9 @@ static void flow_adjust_task ( void *pvParameters ) {
             if(rx_data == flow_adjust)
             {
                 if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC))
-                    ADC_val = (ADC_GetConversionValue(ADC1) & 0x0FFF);
+                    ADC_val = (ADC_GetConversionValue(ADC1));
                 	printf("ADC_val %u.\n", ADC_val);
-                
+
                 xQueueOverwrite(xFlowQueue_handle, &ADC_val);
                 rx_data = flow_adjust; // traffic_gen;
 
@@ -189,7 +189,7 @@ static void flow_adjust_task ( void *pvParameters ) {
                     vTaskDelay(pdMS_TO_TICKS(2000));
                 }
             }
-            
+
             else {
                 if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
                 {
@@ -205,21 +205,21 @@ static void flow_adjust_task ( void *pvParameters ) {
 static void traffic_gen_task ( void *pvParameters ) {
     while(1)
 	{
-        
+
     }
 }
 
 static void light_state_task ( void *pvParameters ) {
     while(1)
 	{
-        
+
     }
 }
 
 static void sys_display_task ( void *pvParameters ) {
     while(1)
 	{
-        
+
     }
 }
 /*-----------------------------------------------------------*/
@@ -231,7 +231,7 @@ void vApplicationMallocFailedHook( void )
 
 	Called if a call to pvPortMalloc() fails because there is insufficient
 	free memory available in the FreeRTOS heap.  pvPortMalloc() is called
-	internally by FreeRTOS API functions that create tasks, queues, software 
+	internally by FreeRTOS API functions that create tasks, queues, software
 	timers, and semaphores.  The size of the FreeRTOS heap is set by the
 	configTOTAL_HEAP_SIZE configuration constant in FreeRTOSConfig.h. */
 	for( ;; );
