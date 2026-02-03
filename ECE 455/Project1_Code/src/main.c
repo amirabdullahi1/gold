@@ -51,15 +51,12 @@ void myGPIO_LED_Init()
 
 void myGPIO_ADC_Init()
 {
-    GPIO_InitTypeDef GPIO_InitStruct;
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
 
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 
     /* Configured as analog  */
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;
-
-    /* Set to Push Pull to ensure LEDs are visible and bright */
-    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP; // Look into this a bit more, need to do testing to 100% know which one is the best to use.
 
     /* Currently turns of any internal resistors */
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // Adjust through testing, not sure currently what setting is good for LEDs (If we have no external resistors will need to turn on).
@@ -71,7 +68,7 @@ void myGPIO_ADC_Init()
 
 void myADC1_Init()
 {
-	ADC_InitTypeDef ADC_InitStruct;
+	ADC_InitTypeDef ADC_InitStruct = {0};
 
 	/* Enable clock for ADC1 peripheral */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
@@ -98,7 +95,7 @@ void myADC1_Init()
 
     ADC_Cmd(ADC1, ENABLE);
 
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 1, ADC_SampleTime_3Cycles);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 1, ADC_SampleTime_144Cycles);
 
     ADC_SoftwareStartConv(ADC1);
 }
@@ -145,7 +142,7 @@ int main(void)
 	/* Add to the registry, for the benefit of kernel aware debugging. */
     vQueueAddToRegistry( xFlowQueue_handle, "flowQueue" );
 
-	xTaskCreate( flow_adjust_task, "Flow Adjust", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+	xTaskCreate( flow_adjust_task, "Flow Adjust", 256, NULL, 1, NULL);
 	xTaskCreate( traffic_gen_task, "Traffic Gen", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 	xTaskCreate( light_state_task, "Light State", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 	xTaskCreate( sys_display_task, "Sys Display", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
@@ -176,9 +173,10 @@ static void flow_adjust_task ( void *pvParameters ) {
         {
             if(rx_data == flow_adjust)
             {
-                if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC))
+                if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC)) {
                     ADC_val = (ADC_GetConversionValue(ADC1));
                 	printf("ADC_val %u.\n", ADC_val);
+                }
 
                 xQueueOverwrite(xFlowQueue_handle, &ADC_val);
                 rx_data = flow_adjust; // traffic_gen;
