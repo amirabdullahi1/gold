@@ -4,8 +4,8 @@
 #include "stm32f4_discovery.h"
 /* Kernel includes. */
 #include "stm32f4xx.h"
-#include "stm32f4xx_gpio.c"
-#include "stf32f4xx_adc.c"
+#include "stm32f4xx_gpio.h"
+#include "stm32f4xx_adc.h"
 #include "../FreeRTOS_Source/include/FreeRTOS.h"
 #include "../FreeRTOS_Source/include/queue.h"
 #include "../FreeRTOS_Source/include/semphr.h"
@@ -22,32 +22,79 @@
 #define flowQUEUE_LENGTH 1
 #define taskQUEUE_LENGTH 4
 
+/* Function that sets up the leds */
+void myGPIO_LED_Init()
+{
+    GPIO_InitTypeDef GPIO_InitStruct;
+
+    /* Enable clock for GPIO peripherals */
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+
+    /* Configured as an output */
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+
+    /* Set to Push Pull to ensure LEDs are visible and bright */
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP; // Look into this a bit more, need to do testing to 100% know which one is the best to use.
+
+    /* Currently turns of any internal resistors */
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // Adjust through testing, not sure currently what setting is good for LEDs (If we have no external resistors will need to turn on).
+
+    /* Configuring speed of rising and galling edges */
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
+
+    /* Pin initialization for LEDs */
+    /* Has been set up for the 3 different traffic lights, potentiometer and 3 middle car lights shift register */
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8;
+    GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+}
+
+void myGPIO_ADC_Init()
+{
+    GPIO_InitTypeDef GPIO_InitStruct;
+
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+
+    /* Configured as an output */
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+
+    /* Set to Push Pull to ensure LEDs are visible and bright */
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP; // Look into this a bit more, need to do testing to 100% know which one is the best to use.
+
+    /* Currently turns of any internal resistors */
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // Adjust through testing, not sure currently what setting is good for LEDs (If we have no external resistors will need to turn on).
+
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
+    GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+}
+
 void myADC1_Init()
 {
-	/* Enable clock for ADC1 peripheral */
-    RCC_APB2PeriphClockCmd(RCC_APB2_Periph_ADC1, ENABLE);
+	ADC_InitTypeDef ADC_InitStruct;
 
-    ADC_InitTypeDef adc1_init_struct;
+//	/* Enable clock for ADC1 peripheral */
+//    RCC_APB2PeriphClockCmd(RCC_APB2_Periph_ADC1, ENABLE);
 
     /* Initialize the ADC_Mode member */
-    adc1_init_struct.ADC_Resolution = ADC_Resolution_12b;
+    ADC_InitStruct.ADC_Resolution = ADC_Resolution_12b;
 
     /* initialize the ADC_ScanConvMode member */
-    adc1_init_struct.ADC_ScanConvMode = DISABLE;
+    ADC_InitStruct.ADC_ScanConvMode = DISABLE;
 
     /* Initialize the ADC_ContinuousConvMode member */
-    adc1_init_struct.ADC_ContinuousConvMode = ENABLE;
+    ADC_InitStruct.ADC_ContinuousConvMode = ENABLE;
 
     /* Initialize the ADC_ExternalTrigConvEdge member */
-    adc1_init_struct.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
+    ADC_InitStruct.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
 
     /* Initialize the ADC_DataAlign member */
-    adc1_init_struct.ADC_DataAlign = ADC_DataAlign_Right;
+    ADC_InitStruct.ADC_DataAlign = ADC_DataAlign_Right;
 
     /* Initialize the ADC_NbrOfConversion member */
-    adc1_init_struct.ADC_NbrOfConversion = 1;
+    ADC_InitStruct.ADC_NbrOfConversion = 1;
 
-    ADC_Init(ADC1, &adc1_init_struct);
+    ADC_Init(ADC1, &ADC_InitStruct);
 
     ADC_Cmd(ADC1, ENABLE);
 
@@ -56,27 +103,41 @@ void myADC1_Init()
     ADC_SoftwareStartConv(ADC1);
 }
 
+static void flow_adjust_task( void *pvParameters );
+static void traffic_gen_task( void *pvParameters );
+static void light_state_task( void *pvParameters );
+static void sys_display_task( void *pvParameters );
+
+xQueueHandle xTaskQueue_handle = 0;
+xQueueHandle xFlowQueue_handle = 0;
+
+/*-----------------------------------------------------------*/
+
+
 int main(void)
 {
     /* Configure the system. The clock configuration can be
 	done here if it was not done before main() was called. */
-	prvSetupHardware();
+//	prvSetupHardware();
 
+	myGPIO_LED_Init(); // Example code to turn LEDs on/off: ON: GPIO_SetBits(GPIOC, GPIO_Pin_0); OFF GPIO_ResetBits(GPIOC, GPIO_Pin_0);
+    myGPIO_ADC_Init();
     myADC1_Init();
+
 
     xTaskQueue_handle = xQueueCreate( 	
         taskQUEUE_LENGTH,		/* The number of items the queue can hold. */
         sizeof( uint16_t )      /* The size of each item the queue holds. */
     );
 	/* Add to the registry, for the benefit of kernel aware debugging. */
-    vQueueAddToRegistry( xQueue_handle, "taskQueue" );
+    vQueueAddToRegistry( xTaskQueue_handle, "taskQueue" );
 
 	xFlowQueue_handle = xQueueCreate( 	
         flowQUEUE_LENGTH,		/* The number of items the queue can hold. */
         sizeof( uint16_t )      /* The size of each item the queue holds. */
     );	
 	/* Add to the registry, for the benefit of kernel aware debugging. */
-    vQueueAddToRegistry( xQueue_handle, "flowQueue" );
+    vQueueAddToRegistry( xFlowQueue_handle, "flowQueue" );
 
 	xTaskCreate( flow_adjust_task, "Flow Adjust", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 	xTaskCreate( traffic_gen_task, "Traffic Gen", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
@@ -111,14 +172,15 @@ static void flow_adjust_task ( void *pvParameters ) {
             {
                 if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC))
                     ADC_val = (ADC_GetConversionValue(ADC1) & 0x0FFF);
+                	printf("ADC_val %u.\n", ADC_val);
                 
                 xQueueOverwrite(xFlowQueue_handle, &ADC_val);
-                rx_data = traffic_gen;
+                rx_data = flow_adjust; // traffic_gen;
 
                 if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
                 {
                     // printf("Flow Adjust GWP (%u).\n", rx_data); // Got wrong Package
-                    vTaskDelay(pdMS_TO_TICKS(5));
+                    vTaskDelay(pdMS_TO_TICKS(2000));
                 }
             }
             
