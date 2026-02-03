@@ -103,6 +103,12 @@ void myADC1_Init()
     ADC_SoftwareStartConv(ADC1);
 }
 
+/*
+ * TODO: Implement this function for any hardware specific clock configuration
+ * that was not already performed before main() was called.
+ */
+static void prvSetupHardware( void );
+
 static void flow_adjust_task( void *pvParameters );
 static void traffic_gen_task( void *pvParameters );
 static void light_state_task( void *pvParameters );
@@ -215,4 +221,15 @@ static void sys_display_task ( void *pvParameters ) {
 	{
         
     }
+}
+/*-----------------------------------------------------------*/
+
+static void prvSetupHardware( void )
+{
+	/* Ensure all priority bits are assigned as preemption priority bits.
+	http://www.freertos.org/RTOS-Cortex-M3-M4.html */
+	NVIC_SetPriorityGrouping( 0 );
+
+	/* TODO: Setup the clocks, etc. here, if they were not configured before
+	main() was called. */
 }
