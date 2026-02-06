@@ -199,7 +199,25 @@ static void flow_adjust_task ( void *pvParameters ) {
 static void traffic_gen_task ( void *pvParameters ) {
     while(1)
 	{
+        if(xQueueReceive(xTaskQueue_handle, &rx_data, 500))
+        {
+            if(rx_data == traffic_gen)
+            {
 
+            }
+
+            rx_data = light_state;
+            xQueueSend(xTaskQueue_handle,&rx_data,1000);
+        }
+
+        else 
+        {
+            if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
+            {
+                // printf("Traffic Gen GWP (%u).\n", rx_data); // Got wrong Package
+                vTaskDelay(pdMS_TO_TICKS(5));
+            }
+        }
     }
 }
 
@@ -245,7 +263,25 @@ static void light_state_task ( void *pvParameters ) {
 static void sys_display_task ( void *pvParameters ) {
     while(1)
 	{
+        if(xQueueReceive(xTaskQueue_handle, &rx_data, 500))
+        {
+            if(rx_data == sys_display)
+            {
 
+            }
+
+            rx_data = flow_adjust;
+            xQueueSend(xTaskQueue_handle,&rx_data,1000);
+        }
+
+        else 
+        {
+            if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
+            {
+                // printf("Sys Display GWP (%u).\n", rx_data); // Got wrong Package
+                vTaskDelay(pdMS_TO_TICKS(5));
+            }
+        }
     }
 }
 /*-----------------------------------------------------------*/
