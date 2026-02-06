@@ -257,7 +257,7 @@ static void light_state_task ( void *pvParameters ) {
             // GPIO_SetBits(GPIOC, GPIO_Pin_1);    // Y LED ON
 
             // GPIO_ResetBits(GPIOC, GPIO_Pin_1);  // Y LED OFF
-            // GPIO_SetBits(GPIOC, GPIO_Pin_2);    // R LED ON
+            // GPIO_SetBits(GPIOC, GPIO_Pin_0);    // R LED ON
 
 
             rx_data = flow_adjust; // sys_display;
