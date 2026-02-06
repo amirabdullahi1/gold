@@ -13,6 +13,13 @@
 #include "../FreeRTOS_Source/include/timers.h"
 
 /*-----------------------------------------------------------*/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+/*-----------------------------------------------------------*/
+
+/*-----------------------------------------------------------*/
 #define flow_adjust  	0
 #define traffic_gen  	1
 #define light_state  	2
@@ -114,7 +121,6 @@ static void sys_display_task( void *pvParameters );
 
 xQueueHandle xTaskQueue_handle = 0;
 xQueueHandle xFlowQueue_handle = 0;
-
 /*-----------------------------------------------------------*/
 
 
@@ -362,3 +368,6 @@ static void prvSetupHardware( void )
 	/* TODO: Setup the clocks, etc. here, if they were not configured before
 	main() was called. */
 }
+
+/*-----------------------------------------------------------*/
+#pragma GCC diagnostic pop
