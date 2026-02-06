@@ -124,7 +124,7 @@ int main(void)
 	done here if it was not done before main() was called. */
 //	prvSetupHardware();
 
-	myGPIO_LED_Init(); // Example code to turn LEDs on/off: ON: GPIO_SetBits(GPIOC, GPIO_Pin_0); OFF GPIO_ResetBits(GPIOC, GPIO_Pin_0);
+	myGPIO_LED_Init();
     myGPIO_ADC_Init();
     myADC1_Init();
 
