@@ -239,9 +239,9 @@ static void light_state_task ( void *pvParameters ) {
                 {
                     r_dur = 9999.0 * (2 - ADC_val/ADC_MAX);
                     g_dur = 9999.0 * (1 + ADC_val/ADC_MAX);
-                	printf("r_dur %u.\n", r_dur);
-                	printf("y_dur %u.\n", y_dur);
-                	printf("g_dur %u.\n", g_dur);
+                	printf("r_dur %.5f.\n", r_dur);
+                	printf("y_dur %.5f.\n", y_dur);
+                	printf("g_dur %.5f.\n", g_dur);
                 }
             }
 
