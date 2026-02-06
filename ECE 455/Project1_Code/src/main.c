@@ -217,7 +217,7 @@ static void traffic_gen_task ( void *pvParameters ) {
             xQueueSend(xTaskQueue_handle,&rx_data,1000);
         }
 
-        else 
+        else
         {
             if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
             {
@@ -236,7 +236,7 @@ static void light_state_task ( void *pvParameters ) {
     uint16_t r_dur = 3000.0; // assume milliseconds
     uint16_t y_dur = 3000.0; // assume milliseconds
     uint16_t g_dur = 3000.0; // assume milliseconds
-    
+
     uint16_t ADC_val = 0;
     uint16_t rx_data;
     while(1)
@@ -253,12 +253,12 @@ static void light_state_task ( void *pvParameters ) {
                 	// printf("y_dur %u.\n", y_dur);
                 	// printf("g_dur %u.\n", g_dur);
                 }
-            }   
+            }
 
 
             GPIO_ResetBits(GPIOC, GPIO_Pin_0);  // R LED OFF
             GPIO_SetBits(GPIOC, GPIO_Pin_2);    // G LED ON
-                        
+
             // GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
             // GPIO_SetBits(GPIOC, GPIO_Pin_1);    // Y LED ON
 
@@ -270,7 +270,7 @@ static void light_state_task ( void *pvParameters ) {
             xQueueSend(xTaskQueue_handle,&rx_data,1000);
         }
 
-        else 
+        else
         {
             if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
             {
@@ -297,7 +297,7 @@ static void sys_display_task ( void *pvParameters ) {
             xQueueSend(xTaskQueue_handle,&rx_data,1000);
         }
 
-        else 
+        else
         {
             if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
             {
