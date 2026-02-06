@@ -13,7 +13,6 @@
 #include "../FreeRTOS_Source/include/timers.h"
 
 /*-----------------------------------------------------------*/
-// #define GLO_VAR 0
 #define flow_adjust  	0
 #define traffic_gen  	1
 #define light_state  	2
@@ -21,6 +20,8 @@
 
 #define flowQUEUE_LENGTH 1
 #define taskQUEUE_LENGTH 4
+
+#define ADC_MAX 4095
 
 /* Function that sets up the leds */
 void myGPIO_LED_Init()
@@ -179,13 +180,7 @@ static void flow_adjust_task ( void *pvParameters ) {
                 }
 
                 xQueueOverwrite(xFlowQueue_handle, &ADC_val);
-                rx_data = flow_adjust; // traffic_gen;
-
-                if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
-                {
-                    // printf("Flow Adjust GWP (%u).\n", rx_data); // Got wrong Package
-                    vTaskDelay(pdMS_TO_TICKS(2000));
-                }
+                rx_data = light_state; // traffic_gen;
             }
 
             else {
@@ -208,11 +203,41 @@ static void traffic_gen_task ( void *pvParameters ) {
 }
 
 static void light_state_task ( void *pvParameters ) {
+    uint16_t r_dur = 3000; // assume milliseconds
+    uint16_t y_dur = 3000; // assume milliseconds
+    uint16_t g_dur = 3000; // assume milliseconds
+    
+    uint16_t ADC_val = 0;
     while(1)
 	{
+        if(xQueueReceive(xTaskQueue_handle, &rx_data, 500))
+        {
+            if(rx_data == light_state)
+            {
+                if(xQueuePeek(xFlowQueue_handle, &ADC_val, 500))
+                {
+                    r_dur = 9999 * (2 - ADC_Val/ADC_MAX);
+                    g_dur = 9999 * (1 + ADC_Val/ADC_MAX);
+                	printf("r_dur %u.\n", r_dur);
+                	printf("y_dur %u.\n", y_dur);
+                	printf("g_dur %u.\n", g_dur);
+                }
+            }
 
+            rx_data = flow_adjust; // sys_display;
+        }
+
+        else 
+        {
+            if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
+            {
+                // printf("Light State GWP (%u).\n", rx_data); // Got wrong Package
+                vTaskDelay(pdMS_TO_TICKS(5));
+            }
+        }
     }
 }
+
 
 static void sys_display_task ( void *pvParameters ) {
     while(1)
