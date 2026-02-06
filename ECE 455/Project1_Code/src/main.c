@@ -21,7 +21,7 @@
 #define flowQUEUE_LENGTH 1
 #define taskQUEUE_LENGTH 4
 
-#define ADC_MAX 4095
+#define ADC_MAX 4095.0
 
 /* Function that sets up the leds */
 void myGPIO_LED_Init()
@@ -223,9 +223,9 @@ static void traffic_gen_task ( void *pvParameters ) {
 }
 
 static void light_state_task ( void *pvParameters ) {
-    uint16_t r_dur = 3000; // assume milliseconds
-    uint16_t y_dur = 3000; // assume milliseconds
-    uint16_t g_dur = 3000; // assume milliseconds
+    float r_dur = 3000.0; // assume milliseconds
+    float y_dur = 3000.0; // assume milliseconds
+    float g_dur = 3000.0; // assume milliseconds
     
     uint16_t ADC_val = 0;
     uint16_t rx_data;
@@ -237,8 +237,8 @@ static void light_state_task ( void *pvParameters ) {
             {
                 if(xQueuePeek(xFlowQueue_handle, &ADC_val, 500))
                 {
-                    r_dur = 9999 * (2 - ADC_val/ADC_MAX);
-                    g_dur = 9999 * (1 + ADC_val/ADC_MAX);
+                    r_dur = 9999.0 * (2 - ADC_val/ADC_MAX);
+                    g_dur = 9999.0 * (1 + ADC_val/ADC_MAX);
                 	printf("r_dur %u.\n", r_dur);
                 	printf("y_dur %u.\n", y_dur);
                 	printf("g_dur %u.\n", g_dur);
