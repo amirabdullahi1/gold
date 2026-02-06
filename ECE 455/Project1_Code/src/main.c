@@ -197,6 +197,7 @@ static void flow_adjust_task ( void *pvParameters ) {
 }
 
 static void traffic_gen_task ( void *pvParameters ) {
+    uint16_t rx_data;
     while(1)
 	{
         if(xQueueReceive(xTaskQueue_handle, &rx_data, 500))
@@ -261,6 +262,7 @@ static void light_state_task ( void *pvParameters ) {
 
 
 static void sys_display_task ( void *pvParameters ) {
+    uint16_t rx_data;
     while(1)
 	{
         if(xQueueReceive(xTaskQueue_handle, &rx_data, 500))
