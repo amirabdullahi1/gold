@@ -122,7 +122,7 @@ int main(void)
 {
     /* Configure the system. The clock configuration can be
 	done here if it was not done before main() was called. */
-//	prvSetupHardware();
+    //	prvSetupHardware();
 
 	myGPIO_LED_Init();
     myGPIO_ADC_Init();
