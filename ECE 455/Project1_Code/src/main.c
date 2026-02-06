@@ -223,6 +223,10 @@ static void traffic_gen_task ( void *pvParameters ) {
 }
 
 static void light_state_task ( void *pvParameters ) {
+    GPIO_ResetBits(GPIOC, GPIO_Pin_0);  // R LED OFF
+    GPIO_ResetBits(GPIOC, GPIO_Pin_1);  // Y LED OFF
+    GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
+
     uint16_t r_dur = 3000.0; // assume milliseconds
     uint16_t y_dur = 3000.0; // assume milliseconds
     uint16_t g_dur = 3000.0; // assume milliseconds
@@ -239,11 +243,22 @@ static void light_state_task ( void *pvParameters ) {
                 {
                     r_dur = 9999.0 * (2 - ADC_val/ADC_MAX);
                     g_dur = 9999.0 * (1 + ADC_val/ADC_MAX);
-                	printf("r_dur %u.\n", r_dur);
-                	printf("y_dur %u.\n", y_dur);
-                	printf("g_dur %u.\n", g_dur);
+                	// printf("r_dur %u.\n", r_dur);
+                	// printf("y_dur %u.\n", y_dur);
+                	// printf("g_dur %u.\n", g_dur);
                 }
-            }
+            }   
+
+
+            GPIO_ResetBits(GPIOC, GPIO_Pin_0);  // R LED OFF
+            GPIO_SetBits(GPIOC, GPIO_Pin_2);    // G LED ON
+                        
+            // GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
+            // GPIO_SetBits(GPIOC, GPIO_Pin_1);    // Y LED ON
+
+            // GPIO_ResetBits(GPIOC, GPIO_Pin_1);  // Y LED OFF
+            // GPIO_SetBits(GPIOC, GPIO_Pin_2);    // R LED ON
+
 
             rx_data = flow_adjust; // sys_display;
             xQueueSend(xTaskQueue_handle,&rx_data,1000);
