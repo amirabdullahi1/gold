@@ -209,6 +209,7 @@ static void light_state_task ( void *pvParameters ) {
     uint16_t g_dur = 3000; // assume milliseconds
     
     uint16_t ADC_val = 0;
+    uint16_t rx_data;
     while(1)
 	{
         if(xQueueReceive(xTaskQueue_handle, &rx_data, 500))
