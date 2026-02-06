@@ -181,6 +181,7 @@ static void flow_adjust_task ( void *pvParameters ) {
 
                 xQueueOverwrite(xFlowQueue_handle, &ADC_val);
                 rx_data = light_state; // traffic_gen;
+                xQueueSend(xTaskQueue_handle,&rx_data,1000);
             }
 
             else {
@@ -225,6 +226,7 @@ static void light_state_task ( void *pvParameters ) {
             }
 
             rx_data = flow_adjust; // sys_display;
+            xQueueSend(xTaskQueue_handle,&rx_data,1000);
         }
 
         else 
