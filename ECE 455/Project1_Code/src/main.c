@@ -28,7 +28,12 @@
 #define flowQUEUE_LENGTH 1
 #define taskQUEUE_LENGTH 4
 
-#define ADC_MAX 4095.0
+#define ADC_MAX 4095
+
+#define configUSE_TIMERS 1
+#define configTIMER_TASK_PRIORITY        2
+#define configTIMER_QUEUE_LENGTH         5
+#define configTIMER_TASK_STACK_DEPTH     256
 
 /* Function that sets up the leds */
 void myGPIO_LED_Init()
@@ -106,6 +111,53 @@ void myADC1_Init()
     ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 1, ADC_SampleTime_144Cycles);
 
     ADC_SoftwareStartConv(ADC1);
+}
+
+typedef enum {
+    R_STATE,
+    Y_STATE,
+    G_STATE
+} LightState;
+
+static LightState state = G_STATE;
+static TimerHandle_t TIM_RYG;
+
+void myTIM_Init(void)
+{
+    TIM_RYG = xTimerCreate(
+        "Traffic",
+        pdMS_TO_TICKS(100),
+        pdFALSE,     // one-shot
+        NULL,
+        NULL
+    );
+
+    // Always check creation
+    configASSERT(TIM_RYG);
+}
+
+void red_foo()
+{
+    GPIO_ResetBits(GPIOC, GPIO_Pin_0);  // R LED OFF
+    GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
+    
+    GPIO_SetBits(GPIOC, GPIO_Pin_1);    // Y LED ON
+}
+
+void yellow_foo()
+{
+    GPIO_ResetBits(GPIOC, GPIO_Pin_1);  // Y LED OFF
+    GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
+    
+    GPIO_SetBits(GPIOC, GPIO_Pin_0);    // R LED ON
+}
+
+void green_foo()
+{
+    GPIO_ResetBits(GPIOC, GPIO_Pin_0);  // R LED OFF
+    GPIO_ResetBits(GPIOC, GPIO_Pin_1);  // Y LED OFF
+
+    GPIO_SetBits(GPIOC, GPIO_Pin_2);    // G LED ON
 }
 
 /*
@@ -194,10 +246,9 @@ static void flow_adjust_task ( void *pvParameters ) {
                 if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
                 {
                     // printf("Flow Adjust GWP (%u).\n", rx_data); // Got wrong Package
-                    vTaskDelay(pdMS_TO_TICKS(5));
+                    vTaskDelay(pdMS_TO_TICKS(500));
                 }
             }
-
         }
     }
 }
@@ -229,13 +280,11 @@ static void traffic_gen_task ( void *pvParameters ) {
 }
 
 static void light_state_task ( void *pvParameters ) {
-    GPIO_ResetBits(GPIOC, GPIO_Pin_0);  // R LED OFF
-    GPIO_ResetBits(GPIOC, GPIO_Pin_1);  // Y LED OFF
-    GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
-
     uint16_t r_dur = 3000.0; // assume milliseconds
     uint16_t y_dur = 3000.0; // assume milliseconds
     uint16_t g_dur = 3000.0; // assume milliseconds
+
+    xTimerStart(TIM_RYG, 0);
 
     uint16_t ADC_val = 0;
     uint16_t rx_data;
@@ -247,35 +296,49 @@ static void light_state_task ( void *pvParameters ) {
             {
                 if(xQueuePeek(xFlowQueue_handle, &ADC_val, 500))
                 {
-                    r_dur = 9999.0 * (2 - ADC_val/ADC_MAX);
-                    g_dur = 9999.0 * (1 + ADC_val/ADC_MAX);
+                    r_dur = (20000 - (10000 * ADC_val / ADC_MAX)); // 10000 → 20000 ms
+                    g_dur = (10000 + (10000 * ADC_val / ADC_MAX)); // 10000 → 20000 ms
                 	// printf("r_dur %u.\n", r_dur);
                 	// printf("y_dur %u.\n", y_dur);
                 	// printf("g_dur %u.\n", g_dur);
                 }
+
+                if(xTimerIsTimerActive(TIM_RYG) == pdFALSE)
+                {
+                    switch (state)
+                    {
+                        case G_STATE:
+                            green_foo();
+                            xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(g_dur), 0);
+                            state = Y_STATE;
+                            break;
+
+                        case Y_STATE:
+                            yellow_foo();
+                            xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(y_dur), 0);
+                            state = R_STATE;
+                            break;
+
+                        case R_STATE:
+                            red_foo();
+                            xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(r_dur), 0);
+                            state = G_STATE;
+                            break;
+                    }
+                    xTimerStart(TIM_RYG, 0);
+                }
+        
+                rx_data = flow_adjust; // sys_display;
+                xQueueSend(xTaskQueue_handle,&rx_data,1000);
             }
 
-
-            GPIO_ResetBits(GPIOC, GPIO_Pin_0);  // R LED OFF
-            GPIO_SetBits(GPIOC, GPIO_Pin_2);    // G LED ON
-
-            // GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
-            // GPIO_SetBits(GPIOC, GPIO_Pin_1);    // Y LED ON
-
-            // GPIO_ResetBits(GPIOC, GPIO_Pin_1);  // Y LED OFF
-            // GPIO_SetBits(GPIOC, GPIO_Pin_0);    // R LED ON
-
-
-            rx_data = flow_adjust; // sys_display;
-            xQueueSend(xTaskQueue_handle,&rx_data,1000);
-        }
-
-        else
-        {
-            if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
+            else
             {
-                // printf("Light State GWP (%u).\n", rx_data); // Got wrong Package
-                vTaskDelay(pdMS_TO_TICKS(5));
+                if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
+                {
+                    // printf("Light State GWP (%u).\n", rx_data); // Got wrong Package
+                    vTaskDelay(pdMS_TO_TICKS(5));
+                }
             }
         }
     }
