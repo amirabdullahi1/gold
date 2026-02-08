@@ -25,8 +25,9 @@
 #define light_state  	2
 #define sys_display  	3
 
-#define flowQUEUE_LENGTH 1
 #define taskQUEUE_LENGTH 4
+#define flowQUEUE_LENGTH 1
+#define rygQUEUE_LENGTH 1
 
 #define ADC_MAX 4095
 
@@ -119,7 +120,6 @@ typedef enum {
     G_STATE
 } LightState;
 
-static LightState state = G_STATE;
 static TimerHandle_t TIM_RYG;
 
 void myTIM_Init(void)
@@ -173,6 +173,7 @@ static void sys_display_task( void *pvParameters );
 
 xQueueHandle xTaskQueue_handle = 0;
 xQueueHandle xFlowQueue_handle = 0;
+xQueueHandle xRygQueue_handle = 0;
 /*-----------------------------------------------------------*/
 
 
@@ -200,6 +201,13 @@ int main(void)
     );
 	/* Add to the registry, for the benefit of kernel aware debugging. */
     vQueueAddToRegistry( xFlowQueue_handle, "flowQueue" );
+
+    xRygQueue_handle = xQueueCreate(
+        rygQUEUE_LENGTH,		/* The number of items the queue can hold. */
+        sizeof( LightState )      /* The size of each item the queue holds. */
+    );
+	/* Add to the registry, for the benefit of kernel aware debugging. */
+    vQueueAddToRegistry( xRygQueue_handle, "rygQueue" );
 
 	xTaskCreate( flow_adjust_task, "Flow Adjust", 256, NULL, 1, NULL);
 	xTaskCreate( traffic_gen_task, "Traffic Gen", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
@@ -280,6 +288,9 @@ static void traffic_gen_task ( void *pvParameters ) {
 }
 
 static void light_state_task ( void *pvParameters ) {
+    LightState state = G_STATE;
+    xQueueOverwrite(xRygQueue_handle, &state);
+
     uint16_t r_dur = 3000.0; // assume milliseconds
     uint16_t y_dur = 3000.0; // assume milliseconds
     uint16_t g_dur = 3000.0; // assume milliseconds
@@ -294,10 +305,10 @@ static void light_state_task ( void *pvParameters ) {
         {
             if(rx_data == light_state)
             {
-                if(xQueuePeek(xFlowQueue_handle, &ADC_val, 500))
+                if(xQueuePeek(xFlowQueue_handle, &ADC_val, 0))
                 {
-                    r_dur = (20000 - (10000 * ADC_val / ADC_MAX)); // 10000 → 20000 ms
-                    g_dur = (10000 + (10000 * ADC_val / ADC_MAX)); // 10000 → 20000 ms
+                    r_dur = (20000 - (10000 * ADC_val / ADC_MAX)); // 10s → 20s
+                    g_dur = (10000 + (10000 * ADC_val / ADC_MAX)); // 10s → 20s
                 	// printf("r_dur %u.\n", r_dur);
                 	// printf("y_dur %u.\n", y_dur);
                 	// printf("g_dur %u.\n", g_dur);
@@ -328,6 +339,7 @@ static void light_state_task ( void *pvParameters ) {
                     xTimerStart(TIM_RYG, 0);
                 }
         
+                xQueueOverwrite(xRygQueue_handle, &state);
                 rx_data = flow_adjust; // sys_display;
                 xQueueSend(xTaskQueue_handle,&rx_data,1000);
             }
@@ -343,7 +355,6 @@ static void light_state_task ( void *pvParameters ) {
         }
     }
 }
-
 
 static void sys_display_task ( void *pvParameters ) {
     uint16_t rx_data;
