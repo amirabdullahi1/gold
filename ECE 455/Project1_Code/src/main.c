@@ -392,8 +392,8 @@ static void light_state_task ( void *pvParameters ) {
             {
                 if(xQueuePeek(xFlowQueue_handle, &ADC_val, 0))
                 {
-                    r_dur = (20000 - (10000 * ADC_val / ADC_MAX)); // 10s → 20s
-                    g_dur = (10000 + (10000 * ADC_val / ADC_MAX)); // 10s → 20s
+                    r_dur = (20000 - (10000 * ADC_val / ADC_MAX)); // 10s -> 20s
+                    g_dur = (10000 + (10000 * ADC_val / ADC_MAX)); // 10s -> 20s
                 	// printf("r_dur %u.\n", r_dur);
                 	// printf("y_dur %u.\n", y_dur);
                 	// printf("g_dur %u.\n", g_dur);
