@@ -295,9 +295,9 @@ int main(void)
     vQueueAddToRegistry( xRygQueue_handle, "rygQueue" );
 
 	xTaskCreate( flow_adjust_task, "Flow Adjust", 256, NULL, 1, NULL);
-	xTaskCreate( traffic_gen_task, "Traffic Gen", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
-	xTaskCreate( light_state_task, "Light State", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
-	xTaskCreate( sys_display_task, "Sys Display", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+	xTaskCreate( traffic_gen_task, "Traffic Gen", 256, NULL, 1, NULL);
+	xTaskCreate( light_state_task, "Light State", 256, NULL, 1, NULL);
+	xTaskCreate( sys_display_task, "Sys Display", 256, NULL, 1, NULL);
 
     uint16_t tx_data = flow_adjust;
 
