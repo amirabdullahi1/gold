@@ -36,13 +36,23 @@
 #define configTIMER_QUEUE_LENGTH         5
 #define configTIMER_TASK_STACK_DEPTH     256
 
+// Added for traffic managment.
+#define NUM_TRAFFIC_LEDS 19
+#define INTERSECTION 8
+#define MAX_LEDS 10
+
+volatile uint8_t head = 0; // Leading leds postion.
+volatile uint8_t length = 1; // Current number of active leds.
+volatile uint8_t red_light = 1; // 1 means block 0 means go.
+
+
 /* Function that sets up the leds */
 void myGPIO_LED_Init()
 {
-    GPIO_InitTypeDef GPIO_InitStruct;
-
     /* Enable clock for GPIO peripherals */
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+
+    GPIO_InitTypeDef GPIO_InitStruct;
 
     /* Configured as an output */
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
@@ -140,16 +150,20 @@ void red_foo()
 {
     GPIO_ResetBits(GPIOC, GPIO_Pin_0);  // R LED OFF
     GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
-    
+
     GPIO_SetBits(GPIOC, GPIO_Pin_1);    // Y LED ON
+
+    red_light = 1;
 }
 
 void yellow_foo()
 {
     GPIO_ResetBits(GPIOC, GPIO_Pin_1);  // Y LED OFF
     GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
-    
+
     GPIO_SetBits(GPIOC, GPIO_Pin_0);    // R LED ON
+
+    red_light = 1;
 }
 
 void green_foo()
@@ -158,6 +172,70 @@ void green_foo()
     GPIO_ResetBits(GPIOC, GPIO_Pin_1);  // Y LED OFF
 
     GPIO_SetBits(GPIOC, GPIO_Pin_2);    // G LED ON
+
+    red_light = 0;
+}
+void delay(volatile uint32_t count){
+    while(count--);
+}
+
+void reset_register(void){
+    GPIO_ResetBits(GPIOC, GPIO_Pin_8);
+    delay(2000);
+    GPIO_SetBits(GPIOC, GPIO_Pin_8);
+}
+
+void shift_clock(void){
+    GPIO_ResetBits(GPIOC, GPIO_Pin_7);
+    delay(2000);
+    GPIO_SetBits(GPIOC, GPIO_Pin_7);
+    delay(2000);
+    GPIO_ResetBits(GPIOC, GPIO_Pin_7);
+}
+
+void shift_bits(uint8_t bit){
+    if(bit){
+        GPIO_SetBits(GPIOC, GPIO_Pin_6);
+    }else{
+        GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+    }
+    shift_clock();
+}
+
+void shift_19bits(uint32_t data){
+    for(int i = 19; i >= 0; i--){
+        shift_bits((data >> i) & 0x01);
+    }
+    reset_register();
+}
+
+uint32_t build_light_queue(uint8_t head, uint8_t length){
+    uint32_t leds = 0;
+
+    for(int i = 0; i < length; i++){
+        int pos = head - i;
+
+        if(pos < 0)
+            break;
+
+        leds |= (1 << pos);
+    }
+
+    return leds;
+}
+
+void traffic_handler(void){
+    if(red_light && head >= intersection){
+        if(length < MAX_LEDS)
+            length++;
+    }else{
+        head++;
+        if(head >= NUM_TRAFFIC_LEDS)
+            head = 0;
+    }
+
+    uint32_t leds = build_light_queue(head, length);
+    shift_19bits(leds);
 }
 
 /*
@@ -186,6 +264,13 @@ int main(void)
 	myGPIO_LED_Init();
     myGPIO_ADC_Init();
     myADC1_Init();
+
+    // Set for testing purposes.
+    while(1){
+        blocked = 1;
+        traffic_handler();
+        delay(2000);
+    }
 
 
     xTaskQueue_handle = xQueueCreate(
@@ -338,7 +423,7 @@ static void light_state_task ( void *pvParameters ) {
                     }
                     xTimerStart(TIM_RYG, 0);
                 }
-        
+
                 xQueueOverwrite(xRygQueue_handle, &state);
                 rx_data = flow_adjust; // sys_display;
                 xQueueSend(xTaskQueue_handle,&rx_data,1000);
