@@ -264,6 +264,7 @@ int main(void)
 	myGPIO_LED_Init();
     myGPIO_ADC_Init();
     myADC1_Init();
+    myTIM_Init();
 
     // Set for testing purposes.
     while(1){
