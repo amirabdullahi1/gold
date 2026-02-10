@@ -187,7 +187,7 @@ void delay(volatile uint32_t count){
 
 void reset_register(void){
     GPIO_ResetBits(GPIOC, GPIO_Pin_8);
-    vTaskDelay(pdMS_TO_TICKS(500)); // may need to use timer
+    delay(2000);
     GPIO_SetBits(GPIOC, GPIO_Pin_8);
 }
 
