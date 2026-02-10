@@ -20,27 +20,26 @@
 /*-----------------------------------------------------------*/
 
 /*-----------------------------------------------------------*/
+// Added for task management.
 #define flow_adjust  	0
 #define traffic_gen  	1
 #define light_state  	2
 #define sys_display  	3
 
+// Added for queue management.
 #define taskQUEUE_LENGTH 4
 #define flowQUEUE_LENGTH 1
 #define rygQUEUE_LENGTH 1
 
+// Added for ADC management.
 #define ADC_MIN 0
 #define ADC_MAX 3900
 #define ADC_RES 40
 
-// Added for traffic managment.
+// Added for traffic management.
 #define NUM_TRAFFIC_LEDS 19
 #define INTERSECTION 8
 #define MAX_LEDS 10
-
-volatile uint8_t head = 0; // Leading leds postion.
-volatile uint8_t length = 1; // Current number of active leds.
-volatile uint8_t red_light = 1; // 1 means block 0 means go.
 
 
 /* Function that sets up the leds */
@@ -140,7 +139,7 @@ void myTIM_Init(void)
     TIM_RYG = xTimerCreate(
         "Traffic",
         pdMS_TO_TICKS(100),
-        pdFALSE,    
+        pdFALSE,
         NULL,
         vRygTimerCallback
     );
@@ -157,7 +156,7 @@ void red_foo()
 
 void yellow_foo()
 {
-    
+
     GPIO_ResetBits(GPIOC, GPIO_Pin_0);  // R LED OFF
     GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
 
@@ -278,7 +277,7 @@ int main(void)
     myADC1_Init();
     myTIM_Init();
 
-	
+
     /* Start test sys_display? */
 //    reset_register();
 //    traffic_handler();
