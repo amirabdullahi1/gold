@@ -308,7 +308,7 @@ int main(void)
 	/* Add to the registry, for the benefit of kernel aware debugging. */
     vQueueAddToRegistry( xRygQueue_handle, "rygQueue" );
 
-    // All tasks have priority 1. Might need to vary priorities. 
+    // All tasks have priority 1. Might need to vary priorities.
 	xTaskCreate( flow_adjust_task, "Flow Adjust", 256, NULL, 1, NULL);
 	xTaskCreate( traffic_gen_task, "Traffic Gen", 256, NULL, 1, NULL);
 	xTaskCreate( light_state_task, "Light State", 256, NULL, 1, NULL);
@@ -347,7 +347,7 @@ static void flow_adjust_task ( void *pvParameters ) {
                 /**
                  * Potential necessary improvement:
                  * Avoid polling ADC_GetFlagStatus in a tight loop.
-                 * Consider using ADC interrupt mode to automatically store values in xFlowQueue_handle. 
+                 * Consider using ADC interrupt mode to automatically store values in xFlowQueue_handle.
                  * This frees up the CPU.
                  */
                 if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC)) {
