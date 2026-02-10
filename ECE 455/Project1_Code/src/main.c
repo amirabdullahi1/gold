@@ -136,7 +136,7 @@ static TimerHandle_t TIM_RYG;
 void vRygTimerCallback(TimerHandle_t xTimer)
 {
     // uint16_t rx_data = light_state;
-    // xQueueSend(xTaskQueue_handle,&rx_data,0);
+    // xQueueSendFromISR(xTaskQueue_handle, &rx_data, pdFALSE);
 }
 
 void myTIM_Init(void)
@@ -345,7 +345,7 @@ static void flow_adjust_task ( void *pvParameters ) {
                 }
 
                 xQueueOverwrite(xFlowQueue_handle, &ADC_val);
-                rx_data = light_state; // traffic_gen;
+                rx_data = light_state;
                 xQueueSend(xTaskQueue_handle,&rx_data,1000);
             }
 
@@ -369,7 +369,7 @@ static void traffic_gen_task ( void *pvParameters ) {
         {
             if(rx_data == traffic_gen)
             {
-                rx_data = light_state;
+                rx_data = sys_display;
                 xQueueSend(xTaskQueue_handle,&rx_data,1000);
             }
 
@@ -387,11 +387,9 @@ static void traffic_gen_task ( void *pvParameters ) {
 
 static void light_state_task ( void *pvParameters ) {
     LightState state = G_STATE;
-    xQueueOverwrite(xRygQueue_handle, &state);
 
-    uint16_t r_dur, y_dur, g_dur; // assume milliseconds
-
-    xTimerStart(TIM_RYG, 0);
+    uint16_t r_dur = 20000; // assume milliseconds
+    uint16_t g_dur = 10000; // assume milliseconds
 
     uint16_t ADC_old = ADC_MAX;
     uint16_t ADC_new = ADC_MIN;
@@ -409,7 +407,6 @@ static void light_state_task ( void *pvParameters ) {
                         r_dur = (20000 - (10000 * ADC_new / ADC_MAX)); // 10s -> 20s
                         g_dur = (10000 + (10000 * ADC_new / ADC_MAX)); // 10s -> 20s
                         // printf("r_dur %u.\n", r_dur);
-                        // printf("y_dur %u.\n", y_dur);
                         // printf("g_dur %u.\n", g_dur);
 
                         if (state == R_STATE)
@@ -433,7 +430,7 @@ static void light_state_task ( void *pvParameters ) {
 
                         case Y_STATE:
                             yellow_foo();
-                            xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(y_dur), 0);
+                            xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(3000), 0);
                             state = R_STATE;
                             break;
 
@@ -447,7 +444,7 @@ static void light_state_task ( void *pvParameters ) {
                 }
 
                 xQueueOverwrite(xRygQueue_handle, &state);
-                rx_data = flow_adjust; // sys_display;
+                rx_data = flow_adjust; // traffic_gen;
                 xQueueSend(xTaskQueue_handle,&rx_data,1000);
             }
 
