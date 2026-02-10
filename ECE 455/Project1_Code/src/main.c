@@ -326,7 +326,11 @@ int main(void)
 
 	/* Start the tasks and timer running. */
 	vTaskStartScheduler();
-
+	/*
+	 * Does vTaskStartScheduler(); seem to stall?
+	 * Check line 95 in FreeRTOSConfig.h and increase configTOTAL_HEAP_SIZE.
+	 * #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 24 * 1024 ) )
+	 */
     return 0;
 }
 
