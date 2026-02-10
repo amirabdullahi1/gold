@@ -31,8 +31,6 @@
 
 #define ADC_MAX 4095
 
-#define configTOTAL_HEAP_SIZE (20 * 1024)
-
 // Added for traffic managment.
 #define NUM_TRAFFIC_LEDS 19
 #define INTERSECTION 8
@@ -129,6 +127,11 @@ typedef enum {
 
 static TimerHandle_t TIM_RYG;
 
+static void vRygTimerCallback(TimerHandle_t xTimer)
+{
+    // just wake the light_state task later if needed
+}
+
 void myTIM_Init(void)
 {
     TIM_RYG = xTimerCreate(
@@ -136,7 +139,7 @@ void myTIM_Init(void)
         pdMS_TO_TICKS(100),
         pdFALSE,     // one-shot
         NULL,
-        NULL
+        vRygTimerCallback
     );
 
     // Always check creation
