@@ -308,6 +308,7 @@ int main(void)
 	/* Add to the registry, for the benefit of kernel aware debugging. */
     vQueueAddToRegistry( xRygQueue_handle, "rygQueue" );
 
+    // All tasks have priority 1. Might need to vary priorities. 
 	xTaskCreate( flow_adjust_task, "Flow Adjust", 256, NULL, 1, NULL);
 	xTaskCreate( traffic_gen_task, "Traffic Gen", 256, NULL, 1, NULL);
 	xTaskCreate( light_state_task, "Light State", 256, NULL, 1, NULL);
@@ -339,13 +340,19 @@ static void flow_adjust_task ( void *pvParameters ) {
 	uint16_t rx_data;
     while(1)
 	{
-        if(xQueueReceive(xTaskQueue_handle, &rx_data, 500))
+        if(xQueueReceive(xTaskQueue_handle, &rx_data, portMAX_DELAY))
         {
             if(rx_data == flow_adjust)
             {
+                /**
+                 * Potential necessary improvement:
+                 * Avoid polling ADC_GetFlagStatus in a tight loop.
+                 * Consider using ADC interrupt mode to automatically store values in xFlowQueue_handle. 
+                 * This frees up the CPU.
+                 */
                 if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC)) {
                     ADC_val = (ADC_GetConversionValue(ADC1) & 0x0FFF);
-                	printf("ADC_val %u.\n", ADC_val);
+                	// printf("ADC_val %u.\n", ADC_val);
                 }
 
                 xQueueOverwrite(xFlowQueue_handle, &ADC_val);
@@ -369,7 +376,7 @@ static void traffic_gen_task ( void *pvParameters ) {
     uint16_t rx_data;
     while(1)
 	{
-        if(xQueueReceive(xTaskQueue_handle, &rx_data, 500))
+        if(xQueueReceive(xTaskQueue_handle, &rx_data, portMAX_DELAY))
         {
             if(rx_data == traffic_gen)
             {
@@ -399,7 +406,7 @@ static void light_state_task ( void *pvParameters ) {
     uint16_t rx_data;
     while(1)
 	{
-        if(xQueueReceive(xTaskQueue_handle, &rx_data, 500))
+        if(xQueueReceive(xTaskQueue_handle, &rx_data, portMAX_DELAY))
         {
             if(rx_data == light_state)
             {
@@ -409,8 +416,8 @@ static void light_state_task ( void *pvParameters ) {
                     {
                         r_dur = (9999 - (5000 * ADC_new / ADC_MAX)); // 10s -> 5s
                         g_dur = (4999 + (5000 * ADC_new / ADC_MAX)); // 5s -> 10s
-                         printf("r_dur %u.\n", r_dur);
-                         printf("g_dur %u.\n", g_dur);
+                        //  printf("r_dur %u.\n", r_dur);
+                        //  printf("g_dur %u.\n", g_dur);
 
                         if (next_light_state == Y_STATE)
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(r_dur), 0);
@@ -432,8 +439,8 @@ static void light_state_task ( void *pvParameters ) {
                              * ------------------------------
                              * Then next_light_state = Red
                              */
-                        	next_light_state = R_STATE;
                         	green_foo();
+                        	next_light_state = R_STATE;
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(g_dur), 0);
                             break;
 
@@ -444,8 +451,8 @@ static void light_state_task ( void *pvParameters ) {
                              * ------------------------------
                              * Then next_light_state = Green
                              */
-                        	next_light_state = G_STATE;
                         	yellow_foo();
+                        	next_light_state = G_STATE;
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(3000), 0);
                             break;
 
@@ -456,8 +463,8 @@ static void light_state_task ( void *pvParameters ) {
                              * ------------------------------
                              * Then next_light_state = Yellow
                              */
-                        	next_light_state = Y_STATE;
                         	red_foo();
+                        	next_light_state = Y_STATE;
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(r_dur), 0);
                             break;
                     }
@@ -485,7 +492,7 @@ static void sys_display_task ( void *pvParameters ) {
     uint16_t rx_data;
     while(1)
 	{
-        if(xQueueReceive(xTaskQueue_handle, &rx_data, 500))
+        if(xQueueReceive(xTaskQueue_handle, &rx_data, portMAX_DELAY))
         {
             if(rx_data == sys_display)
             {
