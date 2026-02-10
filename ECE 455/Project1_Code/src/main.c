@@ -388,8 +388,8 @@ static void traffic_gen_task ( void *pvParameters ) {
 static void light_state_task ( void *pvParameters ) {
     LightState next_light_state = Y_STATE;
 
-    uint16_t r_dur = 20000; // assume milliseconds
-    uint16_t g_dur = 10000; // assume milliseconds
+    uint16_t r_dur = 9999; // assume milliseconds
+    uint16_t g_dur = 4999; // assume milliseconds
 
     uint16_t ADC_old = ADC_MAX;
     uint16_t ADC_new = ADC_MIN;
@@ -404,10 +404,10 @@ static void light_state_task ( void *pvParameters ) {
                 {
                     if(abs(ADC_old - ADC_new) > ADC_RES)
                     {
-                        r_dur = (20000 - (10000 * ADC_new / ADC_MAX)); // 10s -> 20s
-                        g_dur = (10000 + (10000 * ADC_new / ADC_MAX)); // 10s -> 20s
-                        // printf("r_dur %u.\n", r_dur);
-                        // printf("g_dur %u.\n", g_dur);
+                        r_dur = (9999 - (5000 * ADC_new / ADC_MAX)); // 10s -> 5s
+                        g_dur = (4999 + (5000 * ADC_new / ADC_MAX)); // 5s -> 10s
+                         printf("r_dur %u.\n", r_dur);
+                         printf("g_dur %u.\n", g_dur);
 
                         if (next_light_state == G_STATE)
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(r_dur), 0);
