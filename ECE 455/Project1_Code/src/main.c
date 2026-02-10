@@ -1,6 +1,7 @@
 /* Standard includes. */
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "stm32f4_discovery.h"
 /* Kernel includes. */
 #include "stm32f4xx.h"
@@ -392,7 +393,7 @@ static void light_state_task ( void *pvParameters ) {
 
     xTimerStart(TIM_RYG, 0);
 
-    uint16_t ADC_old = ADC_MAX; 
+    uint16_t ADC_old = ADC_MAX;
     uint16_t ADC_new = ADC_MIN;
     uint16_t rx_data;
     while(1)
