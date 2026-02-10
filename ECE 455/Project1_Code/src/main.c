@@ -386,7 +386,7 @@ static void traffic_gen_task ( void *pvParameters ) {
 }
 
 static void light_state_task ( void *pvParameters ) {
-    LightState state = G_STATE;
+    LightState next_light_state = Y_STATE;
 
     uint16_t r_dur = 20000; // assume milliseconds
     uint16_t g_dur = 10000; // assume milliseconds
@@ -409,10 +409,10 @@ static void light_state_task ( void *pvParameters ) {
                         // printf("r_dur %u.\n", r_dur);
                         // printf("g_dur %u.\n", g_dur);
 
-                        if (state == R_STATE)
+                        if (next_light_state == G_STATE)
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(r_dur), 0);
 
-                        if (state == G_STATE)
+                        if (next_light_state == Y_STATE)
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(g_dur), 0);
                     }
 					ADC_old = ADC_new;
@@ -420,30 +420,48 @@ static void light_state_task ( void *pvParameters ) {
 
                 if(xTimerIsTimerActive(TIM_RYG) == pdFALSE)
                 {
-                    switch (state)
+                    switch (next_light_state)
                     {
-                        case G_STATE:
+                        case Y_STATE:
+                            /**
+                             * When next_light_state = Yellow
+                             * Then this_light_state = Green
+                             * ------------------------------
+                             * Then next_light_state = Red
+                             */
                             green_foo();
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(g_dur), 0);
-                            state = Y_STATE;
-                            break;
-
-                        case Y_STATE:
-                            yellow_foo();
-                            xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(3000), 0);
-                            state = R_STATE;
+                            next_light_state = R_STATE;
                             break;
 
                         case R_STATE:
+                            /**
+                             * When next_light_state = Red
+                             * Then this_light_state = Yellow
+                             * ------------------------------
+                             * Then next_light_state = Green
+                             */
+                            yellow_foo();
+                            xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(3000), 0);
+                            next_light_state = G_STATE;
+                            break;
+
+                        case G_STATE:
+                            /**
+                             * When next_light_state = Green
+                             * Then this_light_state = Red
+                             * ------------------------------
+                             * Then next_light_state = Yellow
+                             */
                             red_foo();
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(r_dur), 0);
-                            state = G_STATE;
+                            next_light_state = Y_STATE;
                             break;
                     }
                     xTimerStart(TIM_RYG, 0);
                 }
 
-                xQueueOverwrite(xRygQueue_handle, &state);
+                xQueueOverwrite(xRygQueue_handle, &next_light_state);
                 rx_data = flow_adjust; // traffic_gen;
                 xQueueSend(xTaskQueue_handle,&rx_data,1000);
             }
