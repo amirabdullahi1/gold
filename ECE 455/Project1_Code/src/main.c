@@ -178,7 +178,7 @@ void delay(volatile uint32_t count){
 
 void reset_register(void){
     GPIO_ResetBits(GPIOC, GPIO_Pin_8);
-    delay(2000);
+    vTaskDelay(pdMS_TO_TICKS(500)); // may need to use timer
     GPIO_SetBits(GPIOC, GPIO_Pin_8);
 }
 
@@ -190,52 +190,53 @@ void shift_clock(void){
     GPIO_ResetBits(GPIOC, GPIO_Pin_7);
 }
 
-void shift_bits(uint8_t bit){
-    if(bit){
-        GPIO_SetBits(GPIOC, GPIO_Pin_6);
-    }else{
-        GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-    }
-    shift_clock();
+void shift_bits(uint8_t data){
+	for(int i = 0; i < 8; i++){
+		if(data & (0x80 >> i)){
+			GPIO_SetBits(GPIOC, GPIO_Pin_6);
+		}else{
+			GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+		}
+		shift_clock();
+	}
+
 }
 
-void shift_19bits(uint32_t data){
-    for(int i = 19; i >= 0; i--){
-        shift_bits((data >> i) & 0x01);
-    }
-    reset_register();
+void before_intersection(uint8_t data){
+	reset_register();
+	for(int i = 0; i < 8; i++){
+		if(data & (0x80 >> i)){
+			GPIO_SetBits(GPIOC, GPIO_Pin_6);
+		}else{
+			GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+		}
+		shift_clock();
+	}
 }
 
-uint32_t build_light_queue(uint8_t head, uint8_t length){
-    uint32_t leds = 0;
-
-    for(int i = 0; i < length; i++){
-        int pos = head - i;
-
-        if(pos < 0)
-            break;
-
-        leds |= (1 << pos);
-    }
-
-    return leds;
+void intersection_and_beyond(uint8_t data){
+	reset_register();
+	for(int i = 0; i < 16; i++){
+		if(data & (0x80 >> i)){
+			GPIO_SetBits(GPIOC, GPIO_Pin_6);
+		}else{
+			GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+		}
+		shift_clock();
+	}
 }
 
 void traffic_handler(void){
-    LightState state;
-    xQueuePeek(xRygQueue_handle, &state, 0);
+	for(int i = 0; i < 8; i++){
+		data = binary_sets[i];
+		before_intersection(data);
+	}
+	if(red_light == 0)
+		for(int i = 0; i < 8; i++){
+			data = binary_sets[i];
+			intersection_and_beyond(data);
+		}
 
-    if(state == R_STATE && head >= intersection){
-        if(length < MAX_LEDS)
-            length++;
-    }else{
-        head++;
-        if(head >= NUM_TRAFFIC_LEDS)
-            head = 0;
-    }
-
-    uint32_t leds = build_light_queue(head, length);
-    shift_19bits(leds);
 }
 
 /*
@@ -266,12 +267,12 @@ int main(void)
     myADC1_Init();
     myTIM_Init();
 
-    // Set for testing purposes.
-    while(1){
-        blocked = 1;
-        traffic_handler();
-        delay(2000);
-    }
+	
+    /* Start test sys_display? */
+    reset_register();
+    traffic_handler();
+    shift_bits(0b00000001);
+    /* End test sys_display? */
 
 
     xTaskQueue_handle = xQueueCreate(
@@ -348,7 +349,6 @@ static void flow_adjust_task ( void *pvParameters ) {
 }
 
 static void traffic_gen_task ( void *pvParameters ) {
-    uint16_t ADC_old, ADC_new;
     uint16_t rx_data;
     while(1)
 	{
@@ -356,17 +356,19 @@ static void traffic_gen_task ( void *pvParameters ) {
         {
             if(rx_data == traffic_gen)
             {
-                rx_data = light_state;
-                xQueueSend(xTaskQueue_handle,&rx_data,1000);
+
             }
 
-            else
+            rx_data = light_state;
+            xQueueSend(xTaskQueue_handle,&rx_data,1000);
+        }
+
+        else
+        {
+            if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
             {
-                if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
-                {
-                    // printf("Traffic Gen GWP (%u).\n", rx_data); // Got wrong Package
-                    vTaskDelay(pdMS_TO_TICKS(5));
-                }
+                // printf("Traffic Gen GWP (%u).\n", rx_data); // Got wrong Package
+                vTaskDelay(pdMS_TO_TICKS(5));
             }
         }
     }
@@ -376,12 +378,13 @@ static void light_state_task ( void *pvParameters ) {
     LightState state = G_STATE;
     xQueueOverwrite(xRygQueue_handle, &state);
 
-    uint16_t r_dur, y_dur, g_dur; // assume milliseconds
+    uint16_t r_dur = 3000.0; // assume milliseconds
+    uint16_t y_dur = 3000.0; // assume milliseconds
+    uint16_t g_dur = 3000.0; // assume milliseconds
 
     xTimerStart(TIM_RYG, 0);
 
-    uint16_t ADC_old = ADC_MAX; 
-    uint16_t ADC_new = ADC_MIN;
+    uint16_t ADC_val = 0;
     uint16_t rx_data;
     while(1)
 	{
@@ -389,22 +392,13 @@ static void light_state_task ( void *pvParameters ) {
         {
             if(rx_data == light_state)
             {
-                if(xQueuePeek(xFlowQueue_handle, &ADC_new, 0))
+                if(xQueuePeek(xFlowQueue_handle, &ADC_val, 0))
                 {
-                    if(abs(ADC_old - ADC_new) > ADC_RES)
-                    {
-                        r_dur = (20000 - (10000 * ADC_new / ADC_MAX)); // 10s -> 20s
-                        g_dur = (10000 + (10000 * ADC_new / ADC_MAX)); // 10s -> 20s
-                        // printf("r_dur %u.\n", r_dur);
-                        // printf("y_dur %u.\n", y_dur);
-                        // printf("g_dur %u.\n", g_dur);
-
-                        if (state == R_STATE)
-                            xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(r_dur), 0);
-
-                        if (state == G_STATE)
-                            xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(g_dur), 0);
-                    }
+                    r_dur = (20000 - (10000 * ADC_val / ADC_MAX)); // 10s -> 20s
+                    g_dur = (10000 + (10000 * ADC_val / ADC_MAX)); // 10s -> 20s
+                	// printf("r_dur %u.\n", r_dur);
+                	// printf("y_dur %u.\n", y_dur);
+                	// printf("g_dur %u.\n", g_dur);
                 }
 
                 if(xTimerIsTimerActive(TIM_RYG) == pdFALSE)
@@ -457,18 +451,19 @@ static void sys_display_task ( void *pvParameters ) {
         {
             if(rx_data == sys_display)
             {
-
-                rx_data = flow_adjust;
-                xQueueSend(xTaskQueue_handle,&rx_data,1000);
+            	// it's actually is sys_dispaly turn to execute
             }
 
-            else
+            rx_data = sys_display; // flow_adjust;
+            xQueueSend(xTaskQueue_handle,&rx_data,1000);
+        }
+
+        else
+        {
+            if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
             {
-                if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
-                {
-                    // printf("Sys Display GWP (%u).\n", rx_data); // Got wrong Package
-                    vTaskDelay(pdMS_TO_TICKS(5));
-                }
+                // printf("Sys Display GWP (%u).\n", rx_data); // Got wrong Package
+                vTaskDelay(pdMS_TO_TICKS(5));
             }
         }
     }
