@@ -38,8 +38,8 @@ xQueueHandle xRygQueue_handle = 0;
 
 // Added for ADC management.
 #define ADC_MIN 0
-#define ADC_MAX 3900
-#define ADC_RES 40
+#define ADC_MAX 4000
+#define ADC_RES 30
 
 // Added for traffic management.
 #define NUM_TRAFFIC_LEDS 19
@@ -340,7 +340,7 @@ static void flow_adjust_task ( void *pvParameters ) {
             if(rx_data == flow_adjust)
             {
                 if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC)) {
-                    ADC_val = (ADC_GetConversionValue(ADC1));
+                    ADC_val = (ADC_GetConversionValue(ADC1) & 0x0FFF);
                 	printf("ADC_val %u.\n", ADC_val);
                 }
 
@@ -353,7 +353,7 @@ static void flow_adjust_task ( void *pvParameters ) {
                 if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
                 {
                     // printf("Flow Adjust GWP (%u).\n", rx_data); // Got wrong Package
-                    vTaskDelay(pdMS_TO_TICKS(500));
+                    vTaskDelay(pdMS_TO_TICKS(100));
                 }
             }
         }
@@ -388,11 +388,10 @@ static void traffic_gen_task ( void *pvParameters ) {
 static void light_state_task ( void *pvParameters ) {
     LightState next_light_state = Y_STATE;
 
-    uint16_t r_dur = 9999; // assume milliseconds
-    uint16_t g_dur = 4999; // assume milliseconds
+    uint16_t r_dur, g_dur; // assume milliseconds
 
-    uint16_t ADC_old = ADC_MAX;
-    uint16_t ADC_new = ADC_MIN;
+    uint16_t ADC_old = INT16_MAX;
+    uint16_t ADC_new = INT16_MIN;
     uint16_t rx_data;
     while(1)
 	{
@@ -409,10 +408,10 @@ static void light_state_task ( void *pvParameters ) {
                          printf("r_dur %u.\n", r_dur);
                          printf("g_dur %u.\n", g_dur);
 
-                        if (next_light_state == G_STATE)
+                        if (next_light_state == Y_STATE)
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(r_dur), 0);
 
-                        if (next_light_state == Y_STATE)
+                        if (next_light_state == R_STATE)
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(g_dur), 0);
                     }
 					ADC_old = ADC_new;
@@ -429,9 +428,9 @@ static void light_state_task ( void *pvParameters ) {
                              * ------------------------------
                              * Then next_light_state = Red
                              */
-                            green_foo();
+                        	next_light_state = R_STATE;
+                        	green_foo();
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(g_dur), 0);
-                            next_light_state = R_STATE;
                             break;
 
                         case R_STATE:
@@ -441,9 +440,9 @@ static void light_state_task ( void *pvParameters ) {
                              * ------------------------------
                              * Then next_light_state = Green
                              */
-                            yellow_foo();
+                        	next_light_state = G_STATE;
+                        	yellow_foo();
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(3000), 0);
-                            next_light_state = G_STATE;
                             break;
 
                         case G_STATE:
@@ -453,9 +452,9 @@ static void light_state_task ( void *pvParameters ) {
                              * ------------------------------
                              * Then next_light_state = Yellow
                              */
-                            red_foo();
+                        	next_light_state = Y_STATE;
+                        	red_foo();
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(r_dur), 0);
-                            next_light_state = Y_STATE;
                             break;
                     }
                     xTimerStart(TIM_RYG, 0);
