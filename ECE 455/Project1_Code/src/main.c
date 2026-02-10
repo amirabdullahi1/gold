@@ -360,6 +360,7 @@ static void flow_adjust_task ( void *pvParameters ) {
 }
 
 static void traffic_gen_task ( void *pvParameters ) {
+    uint16_t ADC_old, ADC_new;
     uint16_t rx_data;
     while(1)
 	{
@@ -367,19 +368,17 @@ static void traffic_gen_task ( void *pvParameters ) {
         {
             if(rx_data == traffic_gen)
             {
-
+                rx_data = light_state;
+                xQueueSend(xTaskQueue_handle,&rx_data,1000);
             }
 
-            rx_data = light_state;
-            xQueueSend(xTaskQueue_handle,&rx_data,1000);
-        }
-
-        else
-        {
-            if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
+            else
             {
-                // printf("Traffic Gen GWP (%u).\n", rx_data); // Got wrong Package
-                vTaskDelay(pdMS_TO_TICKS(5));
+                if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
+                {
+                    // printf("Traffic Gen GWP (%u).\n", rx_data); // Got wrong Package
+                    vTaskDelay(pdMS_TO_TICKS(5));
+                }
             }
         }
     }
@@ -389,13 +388,12 @@ static void light_state_task ( void *pvParameters ) {
     LightState state = G_STATE;
     xQueueOverwrite(xRygQueue_handle, &state);
 
-    uint16_t r_dur = 3000.0; // assume milliseconds
-    uint16_t y_dur = 3000.0; // assume milliseconds
-    uint16_t g_dur = 3000.0; // assume milliseconds
+    uint16_t r_dur, y_dur, g_dur; // assume milliseconds
 
     xTimerStart(TIM_RYG, 0);
 
-    uint16_t ADC_val = 0;
+    uint16_t ADC_old = ADC_MAX; 
+    uint16_t ADC_new = ADC_MIN;
     uint16_t rx_data;
     while(1)
 	{
@@ -403,13 +401,22 @@ static void light_state_task ( void *pvParameters ) {
         {
             if(rx_data == light_state)
             {
-                if(xQueuePeek(xFlowQueue_handle, &ADC_val, 0))
+                if(xQueuePeek(xFlowQueue_handle, &ADC_new, 0))
                 {
-                    r_dur = (20000 - (10000 * ADC_val / ADC_MAX)); // 10s -> 20s
-                    g_dur = (10000 + (10000 * ADC_val / ADC_MAX)); // 10s -> 20s
-                	// printf("r_dur %u.\n", r_dur);
-                	// printf("y_dur %u.\n", y_dur);
-                	// printf("g_dur %u.\n", g_dur);
+                    if(abs(ADC_old - ADC_new) > ADC_RES)
+                    {
+                        r_dur = (20000 - (10000 * ADC_new / ADC_MAX)); // 10s -> 20s
+                        g_dur = (10000 + (10000 * ADC_new / ADC_MAX)); // 10s -> 20s
+                        // printf("r_dur %u.\n", r_dur);
+                        // printf("y_dur %u.\n", y_dur);
+                        // printf("g_dur %u.\n", g_dur);
+
+                        if (state == R_STATE)
+                            xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(r_dur), 0);
+
+                        if (state == G_STATE)
+                            xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(g_dur), 0);
+                    }
                 }
 
                 if(xTimerIsTimerActive(TIM_RYG) == pdFALSE)
@@ -462,19 +469,18 @@ static void sys_display_task ( void *pvParameters ) {
         {
             if(rx_data == sys_display)
             {
-            	// it's actually is sys_dispaly turn to execute
+
+                rx_data = flow_adjust;
+                xQueueSend(xTaskQueue_handle,&rx_data,1000);
             }
 
-            rx_data = sys_display; // flow_adjust;
-            xQueueSend(xTaskQueue_handle,&rx_data,1000);
-        }
-
-        else
-        {
-            if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
+            else
             {
-                // printf("Sys Display GWP (%u).\n", rx_data); // Got wrong Package
-                vTaskDelay(pdMS_TO_TICKS(5));
+                if(xQueueSend(xTaskQueue_handle,&rx_data,1000))
+                {
+                    // printf("Sys Display GWP (%u).\n", rx_data); // Got wrong Package
+                    vTaskDelay(pdMS_TO_TICKS(5));
+                }
             }
         }
     }
