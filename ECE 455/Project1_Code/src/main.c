@@ -418,6 +418,7 @@ static void light_state_task ( void *pvParameters ) {
                         if (state == G_STATE)
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(g_dur), 0);
                     }
+					ADC_old = ADC_new;
                 }
 
                 if(xTimerIsTimerActive(TIM_RYG) == pdFALSE)
