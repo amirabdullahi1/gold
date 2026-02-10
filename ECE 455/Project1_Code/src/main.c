@@ -31,6 +31,10 @@
 #define flowQUEUE_LENGTH 1
 #define rygQUEUE_LENGTH 1
 
+xQueueHandle xTaskQueue_handle = 0;
+xQueueHandle xFlowQueue_handle = 0;
+xQueueHandle xRygQueue_handle = 0;
+
 // Added for ADC management.
 #define ADC_MIN 0
 #define ADC_MAX 3900
@@ -128,7 +132,7 @@ typedef enum {
 
 static TimerHandle_t TIM_RYG;
 
-static void vRygTimerCallback(TimerHandle_t xTimer)
+void vRygTimerCallback(TimerHandle_t xTimer)
 {
     uint16_t rx_data;
     xQueueSend(xTaskQueue_handle,&rx_data,1000);
@@ -259,10 +263,6 @@ static void flow_adjust_task( void *pvParameters );
 static void traffic_gen_task( void *pvParameters );
 static void light_state_task( void *pvParameters );
 static void sys_display_task( void *pvParameters );
-
-xQueueHandle xTaskQueue_handle = 0;
-xQueueHandle xFlowQueue_handle = 0;
-xQueueHandle xRygQueue_handle = 0;
 /*-----------------------------------------------------------*/
 
 
