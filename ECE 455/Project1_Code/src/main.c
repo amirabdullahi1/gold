@@ -135,8 +135,8 @@ static TimerHandle_t TIM_RYG;
 
 void vRygTimerCallback(TimerHandle_t xTimer)
 {
-    uint16_t rx_data;
-    xQueueSend(xTaskQueue_handle,&rx_data,1000);
+    // uint16_t rx_data = light_state;
+    // xQueueSend(xTaskQueue_handle,&rx_data,0);
 }
 
 void myTIM_Init(void)
