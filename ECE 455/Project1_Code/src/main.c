@@ -129,7 +129,8 @@ static TimerHandle_t TIM_RYG;
 
 static void vRygTimerCallback(TimerHandle_t xTimer)
 {
-    // just wake the light_state task later if needed
+    uint16_t rx_data;
+    xQueueSend(xTaskQueue_handle,&rx_data,1000);
 }
 
 void myTIM_Init(void)
@@ -137,33 +138,28 @@ void myTIM_Init(void)
     TIM_RYG = xTimerCreate(
         "Traffic",
         pdMS_TO_TICKS(100),
-        pdFALSE,     // one-shot
+        pdFALSE,    
         NULL,
         vRygTimerCallback
     );
-
-    // Always check creation
     configASSERT(TIM_RYG);
 }
 
 void red_foo()
 {
-    GPIO_ResetBits(GPIOC, GPIO_Pin_0);  // R LED OFF
-    GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
-
-    GPIO_SetBits(GPIOC, GPIO_Pin_1);    // Y LED ON
-
-    red_light = 1;
-}
-
-void yellow_foo()
-{
     GPIO_ResetBits(GPIOC, GPIO_Pin_1);  // Y LED OFF
     GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
 
     GPIO_SetBits(GPIOC, GPIO_Pin_0);    // R LED ON
+}
 
-    red_light = 1;
+void yellow_foo()
+{
+    
+    GPIO_ResetBits(GPIOC, GPIO_Pin_0);  // R LED OFF
+    GPIO_ResetBits(GPIOC, GPIO_Pin_2);  // G LED OFF
+
+    GPIO_SetBits(GPIOC, GPIO_Pin_1);    // Y LED ON
 }
 
 void green_foo()
@@ -172,9 +168,8 @@ void green_foo()
     GPIO_ResetBits(GPIOC, GPIO_Pin_1);  // Y LED OFF
 
     GPIO_SetBits(GPIOC, GPIO_Pin_2);    // G LED ON
-
-    red_light = 0;
 }
+
 void delay(volatile uint32_t count){
     while(count--);
 }
@@ -225,7 +220,10 @@ uint32_t build_light_queue(uint8_t head, uint8_t length){
 }
 
 void traffic_handler(void){
-    if(red_light && head >= intersection){
+    LightState state;
+    xQueuePeek(xRygQueue_handle, &state, 0);
+
+    if(state == R_STATE && head >= intersection){
         if(length < MAX_LEDS)
             length++;
     }else{
@@ -377,9 +375,7 @@ static void light_state_task ( void *pvParameters ) {
     LightState state = G_STATE;
     xQueueOverwrite(xRygQueue_handle, &state);
 
-    uint16_t r_dur = 3000.0; // assume milliseconds
-    uint16_t y_dur = 3000.0; // assume milliseconds
-    uint16_t g_dur = 3000.0; // assume milliseconds
+    uint16_t r_dur, y_dur, g_dur; // assume milliseconds
 
     xTimerStart(TIM_RYG, 0);
 
@@ -398,10 +394,7 @@ static void light_state_task ( void *pvParameters ) {
                 	// printf("r_dur %u.\n", r_dur);
                 	// printf("y_dur %u.\n", y_dur);
                 	// printf("g_dur %u.\n", g_dur);
-                }
 
-                if(xTimerIsTimerActive(TIM_RYG) == pdFALSE)
-                {
                     switch (state)
                     {
                         case G_STATE:
