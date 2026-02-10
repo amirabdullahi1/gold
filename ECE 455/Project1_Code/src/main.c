@@ -172,13 +172,22 @@ void green_foo()
     GPIO_SetBits(GPIOC, GPIO_Pin_2);    // G LED ON
 }
 
+
+/*--- Start of *need to put in task* ----------------------------------------------------*/
+volatile uint8_t head = 0; // Leading leds postion.
+volatile uint8_t length = 1; // Current number of active leds.
+volatile uint8_t red_light = 1; // 1 means block 0 means go.
+volatile uint8_t data = 0b00000000;
+
+unsigned int binary_sets[] = {0b00000001, 0b00000010, 0b00000100, 0b00001000, 0b00010000, 0b00100000, 0b01000000, 0b10000000};
+
 void delay(volatile uint32_t count){
     while(count--);
 }
 
 void reset_register(void){
     GPIO_ResetBits(GPIOC, GPIO_Pin_8);
-    delay(2000);
+    vTaskDelay(pdMS_TO_TICKS(500)); // may need to use timer
     GPIO_SetBits(GPIOC, GPIO_Pin_8);
 }
 
@@ -238,6 +247,8 @@ void traffic_handler(void){
 		}
 
 }
+/*--- End of *need to put in task* ------------------------------------------------------*/
+
 
 /*
  * TODO: Implement this function for any hardware specific clock configuration
@@ -269,10 +280,11 @@ int main(void)
 
 	
     /* Start test sys_display? */
-    reset_register();
-    traffic_handler();
-    shift_bits(0b00000001);
+//    reset_register();
+//    traffic_handler();
+//    shift_bits(0b00000001);
     /* End test sys_display? */
+
 
 
     xTaskQueue_handle = xQueueCreate(
