@@ -492,10 +492,27 @@ static void sys_display_task ( void *pvParameters ) {
     uint16_t rx_data;
     while(1)
 	{
-        if(xQueueReceive(xTaskQueue_handle, &rx_data, portMAX_DELAY))
+        if(xQueueReceive(xTaskQueue_handle, &rx_data, 500))
         {
             if(rx_data == sys_display)
             {
+                // Reset the register before rewriting to it.
+                reset_register();
+
+                int current_mapping = 0;
+
+                // Updates all traffic care related lights.
+                for(int j = 24; j > 0; j = j - 8){
+                    for int i = 0; i < j; i++){
+                        if(binary_memory_tree[current_mapping] & (0x80 >> i)){
+                            GPIO_SetBits(GPIOC, GPIO_Pin_6);
+                        }else{
+                            GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+                        }
+                        shift_clock();
+                    }
+                    current_mapping++;
+                }
 
                 rx_data = flow_adjust;
                 xQueueSend(xTaskQueue_handle,&rx_data,1000);
