@@ -183,7 +183,10 @@ volatile uint8_t length = 1; // Current number of active leds.
 volatile uint8_t red_light = 1; // 1 means block 0 means go.
 volatile uint8_t data = 0b00000000;
 
-unsigned int binary_sets[] = {0b00000001, 0b00000010, 0b00000100, 0b00001000, 0b00010000, 0b00100000, 0b01000000, 0b10000000};
+uint8_t binary_memory_tree[3] = {0b11111111, 0b11111111, 0b11111111};
+unsigned int data_rate = 5;
+int count = 0;
+uint8_t carry = 0;
 
 void delay(volatile uint32_t count){
     while(count--);
@@ -215,42 +218,42 @@ void shift_bits(uint8_t data){
 
 }
 
-void before_intersection(uint8_t data){
-	reset_register();
-	for(int i = 0; i < 8; i++){
-		if(data & (0x80 >> i)){
-			GPIO_SetBits(GPIOC, GPIO_Pin_6);
-		}else{
-			GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-		}
-		shift_clock();
-	}
-}
+//void before_intersection(uint8_t data){
+//	reset_register();
+//	for(int i = 0; i < 8; i++){
+//		if(data & (0x80 >> i)){
+//			GPIO_SetBits(GPIOC, GPIO_Pin_6);
+//		}else{
+//			GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+//		}
+//		shift_clock();
+//	}
+//}
+//
+//void intersection_and_beyond(uint8_t data){
+//	reset_register();
+//	for(int i = 0; i < 16; i++){
+//		if(data & (0x80 >> i)){
+//			GPIO_SetBits(GPIOC, GPIO_Pin_6);
+//		}else{
+//			GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+//		}
+//		shift_clock();
+//	}
+//}
 
-void intersection_and_beyond(uint8_t data){
-	reset_register();
-	for(int i = 0; i < 16; i++){
-		if(data & (0x80 >> i)){
-			GPIO_SetBits(GPIOC, GPIO_Pin_6);
-		}else{
-			GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-		}
-		shift_clock();
-	}
-}
-
-void traffic_handler(void){
-	for(int i = 0; i < 8; i++){
-		data = binary_sets[i];
-		before_intersection(data);
-	}
-	if(red_light == 0)
-		for(int i = 0; i < 8; i++){
-			data = binary_sets[i];
-			intersection_and_beyond(data);
-		}
-
-}
+//void traffic_handler(void){
+//	for(int i = 0; i < 8; i++){
+//		data = binary_sets[i];
+//		before_intersection(data);
+//	}
+//	if(red_light == 0)
+//		for(int i = 0; i < 8; i++){
+//			data = binary_sets[i];
+//			intersection_and_beyond(data);
+//		}
+//
+//}
 /*--- End of *need to put in task* ------------------------------------------------------*/
 
 
@@ -273,19 +276,11 @@ int main(void)
 	done here if it was not done before main() was called. */
     //	prvSetupHardware();
 
+
 	myGPIO_LED_Init();
     myGPIO_ADC_Init();
     myADC1_Init();
     myTIM_Init();
-
-
-    /* Start test sys_display? */
-//    reset_register();
-//    traffic_handler();
-//    shift_bits(0b00000001);
-    /* End test sys_display? */
-
-
 
     xTaskQueue_handle = xQueueCreate(
         taskQUEUE_LENGTH,		/* The number of items the queue can hold. */
@@ -372,7 +367,10 @@ static void flow_adjust_task ( void *pvParameters ) {
 }
 
 static void traffic_gen_task ( void *pvParameters ) {
-    uint16_t ADC_old, ADC_new;
+    LightState this_light_state;
+
+    uint16_t ADC_old = INT16_MAX;
+    uint16_t ADC_new = INT16_MIN;
     uint16_t rx_data;
     while(1)
 	{
@@ -380,6 +378,53 @@ static void traffic_gen_task ( void *pvParameters ) {
         {
             if(rx_data == traffic_gen)
             {
+            	uint8_t carry = 0;
+            	xQueuePeek(xRygQueue_handle, &this_light_state, 0);
+            	if(this_light_state != G_STATE){ // needs to be changed to check that actually value!!!
+            		for(int i = 6; i >= 0; i--){
+            			int front_val = ((binary_memory_tree[2] >> (i+1)) & 1);
+            			int curr = ((binary_memory_tree[2] >> i) & 1);
+            			if(front_val != 1 && curr == 1){
+            				binary_memory_tree[2] |= (1 << (i+1));
+            				binary_memory_tree[2] &= ~(1 << i);
+            			}
+            		}
+            		for(int i = 1; i >= 0; i--){
+            			uint8_t new_carry = (binary_memory_tree[i] >> 7) & 1;
+            			binary_memory_tree[i] = (binary_memory_tree[i] << 1) | carry;
+            			carry = new_carry;
+            		}
+            	}else{
+            		for(int i = 2; i >= 0; i--){
+            			uint8_t new_carry = (binary_memory_tree[i] >> 7) & 1;
+            			binary_memory_tree[i] = (binary_memory_tree[i] << 1) | carry;
+            			carry = new_carry;
+            		}
+            	}
+
+            	xQueuePeek(xFlowQueue_handle, &ADC_new, 0);
+            	if(abs(ADC_old - ADC_new) > ADC_RES) {
+					if(ADC_new < 667)
+						data_rate = 0;
+					else if(ADC_new < 1334)
+						data_rate = 1;
+					else if(ADC_new < 2001)
+						data_rate = 2;
+					else if (ADC_new < 2668)
+						data_rate = 3;
+					else if (ADC_new < 3335)
+						data_rate = 4;
+					else
+						data_rate = 5;
+            	}
+            	ADC_old = ADC_new;
+
+            	if(count > data_rate){
+            		binary_memory_tree[2] |= 0x01;
+            		count = 0;
+            	}
+            	count++;
+
                 rx_data = sys_display;
                 xQueueSend(xTaskQueue_handle,&rx_data,1000);
             }
@@ -397,6 +442,7 @@ static void traffic_gen_task ( void *pvParameters ) {
 }
 
 static void light_state_task ( void *pvParameters ) {
+    LightState this_light_state = G_STATE;
     LightState next_light_state = Y_STATE;
 
     uint16_t r_dur, g_dur; // assume milliseconds
@@ -439,6 +485,7 @@ static void light_state_task ( void *pvParameters ) {
                              * ------------------------------
                              * Then next_light_state = Red
                              */
+                        	this_light_state = G_STATE;
                         	green_foo();
                         	next_light_state = R_STATE;
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(g_dur), 0);
@@ -451,6 +498,7 @@ static void light_state_task ( void *pvParameters ) {
                              * ------------------------------
                              * Then next_light_state = Green
                              */
+                        	this_light_state = Y_STATE;
                         	yellow_foo();
                         	next_light_state = G_STATE;
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(3000), 0);
@@ -463,6 +511,7 @@ static void light_state_task ( void *pvParameters ) {
                              * ------------------------------
                              * Then next_light_state = Yellow
                              */
+                        	this_light_state = R_STATE;
                         	red_foo();
                         	next_light_state = Y_STATE;
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(r_dur), 0);
@@ -471,8 +520,8 @@ static void light_state_task ( void *pvParameters ) {
                     xTimerStart(TIM_RYG, 0);
                 }
 
-                xQueueOverwrite(xRygQueue_handle, &next_light_state);
-                rx_data = flow_adjust; // traffic_gen;
+                xQueueOverwrite(xRygQueue_handle, &this_light_state);
+                rx_data = traffic_gen;
                 xQueueSend(xTaskQueue_handle,&rx_data,1000);
             }
 
@@ -499,19 +548,16 @@ static void sys_display_task ( void *pvParameters ) {
                 // Reset the register before rewriting to it.
                 reset_register();
 
-                int current_mapping = 0;
-
                 // Updates all traffic care related lights.
-                for(int j = 24; j > 0; j = j - 8){
-                    for int i = 0; i < j; i++){
-                        if(binary_memory_tree[current_mapping] & (0x80 >> i)){
+                for(int j = 0; j < 3; j++){
+                    for (int i = 0; i < 8; i++){
+                        if(binary_memory_tree[j] & (0x80 >> i)){
                             GPIO_SetBits(GPIOC, GPIO_Pin_6);
                         }else{
                             GPIO_ResetBits(GPIOC, GPIO_Pin_6);
                         }
                         shift_clock();
                     }
-                    current_mapping++;
                 }
 
                 rx_data = flow_adjust;
