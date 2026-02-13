@@ -12,15 +12,18 @@
 #include "../FreeRTOS_Source/include/semphr.h"
 #include "../FreeRTOS_Source/include/task.h"
 #include "../FreeRTOS_Source/include/timers.h"
-
 /*-----------------------------------------------------------*/
+
+
+/*---- Pragmas ----------------------------------------------*/
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 /*-----------------------------------------------------------*/
 
-/*-----------------------------------------------------------*/
+
+/*---- Defines ----------------------------------------------*/
 // Added for task management.
 #define flow_adjust  	0
 #define traffic_gen  	1
@@ -30,24 +33,22 @@
 // Added for queue management.
 #define taskQUEUE_LENGTH 4
 #define flowQUEUE_LENGTH 1
+#define genQUEUE_LENGTH 1
 #define rygQUEUE_LENGTH 1
 
 xQueueHandle xTaskQueue_handle = 0;
 xQueueHandle xFlowQueue_handle = 0;
+xQueueHandle xGenQueue_handle = 0;
 xQueueHandle xRygQueue_handle = 0;
 
 // Added for ADC management.
 #define ADC_MIN 0
 #define ADC_MAX 4000
 #define ADC_RES 30
-
-// Added for traffic management.
-#define NUM_TRAFFIC_LEDS 19
-#define INTERSECTION 8
-#define MAX_LEDS 10
+/*-----------------------------------------------------------*/
 
 
-/* Function that sets up the leds */
+/*---- GPIO & ADC Init --------------------------------------*/
 void myGPIO_LED_Init()
 {
     /* Enable clock for GPIO peripherals */
@@ -59,10 +60,10 @@ void myGPIO_LED_Init()
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
 
     /* Set to Push Pull to ensure LEDs are visible and bright */
-    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP; // Look into this a bit more, need to do testing to 100% know which one is the best to use.
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
 
     /* Currently turns of any internal resistors */
-    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // Adjust through testing, not sure currently what setting is good for LEDs (If we have no external resistors will need to turn on).
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
 
     /* Configuring speed of rising and galling edges */
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
@@ -124,13 +125,10 @@ void myADC1_Init()
 
     ADC_SoftwareStartConv(ADC1);
 }
+/*-----------------------------------------------------------*/
 
-typedef enum {
-    R_STATE,
-    Y_STATE,
-    G_STATE
-} LightState;
 
+/*---- Timer ------------------------------------------------*/
 static TimerHandle_t TIM_RYG;
 
 void vRygTimerCallback(TimerHandle_t xTimer)
@@ -150,6 +148,15 @@ void myTIM_Init(void)
     );
     configASSERT(TIM_RYG);
 }
+/*-----------------------------------------------------------*/
+
+
+/*---- RYG Lights -------------------------------------------*/
+typedef enum {
+    R_STATE,
+    Y_STATE,
+    G_STATE
+} LightState;
 
 void red_foo()
 {
@@ -175,86 +182,33 @@ void green_foo()
 
     GPIO_SetBits(GPIOC, GPIO_Pin_2);    // G LED ON
 }
+/*-----------------------------------------------------------*/
 
 
-/*--- Start of *need to put in task* ----------------------------------------------------*/
-volatile uint8_t head = 0; // Leading leds postion.
-volatile uint8_t length = 1; // Current number of active leds.
-volatile uint8_t red_light = 1; // 1 means block 0 means go.
-volatile uint8_t data = 0b00000000;
-
-uint8_t binary_memory_tree[3] = {0b11111111, 0b11111111, 0b11111111};
-unsigned int data_rate = 5;
-int count = 0;
-uint8_t carry = 0;
-
-void delay(volatile uint32_t count){
-    while(count--);
-}
-
-void reset_register(void){
+/*---- Car Lights -------------------------------------------*/
+void reset_reg(void){
     GPIO_ResetBits(GPIOC, GPIO_Pin_8);
-    delay(2000);
     GPIO_SetBits(GPIOC, GPIO_Pin_8);
 }
 
-void shift_clock(void){
+void shift_clk(void){
     GPIO_ResetBits(GPIOC, GPIO_Pin_7);
-    delay(2000);
     GPIO_SetBits(GPIOC, GPIO_Pin_7);
-    delay(2000);
     GPIO_ResetBits(GPIOC, GPIO_Pin_7);
 }
 
 void shift_bits(uint8_t data){
-	for(int i = 0; i < 8; i++){
-		if(data & (0x80 >> i)){
+	for(int i = 0; i < 8; i++)
+	{
+		if(data & (0x80 >> i))
 			GPIO_SetBits(GPIOC, GPIO_Pin_6);
-		}else{
+		else
 			GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-		}
-		shift_clock();
+
+		shift_clk();
 	}
-
 }
-
-//void before_intersection(uint8_t data){
-//	reset_register();
-//	for(int i = 0; i < 8; i++){
-//		if(data & (0x80 >> i)){
-//			GPIO_SetBits(GPIOC, GPIO_Pin_6);
-//		}else{
-//			GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-//		}
-//		shift_clock();
-//	}
-//}
-//
-//void intersection_and_beyond(uint8_t data){
-//	reset_register();
-//	for(int i = 0; i < 16; i++){
-//		if(data & (0x80 >> i)){
-//			GPIO_SetBits(GPIOC, GPIO_Pin_6);
-//		}else{
-//			GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-//		}
-//		shift_clock();
-//	}
-//}
-
-//void traffic_handler(void){
-//	for(int i = 0; i < 8; i++){
-//		data = binary_sets[i];
-//		before_intersection(data);
-//	}
-//	if(red_light == 0)
-//		for(int i = 0; i < 8; i++){
-//			data = binary_sets[i];
-//			intersection_and_beyond(data);
-//		}
-//
-//}
-/*--- End of *need to put in task* ------------------------------------------------------*/
+/*-----------------------------------------------------------*/
 
 
 /*
@@ -262,7 +216,10 @@ void shift_bits(uint8_t data){
  * that was not already performed before main() was called.
  */
 static void prvSetupHardware( void );
+/*-----------------------------------------------------------*/
 
+
+/*-----------------------------------------------------------*/
 static void flow_adjust_task( void *pvParameters );
 static void traffic_gen_task( void *pvParameters );
 static void light_state_task( void *pvParameters );
@@ -270,6 +227,7 @@ static void sys_display_task( void *pvParameters );
 /*-----------------------------------------------------------*/
 
 
+/*---- Main --------------------------------------------------*/
 int main(void)
 {
     /* Configure the system. The clock configuration can be
@@ -295,6 +253,13 @@ int main(void)
     );
 	/* Add to the registry, for the benefit of kernel aware debugging. */
     vQueueAddToRegistry( xFlowQueue_handle, "flowQueue" );
+
+    xGenQueue_handle = xQueueCreate(
+        genQUEUE_LENGTH,		/* The number of items the queue can hold. */
+        sizeof( uint8_t[3] )    /* The size of each item the queue holds. */
+    );
+	/* Add to the registry, for the benefit of kernel aware debugging. */
+    vQueueAddToRegistry( xGenQueue_handle, "genQueue" );
 
     xRygQueue_handle = xQueueCreate(
         rygQUEUE_LENGTH,		/* The number of items the queue can hold. */
@@ -325,11 +290,14 @@ int main(void)
 	/*
 	 * Does vTaskStartScheduler(); seem to stall?
 	 * Check line 95 in FreeRTOSConfig.h and increase configTOTAL_HEAP_SIZE.
-	 * #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 24 * 1024 ) )
+	 * #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 7 * 1024 ) )
 	 */
     return 0;
 }
+/*-----------------------------------------------------------*/
 
+
+/*---- Tasks ------------------------------------------------*/
 static void flow_adjust_task ( void *pvParameters ) {
     uint16_t ADC_val = 0;
 	uint16_t rx_data;
@@ -369,8 +337,11 @@ static void flow_adjust_task ( void *pvParameters ) {
 static void traffic_gen_task ( void *pvParameters ) {
     LightState this_light_state;
 
-    uint16_t ADC_old = INT16_MAX;
-    uint16_t ADC_new = INT16_MIN;
+    uint8_t binary_memory_tree[3] = {0b11111111, 0b11111111, 0b11111111};
+    uint8_t data_rate = 5;
+    uint8_t count = 0;
+
+    uint16_t ADC_val;
     uint16_t rx_data;
     while(1)
 	{
@@ -380,7 +351,7 @@ static void traffic_gen_task ( void *pvParameters ) {
             {
             	uint8_t carry = 0;
             	xQueuePeek(xRygQueue_handle, &this_light_state, 0);
-            	if(this_light_state != G_STATE){ // needs to be changed to check that actually value!!!
+            	if(this_light_state != G_STATE){
             		for(int i = 6; i >= 0; i--){
             			int front_val = ((binary_memory_tree[2] >> (i+1)) & 1);
             			int curr = ((binary_memory_tree[2] >> i) & 1);
@@ -402,28 +373,16 @@ static void traffic_gen_task ( void *pvParameters ) {
             		}
             	}
 
-            	xQueuePeek(xFlowQueue_handle, &ADC_new, 0);
-            	if(abs(ADC_old - ADC_new) > ADC_RES) {
-					if(ADC_new < 667)
-						data_rate = 0;
-					else if(ADC_new < 1334)
-						data_rate = 1;
-					else if(ADC_new < 2001)
-						data_rate = 2;
-					else if (ADC_new < 2668)
-						data_rate = 3;
-					else if (ADC_new < 3335)
-						data_rate = 4;
-					else
-						data_rate = 5;
-            	}
-            	ADC_old = ADC_new;
+            	xQueuePeek(xFlowQueue_handle, &ADC_val, 0);
+            	data_rate = 5 - ADC_val / (ADC_MAX / 6);
 
             	if(count > data_rate){
             		binary_memory_tree[2] |= 0x01;
             		count = 0;
             	}
             	count++;
+
+                xQueueOverwrite(xGenQueue_handle, binary_memory_tree);
 
                 rx_data = sys_display;
                 xQueueSend(xTaskQueue_handle,&rx_data,1000);
@@ -443,6 +402,7 @@ static void traffic_gen_task ( void *pvParameters ) {
 
 static void light_state_task ( void *pvParameters ) {
     LightState this_light_state = G_STATE;
+    green_foo();
     LightState next_light_state = Y_STATE;
 
     uint16_t r_dur, g_dur; // assume milliseconds
@@ -538,6 +498,8 @@ static void light_state_task ( void *pvParameters ) {
 }
 
 static void sys_display_task ( void *pvParameters ) {
+	uint8_t binary_memory_tree[3];
+
     uint16_t rx_data;
     while(1)
 	{
@@ -545,23 +507,30 @@ static void sys_display_task ( void *pvParameters ) {
         {
             if(rx_data == sys_display)
             {
-                // Reset the register before rewriting to it.
-                reset_register();
+            	if(uxQueueMessagesWaiting(xRygQueue_handle))
+            	{
+					// Reset the register before rewriting to it.
+					reset_reg();
 
-                // Updates all traffic care related lights.
-                for(int j = 0; j < 3; j++){
-                    for (int i = 0; i < 8; i++){
-                        if(binary_memory_tree[j] & (0x80 >> i)){
-                            GPIO_SetBits(GPIOC, GPIO_Pin_6);
-                        }else{
-                            GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-                        }
-                        shift_clock();
-                    }
-                }
+	            	xQueuePeek(xGenQueue_handle, binary_memory_tree, 0);
 
-                rx_data = flow_adjust;
-                xQueueSend(xTaskQueue_handle,&rx_data,1000);
+					// Update all car lights.
+					for(int j = 0; j < 3; j++)
+					{
+						for (int i = 0; i < 8; i++)
+						{
+							if(binary_memory_tree[j] & (0x80 >> i))
+								GPIO_SetBits(GPIOC, GPIO_Pin_6);
+							else
+								GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+
+							shift_clk();
+						}
+					}
+
+					rx_data = flow_adjust;
+					xQueueSend(xTaskQueue_handle,&rx_data,1000);
+            	}
             }
 
             else
