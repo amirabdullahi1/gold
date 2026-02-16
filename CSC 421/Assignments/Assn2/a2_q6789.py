@@ -42,6 +42,21 @@ and_gate(1, 1, 1).
 human(socrates). 
 mammal(X) :- human(X). 
 
+or_gate(0, 0, 0).
+or_gate(0, 1, 1).
+or_gate(1, 0, 1).
+or_gate(1, 1, 1).
+
+not_gate(0, 1).
+not_gate(1, 0).
+
+
+circuit(0, 0, 0, 1).
+circuit(0, 1, 0, 1).
+circuit(1, 0, 0, 1).
+circuit(1, 1, 0, 1).
+circuit(1, 1, 1, 1).
+
 
 '''
 
@@ -70,45 +85,95 @@ print_solutions(goal_text, solutions, solutions_vars)
 
 # Question 6 (single variable) - change goal_text appropriately 
 
-# goal_text_q6 = ''
-# (solutions_q6, solutions_vars_q6) = solve(source, goal_text_q6) 
-# print_solutions(goal_text_q6, solutions_q6, solutions_vars_q6)
+# goal_text_q6 = 'not_gate(0,X).'
+# goal_text_q6 = 'not_gate(1,X).'
+goal_text_q6 = 'or_gate(0,1,X).'
+(solutions_q6, solutions_vars_q6) = solve(source, goal_text_q6) 
+print_solutions(goal_text_q6, solutions_q6, solutions_vars_q6)
 
 # Question 7 (two variables) 
 
-# goal_text_q7a = ''
-# (solutions_q7a, solutions_vars_q7a) = solve(source, goal_text_q7a) 
-# print_solutions(goal_text_q7a, solutions_q7a, solutions_vars_q7a)
+goal_text_q7a = 'and_gate(0,Y,Z)'
+(solutions_q7a, solutions_vars_q7a) = solve(source, goal_text_q7a) 
+print_solutions(goal_text_q7a, solutions_q7a, solutions_vars_q7a)
 
-# goal_text_q7b = ''
-# (solutions_q7b, solutions_vars_q7b) = solve(source, goal_text_q7b) 
-# print_solutions(goal_text_q7b, solutions_q7b, solutions_vars_q7b)
+goal_text_q7b = 'and_gate(Y,Z,1)'
+(solutions_q7b, solutions_vars_q7b) = solve(source, goal_text_q7b) 
+print_solutions(goal_text_q7b, solutions_q7b, solutions_vars_q7b)
 
 # Question 8 
-# goal_text_q8a = ''
-# (solutions_q8a, solutions_vars_q8a) = solve(source, goal_text_q8a) 
-# print_solutions(goal_text_q8a, solutions_q8a, solutions_vars_q8a)
+goal_text_q8a = 'circuit(1,1,0, Output)'
+(solutions_q8a, solutions_vars_q8a) = solve(source, goal_text_q8a) 
+print_solutions(goal_text_q8a, solutions_q8a, solutions_vars_q8a)
 
-# goal_text_q8b = ''
-# (solutions_q8b, solutions_vars_q8b) = solve(source, goal_text_q8b) 
-# print_solutions(goal_text_q8b, solutions_q8b, solutions_vars_q8b)
+goal_text_q8b = 'circuit(A,B,C,1)'
+(solutions_q8b, solutions_vars_q8b) = solve(source, goal_text_q8b) 
+print_solutions(goal_text_q8b, solutions_q8b, solutions_vars_q8b)
 
 # Question 9 write the source_factory facts and rules 
 source_factory = ''' 
+    produces(village,factory).
+    produces(city,factory).
+
+    produces(factory,tools).
+    produces(factory,engines).
+    produces(factory,wheels).
+
+    produces(factory,advanced_factory).
+    produces(advanced_factory,trains).
+    produces(advanced_factory,airplanes).
+    produces(advanced_factory,cars).
+    
+    need(factory,village).
+    need(factory,city).
+
+    need(tools,factory).
+    need(engines,factory).
+    need(wheels,factory).
+
+    need(tools,village).
+    need(engines,village).
+    need(wheels,village).
+
+    need(tools,city).
+    need(engines,city).
+    need(wheels,city).
+
+    need(advanced_factory,factory).
+    need(advanced_factory,village).
+    need(advanced_factory,city).
+
+    need(trains,advanced_factory).
+    need(airplanes,advanced_factory).
+    need(cars,advanced_factory).
+
+    need(trains,factory).
+    need(airplanes,factory).
+    need(cars,factory).
+
+    need(trains,village).
+    need(airplanes,village).
+    need(cars,village).
+
+    need(trains,city).
+    need(airplanes,city).
+    need(cars,city).
 '''
 
-# goal_text_q9a = 'need(cars, X).'
-# (solutions_q9a, solutions_vars_q9a) = solve(source_factory, goal_text_q9a) 
-# print_solutions(goal_text_q9a, solutions_q9a, solutions_vars_q9a)
+goal_text_q9a = 'need(cars, X).'
+(solutions_q9a, solutions_vars_q9a) = solve(source_factory, goal_text_q9a) 
+print_solutions(goal_text_q9a, solutions_q9a, solutions_vars_q9a)
 
 
 def tech_needed(product):
-    pass 
+    goal_text_tn = f'need({product}, X).' 
+    (solutions_tn, solutions_vars_tn) = solve(source_factory, goal_text_tn)
+    return [list(v_tn.values())[0] for v_tn in solutions_vars_tn]
 
-# needed_q9b = tech_needed('factory')
-# needed_q9c = tech_needed('cars')
-# print(needed_q9b) 
-# print(needed_q9c)
+needed_q9b = tech_needed('factory')
+needed_q9c = tech_needed('cars')
+print(needed_q9b) 
+print(needed_q9c)
 
 # desired output 
 # ['village', 'city']
