@@ -376,7 +376,7 @@ static void traffic_gen_task ( void *pvParameters ) {
             	xQueuePeek(xFlowQueue_handle, &ADC_val, 0);
             	data_rate = 5 - ADC_val / (ADC_MAX / 6);
 
-            	if(count > data_rate){
+            	if(rand() % 6 >= data_rate && count > data_rate){
             		binary_memory_tree[2] |= 0x01;
             		count = 0;
             	}
