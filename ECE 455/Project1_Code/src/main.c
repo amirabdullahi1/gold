@@ -527,10 +527,10 @@ static void sys_display_task ( void *pvParameters ) {
 							shift_clk();
 						}
 					}
-
-					rx_data = flow_adjust;
-					xQueueSend(xTaskQueue_handle,&rx_data,1000);
-            	}
+				}
+					
+				rx_data = flow_adjust;	
+				xQueueSend(xTaskQueue_handle,&rx_data,1000);
             }
 
             else
