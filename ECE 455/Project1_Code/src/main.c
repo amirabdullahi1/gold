@@ -49,11 +49,12 @@ xQueueHandle xRygQueue_handle = 0;
 
 
 /*---- GPIO & ADC Init --------------------------------------*/
-void myGPIO_LED_Init()
+void myGPIO_Init()
 {
     /* Enable clock for GPIO peripherals */
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 
+	/*-Pin initialization for LEDs-------------------------------*/
     GPIO_InitTypeDef GPIO_InitStruct;
 
     /* Configured as an output */
@@ -68,20 +69,16 @@ void myGPIO_LED_Init()
     /* Configuring speed of rising and galling edges */
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
 
-    /* Pin initialization for LEDs */
     /* Has been set up for the 3 different traffic lights, potentiometer and 3 middle car lights shift register */
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8;
     GPIO_Init(GPIOC, &GPIO_InitStruct);
+	/*-----------------------------------------------------------*/
+	
+	
+	/*-Pin initialization for ADC--------------------------------*/	
+	GPIO_InitStruct = {0};
 
-}
-
-void myGPIO_ADC_Init()
-{
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
-
-    /* Configured as analog  */
+	/* Configured as analog  */
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;
 
     /* Currently turns of any internal resistors */
@@ -89,7 +86,7 @@ void myGPIO_ADC_Init()
 
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
     GPIO_Init(GPIOC, &GPIO_InitStruct);
-
+	/*-----------------------------------------------------------*/
 }
 
 void myADC1_Init()
