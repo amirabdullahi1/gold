@@ -55,37 +55,37 @@ void myGPIO_Init()
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 
 	/*-Pin initialization for LEDs-------------------------------*/
-    GPIO_InitTypeDef GPIO_InitStruct;
+    GPIO_InitTypeDef GPIO_LED_InitStruct;
 
     /* Configured as an output */
-    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_LED_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
 
     /* Set to Push Pull to ensure LEDs are visible and bright */
-    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_LED_InitStruct.GPIO_OType = GPIO_OType_PP;
 
     /* Currently turns of any internal resistors */
-    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_LED_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
 
     /* Configuring speed of rising and galling edges */
-    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
+    GPIO_LED_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
 
     /* Has been set up for the 3 different traffic lights, potentiometer and 3 middle car lights shift register */
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8;
-    GPIO_Init(GPIOC, &GPIO_InitStruct);
+    GPIO_LED_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8;
+    GPIO_Init(GPIOC, &GPIO_LED_InitStruct);
 	/*-----------------------------------------------------------*/
 	
 	
 	/*-Pin initialization for ADC--------------------------------*/	
-	GPIO_InitStruct = {0};
+	GPIO_InitTypeDef GPIO_ADC_InitStruct = {0};
 
 	/* Configured as analog  */
-    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;
+    GPIO_ADC_InitStruct.GPIO_Mode = GPIO_Mode_AN;
 
     /* Currently turns of any internal resistors */
-    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // Adjust through testing, not sure currently what setting is good for LEDs (If we have no external resistors will need to turn on).
+    GPIO_ADC_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // Adjust through testing, not sure currently what setting is good for LEDs (If we have no external resistors will need to turn on).
 
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
-    GPIO_Init(GPIOC, &GPIO_InitStruct);
+    GPIO_ADC_InitStruct.GPIO_Pin = GPIO_Pin_3;
+    GPIO_Init(GPIOC, &GPIO_ADC_InitStruct);
 	/*-----------------------------------------------------------*/
 }
 
