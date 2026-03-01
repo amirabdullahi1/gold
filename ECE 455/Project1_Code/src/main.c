@@ -55,7 +55,7 @@ void myGPIO_Init()
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 
 	/*-Pin initialization for LEDs-------------------------------*/
-    GPIO_InitTypeDef GPIO_LED_InitStruct;
+	GPIO_InitTypeDef GPIO_LED_InitStruct = {0};
 
     /* Configured as an output */
     GPIO_LED_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
@@ -230,10 +230,8 @@ int main(void)
     /* Configure the system. The clock configuration can be
 	done here if it was not done before main() was called. */
     //	prvSetupHardware();
-
-
-	myGPIO_LED_Init();
-    myGPIO_ADC_Init();
+	
+	myGPIO_Init();
     myADC1_Init();
     myTIM_Init();
 
