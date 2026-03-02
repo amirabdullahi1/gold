@@ -31,6 +31,16 @@ class Random_Variable:
 
 def dice_war(A,B, num_samples = 1000, output=True):
     # YOUR CODE GOES HERE
+    samples_A = A.sample(num_samples)
+    samples_B = B.sample(num_samples)
+
+    wins_A = 0
+
+    for s in range(num_samples):
+        if samples_A[s] > samples_B[s]:
+            wins_A += 1
+    
+    prob = wins_A/num_samples
 
     res = prob > 0.5 
     
@@ -61,6 +71,20 @@ dieB = Random_Variable('DieB', values, probabilities_B)
 # YOUR CODE GOES HERE 
 # Add code here to show the non-transitive nature of Red, Green, and Blue dice 
 # Create three dice Red Green Blue
+values_red = np.array([2, 4, 9], dtype=np.int64)
+values_green = np.array([1, 6, 8], dtype=np.int64)
+values_blue = np.array([3, 5, 7], dtype=np.int64)
+probabilities_red = np.array([2/6., 2/6., 2/6.])
+probabilities_green = np.array([2/6., 2/6., 2/6.])
+probabilities_blue = np.array([2/6., 2/6., 2/6.])
+
+red = Random_Variable('Red', values_red, probabilities_red)
+green = Random_Variable('Green', values_green, probabilities_green)
+blue = Random_Variable('Blue', values_blue, probabilities_blue)
+
+(res, prob)=dice_war(red,green)
+(res, prob)=dice_war(green,blue)
+(res, prob)=dice_war(red,blue)
 
 
 # Your output from this cell should look something like this, NOTE that the numbers will differ because of sampling, but the outcome should be the same
