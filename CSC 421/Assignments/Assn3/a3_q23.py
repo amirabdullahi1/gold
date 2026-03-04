@@ -310,7 +310,19 @@ print(rejection_sampling('Burglary', dict(JohnCalls=True, MaryCalls=True), burgl
 
 # YOUR CODE GOES HERE 
 # Name your Bayes network for Dispnea  and specify it below 
-
+dispnea = BayesNet([
+    ('A', '', 0.01),                                # Visit to Asia?
+    ('S', '', 0.5),                                 # Smoker?
+    ("T", 'A', {True: 0.05, False: 0.01}),          # Tuberculosis?
+    ("L", 'S', {True: 0.1, False: 0.01}),           # LungCancer?
+    ("B", 'S', {True: 0.6, False: 0.3}),            # Bronchitis?
+    ("E", ['T','L'],                                # Either TB or Lung Cancer?
+     {(True, True): 1, (True, False): 1, (False, True): 1, (False, False): 0}),
+    ('X', 'E', {True: 0.98, False: 0.05}),          # Positive X-Ray
+    ("D", ['E','B'],                                # Dispnea
+     {(True, True): 0.9, (True, False): 0.7, (False, True): 0.8, (False, False): 0.1})
+])
+print(dispnea.variable_node('L').cpt)
 
 # Expected output
 # {(True,): 0.1, (False,): 0.01}
@@ -318,23 +330,28 @@ print(rejection_sampling('Burglary', dict(JohnCalls=True, MaryCalls=True), burgl
 
 # cpt_l_true should be a float with the probability of true for the CPT of L
 # cpt_l_false should be a float with the probability of false for the CPT of L
+cpt_l_true = dispnea.variable_node('L').cpt[(True,)]
+cpt_l_false = dispnea.variable_node('L').cpt[(False,)]
 
-# print(cpt_l_true)
-# print(cpt_l_false)
+print(cpt_l_true)
+print(cpt_l_false)
 
 
 # Name the results of enumeration_ask, rejection_sampling, likelihood_weighting
 # as ea_result, rs_result, and lw_result, use 100000 samples
 # and assign the probability of True to floating point variables 
 # ea_result_true, rs_result_true, and lw_result_true 
+ea_result = enumeration_ask('D', {'A': True, 'X': True}, dispnea)
+rs_result = rejection_sampling('D', dict(A=True, X=True), dispnea, 100000)
+lw_result = likelihood_weighting('D', dict(A=True, X=True), dispnea, 100000)
 
-# ea_result_true = ea_result[True]
-# rs_result_true = rs_result[True]
-# lw_result_true = lw_result[True]
+ea_result_true = ea_result[True]
+rs_result_true = rs_result[True]
+lw_result_true = lw_result[True]
 
-# print(ea_result_true)
-# print(rs_result_true)
-# print(lw_result_true)
+print(ea_result_true)
+print(rs_result_true)
+print(lw_result_true)
 
 
 
