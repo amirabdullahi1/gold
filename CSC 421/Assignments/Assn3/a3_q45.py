@@ -65,20 +65,26 @@ die2 = Random_Variable("die2", vals_die, probs_die)
 
 
 # YOUR CODE GOES HERE 
+coin_1k = coin.sample(10000)
+die1_1k = die1.sample(10000)
+die2_1k = die2.sample(10000)
 
+cd = coin_1k * (die1_1k + die2_1k)
+approximate_vals_coin_dice, counts = np.unique(cd, return_counts=True)
+approximate_probs_coin_dice = counts / 10000
 
 # Uncomment the following lines once you have approximate inference working
 # The approximate_vals_coin_dice and approximate_probs_coin_dice variables
 # should be np.arrays
 
-#approximate_coin_dice = Random_Variable("approximate_coin_dice", approximate_vals_coin_dice,
-#                                        approximate_probs_coin_dice)
+approximate_coin_dice = Random_Variable("approximate_coin_dice", approximate_vals_coin_dice,
+                                       approximate_probs_coin_dice)
 
 # print("APPROXIMATE INFERENCE")
-# print(approximate_vals_coin_dice)
-# print(approximate_probs_coin_dice) 
-# print(approximate_coin_dice)
-# print(approximate_coin_dice.sample(20))
+print(approximate_vals_coin_dice)
+print(approximate_probs_coin_dice) 
+print(approximate_coin_dice)
+print(approximate_coin_dice.sample(20))
 
 # EXACT INFERENCE 
 # Calculate using exact inference the values and probabilities of CD.
@@ -93,20 +99,28 @@ die2 = Random_Variable("die2", vals_die, probs_die)
 
 
 # YOUR CODE GOES HERE 
-def rv_op(rv1, rv2, f):
-    pass
+def rv_op(rv1, rv2, f):    
+    f_dict = defaultdict(float)
+
+    for i, Pi in zip(rv1.get_values(), rv1.get_probability_distribution()):
+        for j, Pj in zip(rv2.get_values(), rv2.get_probability_distribution()):
+            f_val = f(i, j)
+            f_dict[f_val] += Pi * Pj
+
+    vals = np.array(list(f_dict.keys()))
+    probs = np.array(list(f_dict.values()))
+
+    return Random_Variable(rv1.get_name() + rv2.get_name(), vals, probs)
 
 
 # Uncomment these lines once you have a functionining rv_op 
-# dice = rv_op(die1, die2, lambda a,b:a+b)
-# coin_dice = rv_op(coin, dice, lambda a,b:a*b)
-
-
+dice = rv_op(die1, die2, lambda a,b:a+b)
+coin_dice = rv_op(coin, dice, lambda a,b:a*b)
 
 print("EXACT INFERENCE")
 
-# vals_coin_dice = coin_dice.get_values()
-# probs_coin_dice = coin_dice.get_probability_distribution()
+vals_coin_dice = coin_dice.get_values()
+probs_coin_dice = coin_dice.get_probability_distribution()
 # print(vals_coin_dice)
 # print(probs_coin_dice)
 # print(coin_dice)
