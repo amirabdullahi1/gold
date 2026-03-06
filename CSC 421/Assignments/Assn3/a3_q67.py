@@ -2,6 +2,29 @@ import os
 import numpy as np
 
 # YOUR CODE GOES HERE 
+def get_feature_vector(path: str):
+    dataset = np.array(["awful", "bad", "boring", "dull", "effective", "enjoyable", "great", "hilarious", "adoxography"])
+
+    f = open(path, "r")
+    contents = np.array(f.read().split())
+    bin_feature_vector = np.isin(dataset, list(contents)).astype(int) # binary vector
+    return bin_feature_vector
+
+def word_probabilities(directory: str): 
+    dataset = np.array(["awful", "bad", "boring", "dull", "effective", "enjoyable", "great", "hilarious", "adoxography"])
+    Nwc = np.zeros(len(dataset))
+    Nc = 0
+    alpha = 1
+
+    for filename in os.scandir(directory):
+        if filename.is_file():
+            f = open(filename.path, "r")
+            contents = np.array(f.read().split())
+            Nwc += np.isin(dataset, list(contents)).astype(int)
+            Nc += 1
+
+    laplace_smoothing = (Nwc + alpha) / (Nc + len(dataset) * alpha)
+    return laplace_smoothing
 
 # Test cases
 example_vec = get_feature_vector('review_polarity/txt_sentoken/pos/cv996_11592.txt')
