@@ -5,9 +5,9 @@ import numpy as np
 def get_feature_vector(path: str):
     dataset = np.array(["awful", "bad", "boring", "dull", "effective", "enjoyable", "great", "hilarious", "adoxography"])
 
-    f = open(path, "r")
-    contents = np.array(f.read().split())
-    bin_feature_vector = np.isin(dataset, list(contents)).astype(int) # binary vector
+    with open(path, "r") as f:
+        contents = f.read().lower()
+    bin_feature_vector = np.array([1 if word in contents else 0 for word in dataset]) # binary vector
     return bin_feature_vector
 
 def word_probabilities(directory: str): 
@@ -18,9 +18,9 @@ def word_probabilities(directory: str):
 
     for filename in os.scandir(directory):
         if filename.is_file():
-            f = open(filename.path, "r")
-            contents = np.array(f.read().split())
-            Nwc += np.isin(dataset, list(contents)).astype(int)
+            with open(filename.path, "r") as f:
+                contents = f.read().lower()
+            Nwc += np.array([1 if word in contents else 0 for word in dataset]) # binary vector
             Nc += 1
 
     laplace_smoothing = (Nwc + alpha) / (Nc + len(dataset) * alpha)
