@@ -103,6 +103,31 @@ void dd_task_list_rmv(dd_task_list **task_list, dd_task this_task) {
 	free(task_list_curr);
 }
 /*-----------------------------------------------------------*/
+void create_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, uint32_t absolute_deadline){
+	dd_message msg;
+    msg.msg_type = DD_MSG_CREATE;
+
+    msg.task.t_handle = t_handle;
+    msg.task.task_id = task_id;
+    msg.task.type = type;
+    msg.task.release_time = (uint32_t)xTaskGetTickCount();
+    msg.task.absolute_deadline = absolute_deadline;
+    msg.task.completion_time = 0;
+
+    if(xQueueSend(xDDS_Queue, &msg, 1000) != pdPASS)
+    	printf("create_dd_task: failed when sending to DDS queue\n");
+}
+
+void delete_dd_Task(uint32_t task_id){
+	dd_message msg;
+    msg.msg_type = DD_MSG_DELETE;
+    msg.task.task_id = task_id;
+    msg.task.completion_time = (uint32_t)xTaskGetTickCount();
+
+    if(xQueueSend(xDDS_Queue, &msg, 1000) != pdPASS)
+    	printf("delete_dd_Task: failed when sending to DDS queue\n");
+}
+
 
 
 /*-----------------------------------------------------------*/
@@ -167,7 +192,33 @@ static void Manager_Task( void *pvParameters )
 	}
 }
 /*-----------------------------------------------------------*/
+static void DD_Task_Generator(void *pvParameters){
+	const uint32_t *params = (unint32_t *)pvParameters;
+	uint32_t period_ticks;
+	if(params != NULL){
+    	period_ticks = *params;
+	} else {
+    	period_ticks = pdMS_TO_TICKS(500);
+	}
+    static uint32_t task_id_counter = 0;
+    TaskHandle_t new_task_handle = NULL;
 
+    while(1){
+    	uint32_t release = (uint32_t)xTaskGetTickCount();
+		uint32_t deadline = release + period_ticks;
+
+        xTaskCreate(User_DD_Task, "DD_Task", configMINIMAL_STACK_SIZE, NULL, 1, &new_task_handle);
+
+        if(new_task_handle != NULL){
+        	create_dd_task(new_task_handle, PERIODIC, task_id_counter++, deadline);
+        }
+
+        vTaskDelay(period_ticks);
+    }
+
+}
+
+/*-----------------------------------------------------------*/
 
 
 void vApplicationMallocFailedHook( void )
