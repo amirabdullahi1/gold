@@ -32,6 +32,9 @@ xQueueHandle xDDS_MsgQueue = 0;
 xQueueHandle xDDS_RespQueue = 0;
 
 TaskHandle_t xDDS_Handle = NULL;
+TaskHandle_t xDD1_Handle = NULL;
+TaskHandle_t xDD2_Handle = NULL;
+TaskHandle_t xDD3_Handle = NULL;
 
 
 
@@ -81,6 +84,30 @@ dd_task_list *active_task_list = NULL;
 dd_task_list *completed_task_list = NULL;
 dd_task_list *overdue_task_list = NULL;
 /*-----------------------------------------------------------*/
+
+/*----LED INIT-----------------------------------------------*/
+void myGPIO_Init()
+{
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+
+	GPIO_InitTypeDef GPIO_LED_InitStruct = {0};
+
+	GPIO_LED_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+
+	GPIO_LED_InitStruct.GPIO_OType = GPIO_OType_PP;
+
+	GPIO_LED_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
+
+	GPIO_LED_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
+
+	GPIO_LED_InitStruct.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+	GPIO_Init(GPIOD, &GPIO_LED_InitStruct);
+}
+
+
+/*-----------------------------------------------------------*/
+
+
 
 /*-----------------------------------------------------------*/
 void dd_task_list_add(dd_task_list **task_list, dd_task this_task) {
@@ -135,6 +162,10 @@ void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id) {
 	else
 		task_list_prev->next_task = task_list_curr->next_task;
 
+//    dd_task completed = task_list_curr->task;
+//    completed.completion_time = (uint32_t)xTaskGetTickCount();
+//    dd_task_list_add(&completed_task_list, completed);
+
 	free(task_list_curr);
 }
 /*-----------------------------------------------------------*/
@@ -157,31 +188,13 @@ void create_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, uin
 
 void delete_dd_task(uint32_t task_id)
 {
+
 	if(active_task_list == NULL)
+	{
 		return;
+	}
 
-    // Find the task we want to delete
-	dd_task_list *task_list_curr = active_task_list;
-	while(task_list_curr != NULL)
-    {
-    	if(task_list_curr->task.task_id == task_id)
-        	break;
-
-		task_list_curr = task_list_curr->next_task;
-    }
-
-    // In the case the task is not found we will need to just return
-    if(task_list_curr == NULL)
-    	return;
-
-    // Make sure we give the task its completion time then remove it from the list.
-    dd_task completed = task_list_curr->task;
-    completed.completion_time = (uint32_t)xTaskGetTickCount();
-    dd_task_list_rmv(&completed_task_list, task_id);
-
-    // This next bit may need to be removed depending on what we see as the final result,
-    // This next line adds it to completed tasks, so if we do not wan this to occur we can just remove this next line.
-    dd_task_list_add(&completed_task_list, completed);
+	dd_task_list_rmv(&active_task_list, task_id);
 }
 /*-----------------------------------------------------------*/
 
@@ -218,9 +231,8 @@ void complete_dd_task(uint32_t task_id)
 /*-----------------------------------------------------------*/
 void dds_update_priorities(void)
 {
-    if(active_task_list == NULL)
-        return;
-
+	// if no task running launch the first task that comes
+	// check if
     dd_task_list *curr = active_task_list;
     int is_first = 1;
 
@@ -282,7 +294,8 @@ void myTIM_Init(uint16_t (*test_bench)[2])
 
 
 /*-----------------------------------------------------------*/
-static void DD_Task_Generator( void *pvParameters );
+static void DDS( void *pvParameters );
+//static void DD_Task_Generator( void *pvParameters );
 static void DD_Task1( void *pvParameters );
 static void DD_Task2( void *pvParameters );
 static void DD_Task3( void *pvParameters );
@@ -290,6 +303,8 @@ static void DD_Task3( void *pvParameters );
 
 int main(void)
 {
+
+	myGPIO_Init();
 
 	/* Configure the system ready to run the demo.  The clock configuration
 	can be done here if it was not done before main() was called. */
@@ -309,10 +324,10 @@ int main(void)
 
 	xTaskCreate(DDS, "DDS", 256, NULL, 3, &xDDS_Handle);
 
-	xTaskCreate( DD_Task_Generator, "DD Task Gen", 256, NULL, 2, NULL);
-	xTaskCreate(DD_Task1, "DD_Task1", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
-	xTaskCreate(DD_Task2, "DD_Task2", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
-	xTaskCreate(DD_Task3, "DD_Task3", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+//	xTaskCreate(DD_Task_Generator, "DD Task Gen", 256, NULL, 2, NULL);
+	xTaskCreate(DD_Task1, "DD_Task1", configMINIMAL_STACK_SIZE, NULL, PRIORITY_LOW, xDD1_Handle);
+	xTaskCreate(DD_Task2, "DD_Task2", configMINIMAL_STACK_SIZE, NULL, PRIORITY_LOW, xDD2_Handle);
+	xTaskCreate(DD_Task3, "DD_Task3", configMINIMAL_STACK_SIZE, NULL, PRIORITY_LOW, xDD3_Handle);
 
 	uint16_t test_bench_1[3][2] = {{95, 500}, {150, 500}, {250, 750}};
 	// uint16_t test_bench_2[3][2] = {{95, 500}, {150, 500}, {250, 750}};
@@ -344,7 +359,7 @@ void vGenTimerCallback(TimerHandle_t xTimer)
     static uint16_t task1_interval;
     static uint16_t task2_interval;
     static uint16_t task3_interval;
-    
+
 	uint16_t task_interval;
 
     if(initialized == 0)
@@ -363,31 +378,22 @@ void vGenTimerCallback(TimerHandle_t xTimer)
         initialized = 1;
     }
 
-	// uint16_t rx_data = 0;
-    // xQueueSendFromISR(xTaskQueue_handle, &rx_data, pdFALSE);
-
 	static uint16_t task_id_counter = 0;
-	TaskHandle_t new_task_handle1 = NULL;
-	TaskHandle_t new_task_handle2 = NULL;
-	TaskHandle_t new_task_handle3 = NULL;
 
 	if(task1_interval >= DD_task1_period)
 	{
 		task1_interval = 0;
-		// deadline = ??
-		// release_dd_task
+		release_dd_task(xDD1_Handle, PERIODIC, task_id_counter++, (uint32_t)xTaskGetTickCount() + DD_task1_period);
 	}
-	if(task2_interval >= DD_task2_period) 
+	if(task2_interval >= DD_task2_period)
 	{
 		task2_interval = 0;
-		// deadline = ??
-		// release_dd_task
+		release_dd_task(xDD2_Handle, PERIODIC, task_id_counter++, (uint32_t)xTaskGetTickCount() + DD_task2_period);
 	}
 	if(task3_interval >= DD_task3_period)
 	{
 		task3_interval = 0;
-		// deadline = ??
-		// release_dd_task
+		release_dd_task(xDD3_Handle, PERIODIC, task_id_counter++, (uint32_t)xTaskGetTickCount() + DD_task3_period);
 	}
 
 	task_interval = min(DD_task1_period - task1_interval, min(DD_task2_period - task2_interval, DD_task3_period - task3_interval));
@@ -450,7 +456,7 @@ static void DD_Task1( void *pvParameters )
 	{
 
 		if(tx_data == 0) {
-			//   Do task0.
+			GPIO_SetBits(GPIOD, GPIO_Pin_12);
 		}
 
 		/* xQueue_handle: * xQueueSend Posts an item on queue defined by xQueue_handle
@@ -480,7 +486,7 @@ static void DD_Task2( void *pvParameters )
 	{
 
 		if(tx_data == 0) {
-			//   Do task0.
+			GPIO_SetBits(GPIOD, GPIO_Pin_13);
 		}
 
 		/* xQueue_handle: * xQueueSend Posts an item on queue defined by xQueue_handle
@@ -510,7 +516,7 @@ static void DD_Task3( void *pvParameters )
 	{
 
 		if(tx_data == 0) {
-			//   Do task0.
+			GPIO_SetBits(GPIOD, GPIO_Pin_14);
 		}
 
 		/* xQueue_handle: * xQueueSend Posts an item on queue defined by xQueue_handle
