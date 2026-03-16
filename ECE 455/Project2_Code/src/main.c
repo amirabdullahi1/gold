@@ -21,11 +21,19 @@
 /*-----------------------------------------------------------*/
 
 
-/*-----------------------------------------------------------*/
+/*--------Global Variables-----------------------------------*/
 #define data  	0
 #define msgQUEUE_LENGTH 100
+#define PRIORITY_HIGH  2
+#define PRIORITY_LOW   1
 
 xQueueHandle xMsgQueue_handle = 0;
+xQueueHandle xDDS_MsgQueue = 0;
+xQueueHandle xDDS_RespQueue = 0;
+
+TaskHandle_t xDDS_Handle = NULL;
+
+
 
 /*
  * TODO: Implement this function for any hardware specific clock configuration
@@ -34,9 +42,25 @@ xQueueHandle xMsgQueue_handle = 0;
 static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
 
-
-/*-----------------------------------------------------------*/
 typedef enum {PERIODIC,APERIODIC} task_type;
+
+typedef enum {
+	msg_release_task,
+	msg_complete_task
+} msg_type;
+
+typedef struct {
+	msg_type type;
+    TaskHandle_t t_handle;
+    task_type dd_type;
+    uint32_t task_id;
+    uint32_t absolute_deadline;
+} dds_message;
+
+typedef struct {
+    uint32_t task_id;
+    uint32_t execution_time;
+} task_params;
 
 typedef struct {
 	TaskHandle_t t_handle;
@@ -133,14 +157,31 @@ void create_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, uin
 
 void delete_dd_task(uint32_t task_id)
 {
-
 	if(active_task_list == NULL)
-	{
-		// printf("There is nothing to remove the task list is empty.\n");
 		return;
-	}
 
-	dd_task_list_rmv(&active_task_list, task_id);
+    // Find the task we want to delete
+	dd_task_list *task_list_curr = active_task_list;
+	while(task_list_curr != NULL)
+    {
+    	if(task_list_curr->task.task_id == task_id)
+        	break;
+
+		task_list_curr = task_list_curr->next_task;
+    }
+
+    // In the case the task is not found we will need to just return
+    if(task_list_curr == NULL)
+    	return;
+
+    // Make sure we give the task its completion time then remove it from the list.
+    dd_task completed = task_list_curr->task;
+    completed.completion_time = (uint32_t)xTaskGetTickCount();
+    dd_task_list_rmv(&completed_task_list, task_id);
+
+    // This next bit may need to be removed depending on what we see as the final result,
+    // This next line adds it to completed tasks, so if we do not wan this to occur we can just remove this next line.
+    dd_task_list_add(&completed_task_list, completed);
 }
 /*-----------------------------------------------------------*/
 
@@ -148,15 +189,55 @@ void delete_dd_task(uint32_t task_id)
 /*---- DD Task Release and Complete -------------------------*/
 void release_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, uint32_t absolute_deadline)
 {
-	
+	dd_task *release_task = malloc(sizeof(dds_message));
+    release_task->t_handle = t_handle;
+    release_task->type = type;
+    release_task->task_id = task_id;
+//    release_task->release_time = (uint32_t)xTaskGetTickCount(); // I think this needs to be removed and done in the DDS task.
+    release_task->absolute_deadline = absolute_deadline;
+
+    xQueueSend(xDDS_MsgQueue, release_task, portMAX_DELAY);
+    free(release_task);
+
+    // May need to add a task resume line vTaskResume(<TaskName>);
+   	vTaskResume(xDDS_Handle);
 }
 
-void complete_dd_task()
+// I originally caused this task to do too much, this has been fixed now... (DDS task should be doing most of what I made this do)
+void complete_dd_task(uint32_t task_id)
 {
+	dds_message *completed_message = malloc(sizeof(dds_message));
+    completed_message->type = msg_complete_task;
+    completed_message->task_id = task_id;
 
+    xQueueSend(xDDS_MsgQueue, completed_message, portMAX_DELAY);
+    free(completed_message);
+
+    vTaskResume(xDDS_Handle);
 }
 /*-----------------------------------------------------------*/
+void dds_update_priorities(void)
+{
+    if(active_task_list == NULL)
+        return;
 
+    dd_task_list *curr = active_task_list;
+    int is_first = 1;
+
+    while(curr != NULL)
+    {
+        if(is_first)
+        {
+            vTaskPrioritySet(curr->task.t_handle, PRIORITY_HIGH);
+            is_first = 0;
+        }
+        else
+        {
+            vTaskPrioritySet(curr->task.t_handle, PRIORITY_LOW);
+        }
+        curr = curr->next_task;
+    }
+}
 
 /*-----------------------------------------------------------*/
 uint16_t min(uint16_t a, uint16_t b)
@@ -219,8 +300,14 @@ int main(void)
 	xMsgQueue_handle = xQueueCreate( 	msgQUEUE_LENGTH,		/* The number of items the queue can hold. */
 							sizeof( uint16_t ) );	/* The size of each item the queue holds. */
 
+    // Used for the DDS scheduler.
+    xDDS_MsgQueue  = xQueueCreate(20, sizeof(dds_message));
+	xDDS_RespQueue = xQueueCreate(1,  sizeof(dd_task_list *));
+
 	/* Add to the registry, for the benefit of kernel aware debugging. */
 	vQueueAddToRegistry( xMsgQueue_handle, "MainQueue" );
+
+	xTaskCreate(DDS, "DDS", 256, NULL, 3, &xDDS_Handle);
 
 	xTaskCreate( DD_Task_Generator, "DD Task Gen", 256, NULL, 2, NULL);
 	xTaskCreate(DD_Task1, "DD_Task1", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
@@ -233,6 +320,8 @@ int main(void)
 
 	/* Initialize the timer. */
     myTIM_Init(test_bench_1);
+
+    xTimerStart(TIM_GEN, 0); // Starts the Tim timer.
 
 	/* Start the tasks and timer running. */
 	vTaskStartScheduler();
@@ -314,7 +403,41 @@ static void DDS( void *pvParameters )
 {
 	// pretty sure these calls need to happen from DDS task
 	// create_dd_task(new_task_handle1, PERIODIC, task_id_counter++, deadline);
+	dds_message msg;
+    while(1)
+    {
+		vTaskSuspend(NULL);
+		while(xQueueReceive(xDDS_MsgQueue, &msg, 0) == pdTRUE)
+        {
+        	switch(msg.type)
+            {
+                case msg_release_task:
+            		create_dd_task(msg.t_handle, msg.dd_tytpe, msg.task_id, msg.absolute_deadline);
+                    dds_update_priorities();
+                    break;
 
+                case msg_complete_task:
+                	if(active_task_list != NULL)
+                    {
+                    	dd_task_list *curr = active_task_list;
+                        while(curr != NULL)
+                        {
+                        	if(curr->task.task_id == msg.task_id)
+                            {
+                            	dd_task done = curr->task;
+                                done.completion_time = (uint32_t)xTaskGetTickCount();
+                                dd_task_list_add(&completed_task_list, done);
+                                break;
+                            }
+                            curr = curr->next_task;
+                        }
+                        dd_task_list_rmv(&active_task_list, msg.task_id);
+                    }
+                    dds_update_priorities();
+                    break;
+            }
+        }
+    }
 	// dd_task_list_add(&active_task_list, new_task_handle1); // Calls the function to add to the task list.
 }
 
