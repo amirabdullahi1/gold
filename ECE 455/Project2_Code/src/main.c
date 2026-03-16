@@ -412,7 +412,7 @@ static void DDS( void *pvParameters )
         	switch(msg.type)
             {
                 case msg_release_task:
-            		create_dd_task(msg.t_handle, msg.dd_tytpe, msg.task_id, msg.absolute_deadline);
+            		create_dd_task(msg.t_handle, msg.dd_type, msg.task_id, msg.absolute_deadline);
                     dds_update_priorities();
                     break;
 
