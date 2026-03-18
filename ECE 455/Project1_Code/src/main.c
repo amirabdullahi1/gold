@@ -420,10 +420,10 @@ static void light_state_task ( void *pvParameters ) {
                         //  printf("r_dur %u.\n", r_dur);
                         //  printf("g_dur %u.\n", g_dur);
 
-                        if (next_light_state == Y_STATE)
+                        if(next_light_state == Y_STATE)
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(r_dur), 0);
 
-                        if (next_light_state == R_STATE)
+                        if(next_light_state == R_STATE)
                             xTimerChangePeriod(TIM_RYG, pdMS_TO_TICKS(g_dur), 0);
                     }
 					ADC_old = ADC_new;
