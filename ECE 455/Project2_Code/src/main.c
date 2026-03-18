@@ -40,7 +40,7 @@ TaskHandle_t xDDS_Handle = NULL;
 TaskHandle_t xDD1_Handle = NULL;
 TaskHandle_t xDD2_Handle = NULL;
 TaskHandle_t xDD3_Handle = NULL;
-
+/*-----------------------------------------------------------*/
 
 /*
  * TODO: Implement this function for any hardware specific clock configuration
@@ -65,10 +65,10 @@ typedef struct {
     uint32_t absolute_deadline;
 } dds_msg;
 
-typedef struct {
-    uint32_t task_id;
-    uint32_t execution_time;
-} task_params;
+// typedef struct {
+//     uint32_t task_id;
+//     uint32_t execution_time;
+// } task_params;
 
 typedef struct {
 	TaskHandle_t t_handle;
@@ -104,15 +104,11 @@ void myGPIO_Init()
 	GPIO_LED_InitStruct.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
 	GPIO_Init(GPIOD, &GPIO_LED_InitStruct);
 }
-
-
 /*-----------------------------------------------------------*/
-
-
 
 /*-----------------------------------------------------------*/
 void dd_task_list_add(dd_task_list **task_list, dd_task this_task) {
-	dd_task_list *task_list_this = malloc(sizeof(dd_task_list));
+	dd_task_list *task_list_this = pvPortMalloc(sizeof(dd_task_list));
 	if(task_list_this == NULL)
 		return;
 
@@ -163,7 +159,7 @@ void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id) {
 	else
 		task_list_prev->next_task = task_list_curr->next_task;
 
-	free(task_list_curr);
+	vPortFree(task_list_curr); // -> heap_4
 }
 /*-----------------------------------------------------------*/
 
@@ -177,7 +173,7 @@ void create_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, uin
 	new_task.task_id = task_id;
 	new_task.release_time = xTaskGetTickCount();
 	new_task.absolute_deadline = absolute_deadline;
-	new_task.completion_time = 0; // Intialize with default value until task's execution and completion.
+	new_task.completion_time = 0;
 
 	dd_task_list_add(creator_list, new_task); 
 }
@@ -217,21 +213,26 @@ void complete_dd_task(uint32_t task_id)
 
 /**
  * if (HI task exists && not completed) -> do nothing
- * if (HI task exists && completed) -> demote it, promote updater_list_head
- * if no HI task -> promote updater_list_head
+ * if (HI task exists && completed) -> demote it, promote within updater_list
+ * if no HI task -> promote within updater_list
  */
-void update_dd_task(dd_task_list **updater_list)
+void update_dd_task(dd_task_list *updater_list)
 {
-    dd_task_list *task_list_curr = *updater_list;
-
+    dd_task_list *task_list_curr = updater_list;
     while (task_list_curr != NULL)
     {
         if(uxTaskPriorityGet(task_list_curr->task.t_handle) == PRIORITY_HI)
         {
+			// (HI task exists && completed) -> demote it, promote within updater_list
 			if(task_list_curr->task.completion_time != 0)
 			{
-				// (HI task exists && completed) -> demote it, promote updater_list_head
 				vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
+				vTaskSuspend(task_list_curr->task.t_handle);
+
+				// (HI task demoted) -> do not re-promote it
+				if(task_list_curr == updater_list)
+					  updater_list = updater_list->next_task;
+
 				break;
 			}
 			
@@ -242,9 +243,12 @@ void update_dd_task(dd_task_list **updater_list)
         task_list_curr = task_list_curr->next_task;
     }
 
-    // No HI task -> promote updater_list_head
-    if(*updater_list != NULL)
-        vTaskPrioritySet((*updater_list)->task.t_handle, PRIORITY_HI);
+    // No HI task -> promote within updater_list
+    if(updater_list != NULL)
+	{
+        vTaskPrioritySet(updater_list->task.t_handle, PRIORITY_HI);
+		vTaskResume(updater_list->task.t_handle);
+	}
 }
 /*-----------------------------------------------------------*/
 
@@ -436,12 +440,13 @@ static void DDS( void *pvParameters )
 	{
 		if(xQueueReceive(xDDS_MsgQueue_Handle, &msg, portMAX_DELAY) == pdTRUE)
 		{
-			do { // release and complete cases may need to handle task suspend / resume 
+			do { 
 				switch(msg.dds_msg_type)
 				{
 					case msg_release_task:
+						// Promote and resume incompleted tasks second after create
 						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
-						update_dd_task(&active_task_list);
+						update_dd_task(active_task_list);
 						xQueueOverwrite(xDDS_AtlQueue_Handle, &active_task_list);
 						break;
 
@@ -460,44 +465,67 @@ static void DDS( void *pvParameters )
 							task_list_curr = task_list_curr->next_task;
 						}
 
-						update_dd_task(&active_task_list);
+						// Demote and suspend completed task first before delete
+						update_dd_task(active_task_list);
 						delete_dd_task(msg.task_id, &active_task_list);
 						xQueueOverwrite(xDDS_AtlQueue_Handle, &active_task_list);
 						break;
 				}
-			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);			
+			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);		
 		}
 	}
 }
 
 /*---- User-Defined F-Tasks ---------------------------------*/
-static void DD_Task1( void *pvParameters )
+static void DD_Task1(void *pvParameters)
 {
-	// printf("DD_Task1 ON!\n");
-	// TaskHandle_t curr_task = xTaskGetCurrentTaskHandle();
-	GPIO_SetBits(GPIOD, GPIO_Pin_12);
-	// busy loop for exe time
-	// GPIO_ResetBits(GPIOD, GPIO_Pin_12);
+	// await DDS initally
+	vTaskSuspend(NULL);
+    for (;;)
+    {
+		// printf("DD_Task1 ON!\n");
+        GPIO_SetBits(GPIOD, GPIO_Pin_12);
+
+		for (;;) { /* busy loop for exe time */ }
+
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12);
+        // complete_dd_task(...);
+		vTaskSuspend(NULL);
+    }
 }
 
-static void DD_Task2( void *pvParameters )
+static void DD_Task2(void *pvParameters)
 {
-	// printf("DD_Task2 ON!\n");
-	// TaskHandle_t curr_task = xTaskGetCurrentTaskHandle();
-	GPIO_SetBits(GPIOD, GPIO_Pin_13);
-	// busy loop for exe time
-	// GPIO_ResetBits(GPIOD, GPIO_Pin_13);
+	// await DDS initally
 	vTaskSuspend(NULL);
+    for (;;)
+    {
+		// printf("DD_Task2 ON!\n");
+        GPIO_SetBits(GPIOD, GPIO_Pin_13);
+
+		for (;;) { /* busy loop for exe time */ }
+
+		GPIO_ResetBits(GPIOD, GPIO_Pin_13);
+        // complete_dd_task(...);
+		vTaskSuspend(NULL);
+    }
 }
 
-static void DD_Task3( void *pvParameters )
+static void DD_Task3(void *pvParameters)
 {
-	// printf("DD_Task3 ON!\n");
-	// TaskHandle_t curr_task = xTaskGetCurrentTaskHandle();
-	GPIO_SetBits(GPIOD, GPIO_Pin_15);
-	// busy loop for exe time
-	// GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+	// await DDS initally
 	vTaskSuspend(NULL);
+    for (;;)
+    {
+		// printf("DD_Task3 ON!\n");
+        GPIO_SetBits(GPIOD, GPIO_Pin_15);
+
+		for (;;) { /* busy loop for exe time */ }
+
+		GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+        // complete_dd_task(...);
+		vTaskSuspend(NULL);
+    }
 }
 /*-----------------------------------------------------------*/
 
