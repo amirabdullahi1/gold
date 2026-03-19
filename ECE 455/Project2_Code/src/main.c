@@ -340,15 +340,15 @@ int main(void)
 	// vQueueAddToRegistry( xDDS_CmpQueue_Handle, "Cmp Queue" );
 	// vQueueAddToRegistry( xDDS_OvrQueue_Handle, "Ovr Queue" );
 
-	uint16_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
-	// uint16_t test_bench_2[2][3] = {{ 95, 150, 250}, {250, 500, 750}};
-	// uint16_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
+	static uint16_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
+	// static uint16_t test_bench_2[2][3] = {{ 95, 150, 250}, {250, 500, 750}};
+	// static uint16_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
 
-	uint16_t (*test_bench_i)[3] = test_bench_1;
+	static uint16_t (*test_bench_i)[3] = test_bench_1;
 
-	xTaskCreate(DD_Task1, "DD_Task1", configMINIMAL_STACK_SIZE, test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
-	xTaskCreate(DD_Task2, "DD_Task2", configMINIMAL_STACK_SIZE, test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
-	xTaskCreate(DD_Task3, "DD_Task3", configMINIMAL_STACK_SIZE, test_bench_i[0][2], PRIORITY_LO, &xDD3_Handle);
+	xTaskCreate(DD_Task1, "DD_Task1", configMINIMAL_STACK_SIZE, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
+	xTaskCreate(DD_Task2, "DD_Task2", configMINIMAL_STACK_SIZE, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
+	xTaskCreate(DD_Task3, "DD_Task3", configMINIMAL_STACK_SIZE, &test_bench_i[0][2], PRIORITY_LO, &xDD3_Handle);
 
 	vTaskSuspend(xDD1_Handle);
 	vTaskSuspend(xDD2_Handle);
