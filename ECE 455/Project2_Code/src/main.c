@@ -36,7 +36,7 @@ xQueueHandle xDDS_AtlQueue_Handle = 0;
 // xQueueHandle xDDS_CmpQueue_Handle = 0;
 // xQueueHandle xDDS_OvrQueue_Handle = 0;
 
-// TaskHandle_t xDDS_Handle = NULL;
+TaskHandle_t xDDS_Handle = NULL;
 TaskHandle_t xDD1_Handle = NULL;
 TaskHandle_t xDD2_Handle = NULL;
 TaskHandle_t xDD3_Handle = NULL;
@@ -55,9 +55,9 @@ typedef enum {PERIODIC, APERIODIC} task_type;
 typedef enum {
 	msg_release_task,
 	msg_complete_task,
-	// get_active_dd_task_list
-	// get_completed_dd_task_list
-	// get_overdue_dd_task_list
+    msg_get_active_dd_task_list
+    msg_get_completed_dd_task_list
+    msg_get_overdue_dd_task_list
 } msg_type;
 
 typedef struct {
@@ -234,6 +234,52 @@ void update_dd_task(dd_task_list *updater_list)
 }
 /*-----------------------------------------------------------*/
 
+/*---- Monitor Task Functions--------------------------------*/
+**dd_task_list get_active_dd_task_list(void)
+{
+	dd_task_list *curr = active_task_list;
+
+	printf("Active Task List: ");
+	while(curr != NULL)
+	{
+		printf("%d, ", curr->task.task_id);
+                curr = curr->next_task;
+
+	}
+	printf("\n");
+}
+
+**dd_task_list get_complete_dd_task_list(void)
+{
+	dd_task_list *curr = complete_task_list;
+
+	printf("Completed Task List: ");
+	while(curr != NULL)
+	{
+		printf("%d, ", curr->task.task_id);
+		curr = curr->next_task;
+
+	}
+	printf("\n");
+}
+
+**dd_task_list get_overdue_dd_task_list(void)
+{
+	dd_task_list *curr = overdue_task_list;
+
+	printf("Overdue Task List: ");
+	while(curr != NULL)
+	{
+		printf("%d, ", curr->task.task_id);
+		curr = curr->next_task;
+
+	}
+	printf("\n");
+}
+
+/*-----------------------------------------------------------*/
+
+
 /*---- Min and geeksforgeeks.org/c/lcm-of-two-numbers-in-c --*/
 uint16_t min(uint16_t a, uint16_t b)
 {
@@ -286,6 +332,7 @@ void myTIM_GEN_Init(uint16_t test_bench[3])
 
 /*-----------------------------------------------------------*/
 static void DDS( void *pvParameters );
+static void DD_Monitor( void *pvParameters );
 static void DD_Task1( void *pvParameters );
 static void DD_Task2( void *pvParameters );
 static void DD_Task3( void *pvParameters );
@@ -340,6 +387,7 @@ int main(void)
 	vTaskSuspend(xDD3_Handle);
 
 	xTaskCreate(DDS, "DDS", 256, NULL, 3, NULL /* &xDDS_Handle */);
+	xTaskCreate(DD_Monitor, "DD_Monitor", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
 
 	/* Initialize the timer. */
 	myTIM_GEN_Init(test_bench_i[1]);
@@ -457,9 +505,24 @@ static void DDS( void *pvParameters )
 						break;
 					}
 
-					// case get_active_dd_task_list: {}
-					// case get_completed_dd_task_list: {}
-					// case get_overdue_dd_task_list: {}
+                    case msg_get_active_task_list:
+                    {
+        			    get_active_dd_task_list();
+        			    break;
+                    }
+
+        		    case msg_get_completed_task_list:
+                    {
+        			    get_completed_dd_task_list();
+        			    break;
+                    }
+
+        		    case msg_get_overdue_task_list:
+                    {
+        			    get_overdue_dd_task_list();
+        			    break;
+                    }
+
 				}
 			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);
 
@@ -467,6 +530,40 @@ static void DDS( void *pvParameters )
 		}
 	}
 }
+
+/*---- DD Monitor ----------------------------------------*/
+
+static void DD_Monitor( void *pvParameters )
+{
+	uint16_t tx_data = 0;
+
+	while(1)
+	{
+		if(tx_data == 0)
+		{
+			dds_msg *monitor_message_active = malloc(sizeof(dds_message));
+			monitor_message->type = msg_get_active_task_list;
+			xQueueSend(xDDS_MsgQueue, monitor_message, portMAX_DELAY);
+
+			dds_msg *monitor_message_completed = malloc(sizeof(dds_message));
+			monitor_message->type = msg_get_completed_task_list;
+			xQueueSend(xDDS_MsgQueue, monitor_message, portMAX_DELAY);
+
+			dds_msg *monitor_message_overdue = malloc(sizeof(dds_message));
+			monitor_message->type = msg_get_overdue_task_list;
+			xQueueSend(xDDS_MsgQueue, monitor_message, portMAX_DELAY);
+
+			free(monitor_message_active);
+			free(monitor_message_completed);
+			free(monitor_message_overdue);
+
+			vTaskResume(xDDS_Handle);
+		}
+	}
+}
+
+/*-----------------------------------------------------------*/
+
 
 /*---- User-Defined F-Tasks ---------------------------------*/
 static void DD_Task1(void *pvParameters)
