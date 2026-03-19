@@ -441,14 +441,17 @@ static void DDS( void *pvParameters )
 			do { 
 				switch(msg.dds_msg_type)
 				{
-					case msg_release_task:
+					case msg_release_task: 
+					{
 						// Promote and resume incompleted tasks second after create
 						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
 						update_dd_task(active_task_list);
 						xQueueOverwrite(xDDS_AtlQueue_Handle, &active_task_list);
 						break;
+					}
 
-					case msg_complete_task:
+					case msg_complete_task: 
+					{
 						dd_task_list *task_list_curr = active_task_list;
 						while(task_list_curr != NULL)
 						{
@@ -468,10 +471,11 @@ static void DDS( void *pvParameters )
 						delete_dd_task(msg.task_id, &active_task_list);
 						xQueueOverwrite(xDDS_AtlQueue_Handle, &active_task_list);
 						break;
+					}
 
-					// case get_active_dd_task_list:
-					// case get_completed_dd_task_list:
-					// case get_overdue_dd_task_list:
+					// case get_active_dd_task_list: {}
+					// case get_completed_dd_task_list: {}
+					// case get_overdue_dd_task_list: {}
 				}
 			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);		
 		}
