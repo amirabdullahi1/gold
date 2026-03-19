@@ -107,7 +107,7 @@ void myGPIO_Init()
 
 /*---- DD Task List Add and Remove --------------------------*/
 void dd_task_list_add(dd_task_list **task_list, dd_task this_task) {
-	dd_task_list *task_list_this = pvPortMalloc(sizeof(dd_task_list));
+	dd_task_list *task_list_this = malloc(sizeof(dd_task_list));
 	if(task_list_this == NULL)
 		return;
 
@@ -158,7 +158,7 @@ void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id) {
 	else
 		task_list_prev->next_task = task_list_curr->next_task;
 
-	vPortFree(task_list_curr); // -> heap_4
+	free(task_list_curr);
 }
 /*-----------------------------------------------------------*/
 
