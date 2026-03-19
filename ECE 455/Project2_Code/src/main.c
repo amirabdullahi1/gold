@@ -407,7 +407,6 @@ void vGenTimerCallback(TimerHandle_t genTimer)
 	task3_interval += task_interval;
 
 	xTimerChangePeriod(genTimer, pdMS_TO_TICKS(task_interval), 0);
-	xTimerStart(TIM_GEN, 0);
 }
 /*-----------------------------------------------------------*/
 
