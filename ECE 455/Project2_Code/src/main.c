@@ -279,7 +279,7 @@ void myTIM_GEN_Init(uint16_t test_bench[3])
 {
     TIM_GEN = xTimerCreate(
         "DD Task Gen",
-        pdMS_TO_TICKS(0),
+        pdMS_TO_TICKS(5),
         pdFALSE,
         test_bench,
         vGenTimerCallback
