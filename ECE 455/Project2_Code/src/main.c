@@ -173,7 +173,7 @@ void create_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, uin
 	new_task.absolute_deadline = absolute_deadline;
 	new_task.completion_time = 0;
 
-	dd_task_list_add(creator_list, new_task); 
+	dd_task_list_add(creator_list, new_task);
 }
 
 void delete_dd_task(uint32_t task_id, dd_task_list **deleter_list)
@@ -232,7 +232,7 @@ void update_dd_task(dd_task_list *updater_list)
 
 				break;
 			}
-			
+
 			// (HI task exists && not completed) -> do nothing
             return;
         }
@@ -438,10 +438,10 @@ static void DDS( void *pvParameters )
 	{
 		if(xQueueReceive(xDDS_MsgQueue_Handle, &msg, portMAX_DELAY) == pdTRUE)
 		{
-			do { 
+			do {
 				switch(msg.dds_msg_type)
 				{
-					case msg_release_task: 
+					case msg_release_task:
 					{
 						// Promote and resume incompleted tasks second after create
 						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
@@ -450,14 +450,14 @@ static void DDS( void *pvParameters )
 						break;
 					}
 
-					case msg_complete_task: 
+					case msg_complete_task:
 					{
 						dd_task_list *task_list_curr = active_task_list;
 						while(task_list_curr != NULL)
 						{
 							if(task_list_curr->task.task_id == msg.task_id)
 							{
-								// Completion_time update 
+								// Completion_time update
 								task_list_curr->task.completion_time = xTaskGetTickCount();
 								dd_task_list_add(&completed_task_list, task_list_curr->task);
 								break;
@@ -477,7 +477,7 @@ static void DDS( void *pvParameters )
 					// case get_completed_dd_task_list: {}
 					// case get_overdue_dd_task_list: {}
 				}
-			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);		
+			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);
 		}
 	}
 }
@@ -485,10 +485,10 @@ static void DDS( void *pvParameters )
 /*---- User-Defined F-Tasks ---------------------------------*/
 static void DD_Task1(void *pvParameters)
 {
-	TickType_t execution_time = pdMS_TO_TICKS(*(uint16_t *)pvParameters); 
+	TickType_t execution_time = pdMS_TO_TICKS(*(uint16_t *)pvParameters);
 	for (;;)
     {
-		// printf("DD_Task1 ON!\n");
+		// printf("Green LED ON!\n");
 		uint16_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
         GPIO_SetBits(GPIOD, GPIO_Pin_12);
@@ -502,10 +502,10 @@ static void DD_Task1(void *pvParameters)
 
 static void DD_Task2(void *pvParameters)
 {
-	TickType_t execution_time = pdMS_TO_TICKS(*(uint16_t *)pvParameters); 
+	TickType_t execution_time = pdMS_TO_TICKS(*(uint16_t *)pvParameters);
 	for (;;)
     {
-		// printf("DD_Task2 ON!\n");
+		// printf("Red LED ON!\n");
 		uint16_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
@@ -520,10 +520,10 @@ static void DD_Task2(void *pvParameters)
 
 static void DD_Task3(void *pvParameters)
 {
-	TickType_t execution_time = pdMS_TO_TICKS(*(uint16_t *)pvParameters); 
+	TickType_t execution_time = pdMS_TO_TICKS(*(uint16_t *)pvParameters);
 	for (;;)
     {
-		// printf("DD_Task3 ON!\n");
+		// printf("Blue LED ON!\n");
 		uint16_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
@@ -545,7 +545,7 @@ void vApplicationMallocFailedHook( void )
 
 	Called if a call to pvPortMalloc() fails because there is insufficient
 	free memory available in the FreeRTOS heap.  pvPortMalloc() is called
-	internally by FreeRTOS API functions that create tasks, queues, software 
+	internally by FreeRTOS API functions that create tasks, queues, software
 	timers, and semaphores.  The size of the FreeRTOS heap is set by the
 	configTOTAL_HEAP_SIZE configuration constant in FreeRTOSConfig.h. */
 	for( ;; );
