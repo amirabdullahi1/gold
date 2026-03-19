@@ -324,12 +324,12 @@ int main(void)
 	// vQueueAddToRegistry( xDDS_CmpQueue_Handle, "Cmp Queue" );
 	// vQueueAddToRegistry( xDDS_OvrQueue_Handle, "Ovr Queue" );
 
-	// static uint16_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
+	 static uint16_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
 	// static uint16_t test_bench_2[2][3] = {{ 95, 150, 250}, {250, 500, 750}};
 	// static uint16_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
 	static uint16_t test_bench_4[2][3] = {{ 5000, 2000, 3000}, {10999, 10997, 11000}};
 
-	static uint16_t (*test_bench_i)[3] = test_bench_4;
+	static uint16_t (*test_bench_i)[3] = test_bench_1;
 
 	xTaskCreate(DD_Task1, "DD_Task1", configMINIMAL_STACK_SIZE, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
 	xTaskCreate(DD_Task2, "DD_Task2", configMINIMAL_STACK_SIZE, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
@@ -477,11 +477,14 @@ static void DD_Task1(void *pvParameters)
 		// printf("Green LED ON!\n");
 		uint16_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
-        GPIO_SetBits(GPIOD, GPIO_Pin_12);
+
+		// printf("TickCount1: %u\n", (unsigned int)xTaskGetTickCount());
+		GPIO_SetBits(GPIOD, GPIO_Pin_12);
 		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
 
+		// printf("TickCount1: %u\n", (unsigned int)xTaskGetTickCount());
 		GPIO_ResetBits(GPIOD, GPIO_Pin_12);
-        complete_dd_task(task_identifcation);
+		complete_dd_task(task_identifcation);
 		vTaskSuspend(NULL);
     }
 }
@@ -495,9 +498,11 @@ static void DD_Task2(void *pvParameters)
 		uint16_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
+    	// printf("TickCount2: %u\n", (unsigned int)xTaskGetTickCount());
         GPIO_SetBits(GPIOD, GPIO_Pin_13);
 		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
 
+    	// printf("TickCount2: %u\n", (unsigned int)xTaskGetTickCount());
 		GPIO_ResetBits(GPIOD, GPIO_Pin_13);
         complete_dd_task(task_identifcation);
 		vTaskSuspend(NULL);
@@ -513,9 +518,11 @@ static void DD_Task3(void *pvParameters)
 		uint16_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
+    	// printf("TickCount3: %u\n", (unsigned int)xTaskGetTickCount());
         GPIO_SetBits(GPIOD, GPIO_Pin_15);
 		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
 
+    	// printf("TickCount3: %u\n", (unsigned int)xTaskGetTickCount());
 		GPIO_ResetBits(GPIOD, GPIO_Pin_15);
         complete_dd_task(task_identifcation);
 		vTaskSuspend(NULL);
