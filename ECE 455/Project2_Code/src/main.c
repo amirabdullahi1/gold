@@ -55,8 +55,8 @@ typedef enum {PERIODIC, APERIODIC} task_type;
 typedef enum {
 	msg_release_task,
 	msg_complete_task,
-    msg_get_active_dd_task_list
-    msg_get_completed_dd_task_list
+    msg_get_active_dd_task_list,
+    msg_get_completed_dd_task_list,
     msg_get_overdue_dd_task_list
 } msg_type;
 
@@ -235,50 +235,45 @@ void update_dd_task(dd_task_list *updater_list)
 /*-----------------------------------------------------------*/
 
 /*---- Monitor Task Functions--------------------------------*/
-**dd_task_list get_active_dd_task_list(void)
+void get_active_dd_task_list(dd_task_list *monitor_list)
 {
-	dd_task_list *curr = active_task_list;
+	dd_task_list *curr = monitor_list;
 
 	printf("Active Task List: ");
 	while(curr != NULL)
 	{
-		printf("%d, ", curr->task.task_id);
-                curr = curr->next_task;
-
+		printf("%u, ", (unsigned int)curr->task.task_id);
+		curr = curr->next_task;
 	}
 	printf("\n");
 }
 
-**dd_task_list get_complete_dd_task_list(void)
+void get_completed_dd_task_list(dd_task_list *monitor_list)
 {
-	dd_task_list *curr = complete_task_list;
+	dd_task_list *curr = monitor_list;
 
 	printf("Completed Task List: ");
 	while(curr != NULL)
 	{
-		printf("%d, ", curr->task.task_id);
+		printf("%u, ", (unsigned int)curr->task.task_id);
 		curr = curr->next_task;
-
 	}
 	printf("\n");
 }
 
-**dd_task_list get_overdue_dd_task_list(void)
+void get_overdue_dd_task_list(dd_task_list *monitor_list)
 {
-	dd_task_list *curr = overdue_task_list;
+	dd_task_list *curr = monitor_list;
 
 	printf("Overdue Task List: ");
 	while(curr != NULL)
 	{
-		printf("%d, ", curr->task.task_id);
+		printf("%u, ", (unsigned int)curr->task.task_id);
 		curr = curr->next_task;
-
 	}
 	printf("\n");
 }
-
 /*-----------------------------------------------------------*/
-
 
 /*---- Min and geeksforgeeks.org/c/lcm-of-two-numbers-in-c --*/
 uint16_t min(uint16_t a, uint16_t b)
@@ -300,6 +295,7 @@ uint16_t lcm(uint16_t a, uint16_t b)
 
 /*---- Timer ------------------------------------------------*/
 static TimerHandle_t TIM_GEN;
+static TimerHandle_t TIM_MON;
 //static TimerHandle_t TIM_OVR;
 
 void vGenTimerCallback(TimerHandle_t genTimer);
@@ -315,6 +311,18 @@ void myTIM_GEN_Init(uint16_t test_bench[3])
         vGenTimerCallback
     );
     configASSERT(TIM_GEN);
+}
+
+void myTIM_MON_Init(uint16_t test_bench[3])
+{
+    TIM_MON = xTimerCreate(
+        "DD Task Mon",
+        pdMS_TO_TICKS(5 /* lcm(test_bench[0], lcm(test_bench[1], test_bench[2])) / 2 */),
+        pdTRUE,
+        test_bench,
+        vGenTimerCallback
+    );
+    configASSERT(TIM_MON);
 }
 
 //void myTIM_OVR_Init(uint16_t test_bench[3])
@@ -376,7 +384,7 @@ int main(void)
 	// static uint16_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
 	static uint16_t test_bench_4[2][3] = {{ 5000, 2000, 3000}, {10999, 10997, 11000}};
 
-	static uint16_t (*test_bench_i)[3] = test_bench_1;
+	static uint16_t (*test_bench_i)[3] = test_bench_4;
 
 	xTaskCreate(DD_Task1, "DD_Task1", configMINIMAL_STACK_SIZE, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
 	xTaskCreate(DD_Task2, "DD_Task2", configMINIMAL_STACK_SIZE, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
@@ -391,7 +399,9 @@ int main(void)
 
 	/* Initialize the timer. */
 	myTIM_GEN_Init(test_bench_i[1]);
+	myTIM_MON_Init(test_bench_i[1]);
     xTimerStart(TIM_GEN, 0);
+    xTimerStart(TIM_MON, 0);
 
 	/* Start the tasks and timer running. */
 	vTaskStartScheduler();
@@ -505,21 +515,21 @@ static void DDS( void *pvParameters )
 						break;
 					}
 
-                    case msg_get_active_task_list:
+                    case msg_get_active_dd_task_list:
                     {
-        			    get_active_dd_task_list();
+        			    get_active_dd_task_list(active_task_list);
         			    break;
                     }
 
-        		    case msg_get_completed_task_list:
+        		    case msg_get_completed_dd_task_list:
                     {
-        			    get_completed_dd_task_list();
+        			    get_completed_dd_task_list(completed_task_list);
         			    break;
                     }
 
-        		    case msg_get_overdue_task_list:
+        		    case msg_get_overdue_dd_task_list:
                     {
-        			    get_overdue_dd_task_list();
+        			    // get_overdue_dd_task_list(overdue_task_list);
         			    break;
                     }
 
@@ -536,22 +546,23 @@ static void DDS( void *pvParameters )
 static void DD_Monitor( void *pvParameters )
 {
 	uint16_t tx_data = 0;
+	GPIO_SetBits(GPIOD, GPIO_Pin_14);
 
 	while(1)
 	{
 		if(tx_data == 0)
 		{
-			dds_msg *monitor_message_active = malloc(sizeof(dds_message));
-			monitor_message->type = msg_get_active_task_list;
-			xQueueSend(xDDS_MsgQueue, monitor_message, portMAX_DELAY);
+			dds_msg *monitor_message_active = malloc(sizeof(dds_msg));
+			monitor_message_active->dds_msg_type = msg_get_active_dd_task_list;
+			xQueueSend(xDDS_MsgQueue_Handle, monitor_message_active, portMAX_DELAY);
 
-			dds_msg *monitor_message_completed = malloc(sizeof(dds_message));
-			monitor_message->type = msg_get_completed_task_list;
-			xQueueSend(xDDS_MsgQueue, monitor_message, portMAX_DELAY);
+			dds_msg *monitor_message_completed = malloc(sizeof(dds_msg));
+			monitor_message_completed->dds_msg_type = msg_get_completed_dd_task_list;
+			xQueueSend(xDDS_MsgQueue_Handle, monitor_message_completed, portMAX_DELAY);
 
-			dds_msg *monitor_message_overdue = malloc(sizeof(dds_message));
-			monitor_message->type = msg_get_overdue_task_list;
-			xQueueSend(xDDS_MsgQueue, monitor_message, portMAX_DELAY);
+			dds_msg *monitor_message_overdue = malloc(sizeof(dds_msg));
+			monitor_message_overdue->dds_msg_type = msg_get_overdue_dd_task_list;
+			xQueueSend(xDDS_MsgQueue_Handle, monitor_message_overdue, portMAX_DELAY);
 
 			free(monitor_message_active);
 			free(monitor_message_completed);
