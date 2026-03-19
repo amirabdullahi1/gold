@@ -436,8 +436,6 @@ static void DDS( void *pvParameters )
 	dds_msg msg;
 	while(1)
 	{
-		taskENTER_CRITICAL(); // suspend interrupts for debugging
-
 		if(xQueueReceive(xDDS_MsgQueue_Handle, &msg, portMAX_DELAY) == pdTRUE)
 		{
 			do {
@@ -481,8 +479,6 @@ static void DDS( void *pvParameters )
 				}
 			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);
 		}
-
-		taskEXIT_CRITICAL(); // resume interrupts for debugging
 	}
 }
 
