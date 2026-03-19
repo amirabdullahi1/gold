@@ -486,17 +486,13 @@ static void DDS( void *pvParameters )
 static void DD_Task1(void *pvParameters)
 {
 	TickType_t execution_time = pdMS_TO_TICKS(*(uint16_t *)pvParameters); 
-	TickType_t start_time;
 	for (;;)
     {
-		start_time = xTaskGetTickCount();
-
 		// printf("DD_Task1 ON!\n");
 		uint16_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
         GPIO_SetBits(GPIOD, GPIO_Pin_12);
-
-		while ((xTaskGetTickCount() - start_time) < execution_time); // busy loop
+		vTaskDelay(pdMS_TO_TICKS(execution_time)); // busy "loop"
 
 		GPIO_ResetBits(GPIOD, GPIO_Pin_12);
         complete_dd_task(task_identifcation);
@@ -507,18 +503,14 @@ static void DD_Task1(void *pvParameters)
 static void DD_Task2(void *pvParameters)
 {
 	TickType_t execution_time = pdMS_TO_TICKS(*(uint16_t *)pvParameters); 
-	TickType_t start_time;
 	for (;;)
     {
-		start_time = xTaskGetTickCount();
-
 		// printf("DD_Task2 ON!\n");
 		uint16_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
         GPIO_SetBits(GPIOD, GPIO_Pin_13);
-
-		while ((xTaskGetTickCount() - start_time) < execution_time); // busy loop
+		vTaskDelay(pdMS_TO_TICKS(execution_time)); // busy "loop"
 
 		GPIO_ResetBits(GPIOD, GPIO_Pin_13);
         complete_dd_task(task_identifcation);
@@ -529,18 +521,14 @@ static void DD_Task2(void *pvParameters)
 static void DD_Task3(void *pvParameters)
 {
 	TickType_t execution_time = pdMS_TO_TICKS(*(uint16_t *)pvParameters); 
-	TickType_t start_time;
 	for (;;)
     {
-		start_time = xTaskGetTickCount();
-
 		// printf("DD_Task3 ON!\n");
 		uint16_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
         GPIO_SetBits(GPIOD, GPIO_Pin_15);
-
-		while ((xTaskGetTickCount() - start_time) < execution_time); // busy loop
+		vTaskDelay(pdMS_TO_TICKS(execution_time)); // busy "loop"
 
 		GPIO_ResetBits(GPIOD, GPIO_Pin_15);
         complete_dd_task(task_identifcation);
