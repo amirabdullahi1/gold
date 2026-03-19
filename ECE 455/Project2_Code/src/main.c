@@ -209,8 +209,7 @@ void complete_dd_task(uint32_t task_id)
 }
 
 /**
- * if (HI task exists && not completed) -> do nothing
- * if (HI task exists && completed) -> demote it, promote within updater_list
+ * if HI task exists -> do nothing
  * if no HI task -> promote within updater_list
  */
 void update_dd_task(dd_task_list *updater_list)
@@ -218,24 +217,9 @@ void update_dd_task(dd_task_list *updater_list)
     dd_task_list *task_list_curr = updater_list;
     while (task_list_curr != NULL)
     {
+    	// if HI task exists -> do nothing
         if(uxTaskPriorityGet(task_list_curr->task.t_handle) == PRIORITY_HI)
-        {
-			// (HI task exists && completed) -> demote it, promote within updater_list
-			if(task_list_curr->task.completion_time != 0)
-			{
-				vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
-				vTaskSuspend(task_list_curr->task.t_handle);
-
-				// (HI task demoted) -> do not re-promote it
-				if(task_list_curr == updater_list)
-					  updater_list = updater_list->next_task;
-
-				break;
-			}
-
-			// (HI task exists && not completed) -> do nothing
             return;
-        }
 
         task_list_curr = task_list_curr->next_task;
     }
@@ -343,7 +327,7 @@ int main(void)
 	// static uint16_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
 	// static uint16_t test_bench_2[2][3] = {{ 95, 150, 250}, {250, 500, 750}};
 	// static uint16_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
-	static uint16_t test_bench_4[2][3] = {{ 2000, 3000, 5000}, {11000, 11000, 11000}};
+	static uint16_t test_bench_4[2][3] = {{ 5000, 2000, 3000}, {10999, 10997, 11000}};
 
 	static uint16_t (*test_bench_i)[3] = test_bench_4;
 
@@ -446,7 +430,6 @@ static void DDS( void *pvParameters )
 					{
 						// Promote and resume incompleted tasks second after create
 						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
-						update_dd_task(active_task_list);
 						xQueueOverwrite(xDDS_AtlQueue_Handle, &active_task_list);
 						break;
 					}
@@ -468,7 +451,8 @@ static void DDS( void *pvParameters )
 						}
 
 						// Demote and suspend completed task first before delete
-						update_dd_task(active_task_list);
+						vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
+						vTaskSuspend(task_list_curr->task.t_handle);
 						delete_dd_task(msg.task_id, &active_task_list);
 						xQueueOverwrite(xDDS_AtlQueue_Handle, &active_task_list);
 						break;
@@ -479,6 +463,8 @@ static void DDS( void *pvParameters )
 					// case get_overdue_dd_task_list: {}
 				}
 			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);
+
+			update_dd_task(active_task_list);
 		}
 	}
 }
