@@ -340,11 +340,12 @@ int main(void)
 	// vQueueAddToRegistry( xDDS_CmpQueue_Handle, "Cmp Queue" );
 	// vQueueAddToRegistry( xDDS_OvrQueue_Handle, "Ovr Queue" );
 
-	static uint16_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
+	// static uint16_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
 	// static uint16_t test_bench_2[2][3] = {{ 95, 150, 250}, {250, 500, 750}};
 	// static uint16_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
+	static uint16_t test_bench_4[2][3] = {{ 2000, 3000, 5000}, {11000, 11000, 11000}};
 
-	static uint16_t (*test_bench_i)[3] = test_bench_1;
+	static uint16_t (*test_bench_i)[3] = test_bench_4;
 
 	xTaskCreate(DD_Task1, "DD_Task1", configMINIMAL_STACK_SIZE, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
 	xTaskCreate(DD_Task2, "DD_Task2", configMINIMAL_STACK_SIZE, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
@@ -485,14 +486,14 @@ static void DDS( void *pvParameters )
 /*---- User-Defined F-Tasks ---------------------------------*/
 static void DD_Task1(void *pvParameters)
 {
-	TickType_t execution_time = pdMS_TO_TICKS(*(uint16_t *)pvParameters);
+	TickType_t execution_ticks = *(uint16_t *)pvParameters;
 	for (;;)
     {
 		// printf("Green LED ON!\n");
 		uint16_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
         GPIO_SetBits(GPIOD, GPIO_Pin_12);
-		vTaskDelay(pdMS_TO_TICKS(execution_time)); // busy "loop"
+		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
 
 		GPIO_ResetBits(GPIOD, GPIO_Pin_12);
         complete_dd_task(task_identifcation);
@@ -502,7 +503,7 @@ static void DD_Task1(void *pvParameters)
 
 static void DD_Task2(void *pvParameters)
 {
-	TickType_t execution_time = pdMS_TO_TICKS(*(uint16_t *)pvParameters);
+	TickType_t execution_ticks = *(uint16_t *)pvParameters;
 	for (;;)
     {
 		// printf("Red LED ON!\n");
@@ -510,7 +511,7 @@ static void DD_Task2(void *pvParameters)
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
         GPIO_SetBits(GPIOD, GPIO_Pin_13);
-		vTaskDelay(pdMS_TO_TICKS(execution_time)); // busy "loop"
+		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
 
 		GPIO_ResetBits(GPIOD, GPIO_Pin_13);
         complete_dd_task(task_identifcation);
@@ -520,7 +521,7 @@ static void DD_Task2(void *pvParameters)
 
 static void DD_Task3(void *pvParameters)
 {
-	TickType_t execution_time = pdMS_TO_TICKS(*(uint16_t *)pvParameters);
+	TickType_t execution_ticks = *(uint16_t *)pvParameters;
 	for (;;)
     {
 		// printf("Blue LED ON!\n");
@@ -528,7 +529,7 @@ static void DD_Task3(void *pvParameters)
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
         GPIO_SetBits(GPIOD, GPIO_Pin_15);
-		vTaskDelay(pdMS_TO_TICKS(execution_time)); // busy "loop"
+		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
 
 		GPIO_ResetBits(GPIOD, GPIO_Pin_15);
         complete_dd_task(task_identifcation);
