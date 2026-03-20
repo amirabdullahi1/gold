@@ -341,7 +341,7 @@ int main(void)
 
 	prvSetupHardware();
 
-    xDDS_MsgQueue_Handle = xQueueCreate(50, sizeof(dds_msg));
+    xDDS_MsgQueue_Handle = xQueueCreate(10, sizeof(dds_msg));
 	xDDS_RspQueue_Handle = xQueueCreate(1,  sizeof(dd_task_list *));
 	xDDS_TidQueue_Handle = xQueueCreate(1,  sizeof(uint32_t));
 
@@ -373,13 +373,13 @@ int main(void)
 	vTaskSuspend(xDD3_Handle);
 
 	xTaskCreate(DDS, "DDS", 256, NULL, 3, &xDDS_Handle);
-	xTaskCreate(DD_Monitor, "DD_Monitor", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
+//	xTaskCreate(DD_Monitor, "DD_Monitor", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
 
 	/* Initialize the timers. */
 	myTIM_GEN_Init(test_bench_i[1]);
-	myTIM_MON_Init(500);
+//	myTIM_MON_Init(500);
     xTimerStart(TIM_GEN, 0);
-    xTimerStart(TIM_MON, 0);
+//    xTimerStart(TIM_MON, 0);
 
 	/* Start the tasks and timer running. */
 	vTaskStartScheduler();
@@ -451,20 +451,20 @@ void vGenTimerCallback(TimerHandle_t genTimer)
 /*-----------------------------------------------------------*/
 
 /*---- Monitor Timer Callback --------------------------------*/
-void vMonTimerCallback(TimerHandle_t monTimer)
-{
-    static dds_msg msg_active = {0};
-    static dds_msg msg_completed = {0};
-    static dds_msg msg_overdue = {0};
-
-    msg_active.dds_msg_type    = msg_get_active_dd_task_list;
-    msg_completed.dds_msg_type = msg_get_completed_dd_task_list;
-    msg_overdue.dds_msg_type   = msg_get_overdue_dd_task_list;
-
-    xQueueSend(xDDS_MsgQueue_Handle, &msg_active,    0);
-    xQueueSend(xDDS_MsgQueue_Handle, &msg_completed, 0);
-    xQueueSend(xDDS_MsgQueue_Handle, &msg_overdue,   0);
-}
+//void vMonTimerCallback(TimerHandle_t monTimer)
+//{
+//    static dds_msg msg_active = {0};
+//    static dds_msg msg_completed = {0};
+//    static dds_msg msg_overdue = {0};
+//
+//    msg_active.dds_msg_type    = msg_get_active_dd_task_list;
+//    msg_completed.dds_msg_type = msg_get_completed_dd_task_list;
+//    msg_overdue.dds_msg_type   = msg_get_overdue_dd_task_list;
+//
+//    xQueueSend(xDDS_MsgQueue_Handle, &msg_active,    0);
+//    xQueueSend(xDDS_MsgQueue_Handle, &msg_completed, 0);
+//    xQueueSend(xDDS_MsgQueue_Handle, &msg_overdue,   0);
+//}
 /*-----------------------------------------------------------*/
 
 /*-----------------------------------------------------------*/
@@ -501,23 +501,20 @@ static void DDS( void *pvParameters )
 							task_list_curr = task_list_curr->next_task;
 						}
 
-						/* Task not found — already removed or ID mismatch, bail safely */
 						if(task_list_curr == NULL)
 							break;
 
-						/* Demote and suspend the completed task BEFORE any malloc
-						   (dd_task_list_add) to avoid heap lock contention */
 						vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
-						vTaskSuspend(task_list_curr->task.t_handle);
 
 						/* Record completion time and move to completed list */
-						task_list_curr->task.completion_time = xTaskGetTickCount();
 						dd_task_list_add(&completed_task_list, task_list_curr->task);
+						task_list_curr->task.completion_time = xTaskGetTickCount();
 						xQueueOverwrite(xDDS_CmpQueue_Handle, &completed_task_list);
 
 						/* Remove from active list */
 						delete_dd_task(msg.task_id, &active_task_list);
 						xQueueOverwrite(xDDS_AtlQueue_Handle, &active_task_list);
+						vTaskSuspend(task_list_curr->task.t_handle);
 						break;
 					}
 
