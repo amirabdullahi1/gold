@@ -33,8 +33,8 @@ xQueueHandle xDDS_RspQueue_Handle = 0;
 xQueueHandle xDDS_TidQueue_Handle = 0;
 
 xQueueHandle xDDS_AtlQueue_Handle = 0;
-// xQueueHandle xDDS_CmpQueue_Handle = 0;
-// xQueueHandle xDDS_OvrQueue_Handle = 0;
+ xQueueHandle xDDS_CmpQueue_Handle = 0;
+ xQueueHandle xDDS_OvrQueue_Handle = 0;
 
 TaskHandle_t xDDS_Handle = NULL;
 TaskHandle_t xDD1_Handle = NULL;
@@ -367,8 +367,8 @@ int main(void)
 	xDDS_TidQueue_Handle = xQueueCreate(1,  sizeof(uint32_t));
 
 	xDDS_AtlQueue_Handle = xQueueCreate(1,  sizeof(dd_task_list *));
-	// xDDS_CmpQueue_Handle = xQueueCreate(1,  sizeof(dd_task_list *));
-	// xDDS_OvrQueue_Handle = xQueueCreate(1,  sizeof(dd_task_list *));
+	xDDS_CmpQueue_Handle = xQueueCreate(1,  sizeof(dd_task_list *));
+	xDDS_OvrQueue_Handle = xQueueCreate(1,  sizeof(dd_task_list *));
 
 	/* Add to the registry, for the benefit of kernel aware debugging. */
 	vQueueAddToRegistry( xDDS_MsgQueue_Handle, "Msg Queue" );
@@ -376,8 +376,8 @@ int main(void)
 	vQueueAddToRegistry( xDDS_TidQueue_Handle, "Tid Queue" );
 
 	vQueueAddToRegistry( xDDS_AtlQueue_Handle, "Atl Queue" );
-	// vQueueAddToRegistry( xDDS_CmpQueue_Handle, "Cmp Queue" );
-	// vQueueAddToRegistry( xDDS_OvrQueue_Handle, "Ovr Queue" );
+	vQueueAddToRegistry( xDDS_CmpQueue_Handle, "Cmp Queue" );
+	vQueueAddToRegistry( xDDS_OvrQueue_Handle, "Ovr Queue" );
 
 	 static uint16_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
 	// static uint16_t test_bench_2[2][3] = {{ 95, 150, 250}, {250, 500, 750}};
@@ -395,7 +395,7 @@ int main(void)
 	vTaskSuspend(xDD3_Handle);
 
 	xTaskCreate(DDS, "DDS", 256, NULL, 3, NULL /* &xDDS_Handle */);
-	xTaskCreate(DD_Monitor, "DD_Monitor", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
+//	xTaskCreate(DD_Monitor, "DD_Monitor", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
 
 	/* Initialize the timer. */
 	myTIM_GEN_Init(test_bench_i[1]);
@@ -498,18 +498,22 @@ static void DDS( void *pvParameters )
 						{
 							if(task_list_curr->task.task_id == msg.task_id)
 							{
-								// Completion_time update
-								task_list_curr->task.completion_time = xTaskGetTickCount();
-								dd_task_list_add(&completed_task_list, task_list_curr->task);
+
 								break;
 							}
 
 							task_list_curr = task_list_curr->next_task;
 						}
+						if(task_list_curr == NULL)
+							break;
 
 						// Demote and suspend completed task first before delete
 						vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
 						vTaskSuspend(task_list_curr->task.t_handle);
+
+						// Completion_time update
+						task_list_curr->task.completion_time = xTaskGetTickCount();
+						dd_task_list_add(&completed_task_list, task_list_curr->task);
 						delete_dd_task(msg.task_id, &active_task_list);
 						xQueueOverwrite(xDDS_AtlQueue_Handle, &active_task_list);
 						break;
@@ -534,6 +538,7 @@ static void DDS( void *pvParameters )
                     }
 
 				}
+
 			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);
 
 			update_dd_task(active_task_list);
@@ -543,35 +548,35 @@ static void DDS( void *pvParameters )
 
 /*---- DD Monitor ----------------------------------------*/
 
-static void DD_Monitor( void *pvParameters )
-{
-	uint16_t tx_data = 0;
-	GPIO_SetBits(GPIOD, GPIO_Pin_14);
-
-	while(1)
-	{
-		if(tx_data == 0)
-		{
-			dds_msg *monitor_message_active = malloc(sizeof(dds_msg));
-			monitor_message_active->dds_msg_type = msg_get_active_dd_task_list;
-			xQueueSend(xDDS_MsgQueue_Handle, monitor_message_active, portMAX_DELAY);
-
-			dds_msg *monitor_message_completed = malloc(sizeof(dds_msg));
-			monitor_message_completed->dds_msg_type = msg_get_completed_dd_task_list;
-			xQueueSend(xDDS_MsgQueue_Handle, monitor_message_completed, portMAX_DELAY);
-
-			dds_msg *monitor_message_overdue = malloc(sizeof(dds_msg));
-			monitor_message_overdue->dds_msg_type = msg_get_overdue_dd_task_list;
-			xQueueSend(xDDS_MsgQueue_Handle, monitor_message_overdue, portMAX_DELAY);
-
-			free(monitor_message_active);
-			free(monitor_message_completed);
-			free(monitor_message_overdue);
-
-			vTaskResume(xDDS_Handle);
-		}
-	}
-}
+//static void DD_Monitor( void *pvParameters )
+//{
+//	uint16_t tx_data = 0;
+//	GPIO_SetBits(GPIOD, GPIO_Pin_14);
+//
+//	while(1)
+//	{
+//		if(tx_data == 0)
+//		{
+//			dds_msg *monitor_message_active = malloc(sizeof(dds_msg));
+//			monitor_message_active->dds_msg_type = msg_get_active_dd_task_list;
+//			xQueueSend(xDDS_MsgQueue_Handle, monitor_message_active, portMAX_DELAY);
+//
+//			dds_msg *monitor_message_completed = malloc(sizeof(dds_msg));
+//			monitor_message_completed->dds_msg_type = msg_get_completed_dd_task_list;
+//			xQueueSend(xDDS_MsgQueue_Handle, monitor_message_completed, portMAX_DELAY);
+//
+//			dds_msg *monitor_message_overdue = malloc(sizeof(dds_msg));
+//			monitor_message_overdue->dds_msg_type = msg_get_overdue_dd_task_list;
+//			xQueueSend(xDDS_MsgQueue_Handle, monitor_message_overdue, portMAX_DELAY);
+//
+//			free(monitor_message_active);
+//			free(monitor_message_completed);
+//			free(monitor_message_overdue);
+//
+//			vTaskResume(xDDS_Handle);
+//		}
+//	}
+//}
 
 /*-----------------------------------------------------------*/
 
@@ -583,7 +588,7 @@ static void DD_Task1(void *pvParameters)
 	for (;;)
     {
 		// printf("Green LED ON!\n");
-		uint16_t task_identifcation;
+		uint32_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
 		// printf("TickCount1: %u\n", (unsigned int)xTaskGetTickCount());
@@ -603,7 +608,7 @@ static void DD_Task2(void *pvParameters)
 	for (;;)
     {
 		// printf("Red LED ON!\n");
-		uint16_t task_identifcation;
+		uint32_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
     	// printf("TickCount2: %u\n", (unsigned int)xTaskGetTickCount());
@@ -623,7 +628,7 @@ static void DD_Task3(void *pvParameters)
 	for (;;)
     {
 		// printf("Blue LED ON!\n");
-		uint16_t task_identifcation;
+		uint32_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
     	// printf("TickCount3: %u\n", (unsigned int)xTaskGetTickCount());
