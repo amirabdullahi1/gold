@@ -592,12 +592,20 @@ static void DD_Task1(void *pvParameters)
 		uint32_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
-		// printf("TickCount1: %u\n", (unsigned int)xTaskGetTickCount());
-		GPIO_ResetBits(GPIOD, GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
-		GPIO_SetBits(GPIOD, GPIO_Pin_12);
-		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
+		TickType_t completion_ticks = 0;
+		TickType_t initiation_ticks = 0;
 
 		// printf("TickCount1: %u\n", (unsigned int)xTaskGetTickCount());
+
+		while (completion_ticks < execution_ticks)
+		{
+			GPIO_ResetBits(GPIOD, GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+			GPIO_SetBits(GPIOD, GPIO_Pin_12);
+			initiation_ticks = xTaskGetTickCount();
+			while (xTaskGetTickCount() == initiation_ticks);
+			completion_ticks++;
+		}
+
 		GPIO_ResetBits(GPIOD, GPIO_Pin_12);
 		complete_dd_task(task_identifcation);
     }
@@ -612,12 +620,19 @@ static void DD_Task2(void *pvParameters)
 		uint32_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
-    	// printf("TickCount2: %u\n", (unsigned int)xTaskGetTickCount());
-		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_14 | GPIO_Pin_15);
-        GPIO_SetBits(GPIOD, GPIO_Pin_13);
-		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
+		TickType_t completion_ticks = 0;
+		TickType_t initiation_ticks = 0;
 
     	// printf("TickCount2: %u\n", (unsigned int)xTaskGetTickCount());
+		while (completion_ticks < execution_ticks)
+		{
+			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_14 | GPIO_Pin_15);
+			GPIO_SetBits(GPIOD, GPIO_Pin_13);
+			initiation_ticks = xTaskGetTickCount();
+			while (xTaskGetTickCount() == initiation_ticks);
+			completion_ticks++;
+		}
+
 		GPIO_ResetBits(GPIOD, GPIO_Pin_13);
         complete_dd_task(task_identifcation);
     }
@@ -632,12 +647,19 @@ static void DD_Task3(void *pvParameters)
 		uint32_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
-    	// printf("TickCount3: %u\n", (unsigned int)xTaskGetTickCount());
-		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14);
-        GPIO_SetBits(GPIOD, GPIO_Pin_15);
-		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
+		TickType_t completion_ticks = 0;
+		TickType_t initiation_ticks = 0;
 
     	// printf("TickCount3: %u\n", (unsigned int)xTaskGetTickCount());
+		while (completion_ticks < execution_ticks)
+		{
+			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14);
+        	GPIO_SetBits(GPIOD, GPIO_Pin_15);
+			initiation_ticks = xTaskGetTickCount();
+			while (xTaskGetTickCount() == initiation_ticks);
+			completion_ticks++;
+		}
+
 		GPIO_ResetBits(GPIOD, GPIO_Pin_15);
         complete_dd_task(task_identifcation);
     }
