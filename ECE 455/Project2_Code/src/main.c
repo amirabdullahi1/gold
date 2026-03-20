@@ -33,8 +33,8 @@ xQueueHandle xDDS_RspQueue_Handle = 0;
 xQueueHandle xDDS_TidQueue_Handle = 0;
 
 xQueueHandle xDDS_AtlQueue_Handle = 0;
- xQueueHandle xDDS_CmpQueue_Handle = 0;
- xQueueHandle xDDS_OvrQueue_Handle = 0;
+xQueueHandle xDDS_CmpQueue_Handle = 0;
+xQueueHandle xDDS_OvrQueue_Handle = 0;
 
 TaskHandle_t xDDS_Handle = NULL;
 TaskHandle_t xDD1_Handle = NULL;
@@ -76,7 +76,6 @@ typedef struct {
 	uint32_t release_time;
 	uint32_t absolute_deadline;
 	uint32_t completion_time;
-	// uint32_t *interrupt_times;
 } dd_task;
 
 typedef struct dd_task_list {
@@ -93,13 +92,9 @@ void myGPIO_Init()
 	GPIO_InitTypeDef GPIO_LED_InitStruct = {0};
 
 	GPIO_LED_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
-
 	GPIO_LED_InitStruct.GPIO_OType = GPIO_OType_PP;
-
 	GPIO_LED_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
-
 	GPIO_LED_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
-
 	GPIO_LED_InitStruct.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
 	GPIO_Init(GPIOD, &GPIO_LED_InitStruct);
 }
@@ -196,12 +191,12 @@ void release_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, ui
     release_msg.release_time = (uint32_t)xTaskGetTickCount();
     release_msg.absolute_deadline = absolute_deadline;
 
-    xQueueSend(xDDS_MsgQueue_Handle, &release_msg, portMAX_DELAY);
+    xQueueSend(xDDS_MsgQueue_Handle, &release_msg, 0);
 }
 
 void complete_dd_task(uint32_t task_id)
 {
-	dds_msg complete_msg;
+	dds_msg complete_msg = {0};
     complete_msg.dds_msg_type = msg_complete_task;
     complete_msg.task_id = task_id;
 
@@ -210,21 +205,21 @@ void complete_dd_task(uint32_t task_id)
 
 /**
  * if HI task exists -> do nothing
- * if no HI task -> promote within updater_list
+ * if no HI task -> promote head of updater_list
  */
 void update_dd_task(dd_task_list *updater_list)
 {
     dd_task_list *task_list_curr = updater_list;
     while (task_list_curr != NULL)
     {
-    	// if HI task exists -> do nothing
+    	/* If a HI priority task already exists -> do nothing */
         if(uxTaskPriorityGet(task_list_curr->task.t_handle) == PRIORITY_HI)
             return;
 
         task_list_curr = task_list_curr->next_task;
     }
 
-    // No HI task -> promote within updater_list
+    /* No HI task found -> promote the head (earliest deadline) */
     if(updater_list != NULL)
 	{
 		xQueueOverwrite(xDDS_TidQueue_Handle, &(updater_list->task.task_id));
@@ -296,10 +291,9 @@ uint16_t lcm(uint16_t a, uint16_t b)
 /*---- Timer ------------------------------------------------*/
 static TimerHandle_t TIM_GEN;
 static TimerHandle_t TIM_MON;
-//static TimerHandle_t TIM_OVR;
 
 void vGenTimerCallback(TimerHandle_t genTimer);
-//void vOvrTimerCallback(TimerHandle_t ovrTimer);
+void vMonTimerCallback(TimerHandle_t monTimer);
 
 void myTIM_GEN_Init(uint16_t test_bench[3])
 {
@@ -313,29 +307,17 @@ void myTIM_GEN_Init(uint16_t test_bench[3])
     configASSERT(TIM_GEN);
 }
 
-void myTIM_MON_Init(uint16_t test_bench[3])
+void myTIM_MON_Init(uint32_t period_ms)
 {
     TIM_MON = xTimerCreate(
         "DD Task Mon",
-        pdMS_TO_TICKS(5 /* lcm(test_bench[0], lcm(test_bench[1], test_bench[2])) / 2 */),
+        pdMS_TO_TICKS(period_ms),
         pdTRUE,
-        test_bench,
-        vGenTimerCallback
+        NULL,
+        vMonTimerCallback
     );
     configASSERT(TIM_MON);
 }
-
-//void myTIM_OVR_Init(uint16_t test_bench[3])
-//{
-//    TIM_OVR = xTimerCreate(
-//        "DD Task Ovr",
-//        pdMS_TO_TICKS(5),
-//        pdFALSE,
-//        test_bench,
-//		vOvrTimerCallback
-//    );
-//    configASSERT(TIM_OVR);
-//}
 /*-----------------------------------------------------------*/
 
 /*-----------------------------------------------------------*/
@@ -348,21 +330,18 @@ static void DD_Task3( void *pvParameters );
 
 int main(void)
 {
-	// Disable time slicing
+	/* Disable time slicing */
 	if(configUSE_TIME_SLICING)
 		return -1;
 
 	myGPIO_Init();
+	GPIO_ResetBits(GPIOD, GPIO_Pin_12);
+	GPIO_ResetBits(GPIOD, GPIO_Pin_13);
+	GPIO_ResetBits(GPIOD, GPIO_Pin_15);
 
-	/* Configure the system ready to run the demo.  The clock configuration
-	can be done here if it was not done before main() was called. */
 	prvSetupHardware();
 
-	/* Create the queue used by the queue send and queue receive tasks.
-	http://www.freertos.org/a00116.html */
-
-    // Used for the DDS scheduler.
-    xDDS_MsgQueue_Handle = xQueueCreate(20, sizeof(dds_msg));
+    xDDS_MsgQueue_Handle = xQueueCreate(50, sizeof(dds_msg));
 	xDDS_RspQueue_Handle = xQueueCreate(1,  sizeof(dd_task_list *));
 	xDDS_TidQueue_Handle = xQueueCreate(1,  sizeof(uint32_t));
 
@@ -370,7 +349,6 @@ int main(void)
 	xDDS_CmpQueue_Handle = xQueueCreate(1,  sizeof(dd_task_list *));
 	xDDS_OvrQueue_Handle = xQueueCreate(1,  sizeof(dd_task_list *));
 
-	/* Add to the registry, for the benefit of kernel aware debugging. */
 	vQueueAddToRegistry( xDDS_MsgQueue_Handle, "Msg Queue" );
 	vQueueAddToRegistry( xDDS_RspQueue_Handle, "Rsp Queue" );
 	vQueueAddToRegistry( xDDS_TidQueue_Handle, "Tid Queue" );
@@ -394,12 +372,12 @@ int main(void)
 	vTaskSuspend(xDD2_Handle);
 	vTaskSuspend(xDD3_Handle);
 
-	xTaskCreate(DDS, "DDS", 256, NULL, 3, NULL /* &xDDS_Handle */);
-//	xTaskCreate(DD_Monitor, "DD_Monitor", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
+	xTaskCreate(DDS, "DDS", 256, NULL, 3, &xDDS_Handle);
+	xTaskCreate(DD_Monitor, "DD_Monitor", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 
-	/* Initialize the timer. */
+	/* Initialize the timers. */
 	myTIM_GEN_Init(test_bench_i[1]);
-	myTIM_MON_Init(test_bench_i[1]);
+	myTIM_MON_Init(500);
     xTimerStart(TIM_GEN, 0);
     xTimerStart(TIM_MON, 0);
 
@@ -460,6 +438,10 @@ void vGenTimerCallback(TimerHandle_t genTimer)
 	}
 
 	task_interval = min(DD_task1_period - task1_interval, min(DD_task2_period - task2_interval, DD_task3_period - task3_interval));
+
+	if(task_interval == 0)
+		task_interval = 1;
+
 	task1_interval += task_interval;
 	task2_interval += task_interval;
 	task3_interval += task_interval;
@@ -468,12 +450,29 @@ void vGenTimerCallback(TimerHandle_t genTimer)
 }
 /*-----------------------------------------------------------*/
 
+/*---- Monitor Timer Callback --------------------------------*/
+void vMonTimerCallback(TimerHandle_t monTimer)
+{
+    static dds_msg msg_active = {0};
+    static dds_msg msg_completed = {0};
+    static dds_msg msg_overdue = {0};
+
+    msg_active.dds_msg_type    = msg_get_active_dd_task_list;
+    msg_completed.dds_msg_type = msg_get_completed_dd_task_list;
+    msg_overdue.dds_msg_type   = msg_get_overdue_dd_task_list;
+
+    xQueueSend(xDDS_MsgQueue_Handle, &msg_active,    0);
+    xQueueSend(xDDS_MsgQueue_Handle, &msg_completed, 0);
+    xQueueSend(xDDS_MsgQueue_Handle, &msg_overdue,   0);
+}
+/*-----------------------------------------------------------*/
+
 /*-----------------------------------------------------------*/
 static void DDS( void *pvParameters )
 {
-    dd_task_list *active_task_list = NULL;
+    dd_task_list *active_task_list    = NULL;
     dd_task_list *completed_task_list = NULL;
-    dd_task_list *overdue_task_list = NULL;
+    dd_task_list *overdue_task_list   = NULL;
 
 	dds_msg msg;
 	while(1)
@@ -485,7 +484,6 @@ static void DDS( void *pvParameters )
 				{
 					case msg_release_task:
 					{
-						// Promote and resume incompleted tasks second after create
 						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
 						xQueueOverwrite(xDDS_AtlQueue_Handle, &active_task_list);
 						break;
@@ -493,27 +491,31 @@ static void DDS( void *pvParameters )
 
 					case msg_complete_task:
 					{
+						/* Search active list for the completing task */
 						dd_task_list *task_list_curr = active_task_list;
 						while(task_list_curr != NULL)
 						{
 							if(task_list_curr->task.task_id == msg.task_id)
-							{
-
 								break;
-							}
 
 							task_list_curr = task_list_curr->next_task;
 						}
+
+						/* Task not found — already removed or ID mismatch, bail safely */
 						if(task_list_curr == NULL)
 							break;
 
-						// Demote and suspend completed task first before delete
+						/* Demote and suspend the completed task BEFORE any malloc
+						   (dd_task_list_add) to avoid heap lock contention */
 						vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
 						vTaskSuspend(task_list_curr->task.t_handle);
 
-						// Completion_time update
+						/* Record completion time and move to completed list */
 						task_list_curr->task.completion_time = xTaskGetTickCount();
 						dd_task_list_add(&completed_task_list, task_list_curr->task);
+						xQueueOverwrite(xDDS_CmpQueue_Handle, &completed_task_list);
+
+						/* Remove from active list */
 						delete_dd_task(msg.task_id, &active_task_list);
 						xQueueOverwrite(xDDS_AtlQueue_Handle, &active_task_list);
 						break;
@@ -533,10 +535,13 @@ static void DDS( void *pvParameters )
 
         		    case msg_get_overdue_dd_task_list:
                     {
-        			    // get_overdue_dd_task_list(overdue_task_list);
+        			    get_overdue_dd_task_list(overdue_task_list);
         			    break;
                     }
-
+        		    default:
+        		    {
+        		    	break;
+        		    }
 				}
 
 			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);
@@ -545,41 +550,25 @@ static void DDS( void *pvParameters )
 		}
 	}
 }
-
-/*---- DD Monitor ----------------------------------------*/
-
-//static void DD_Monitor( void *pvParameters )
-//{
-//	uint16_t tx_data = 0;
-//	GPIO_SetBits(GPIOD, GPIO_Pin_14);
-//
-//	while(1)
-//	{
-//		if(tx_data == 0)
-//		{
-//			dds_msg *monitor_message_active = malloc(sizeof(dds_msg));
-//			monitor_message_active->dds_msg_type = msg_get_active_dd_task_list;
-//			xQueueSend(xDDS_MsgQueue_Handle, monitor_message_active, portMAX_DELAY);
-//
-//			dds_msg *monitor_message_completed = malloc(sizeof(dds_msg));
-//			monitor_message_completed->dds_msg_type = msg_get_completed_dd_task_list;
-//			xQueueSend(xDDS_MsgQueue_Handle, monitor_message_completed, portMAX_DELAY);
-//
-//			dds_msg *monitor_message_overdue = malloc(sizeof(dds_msg));
-//			monitor_message_overdue->dds_msg_type = msg_get_overdue_dd_task_list;
-//			xQueueSend(xDDS_MsgQueue_Handle, monitor_message_overdue, portMAX_DELAY);
-//
-//			free(monitor_message_active);
-//			free(monitor_message_completed);
-//			free(monitor_message_overdue);
-//
-//			vTaskResume(xDDS_Handle);
-//		}
-//	}
-//}
-
 /*-----------------------------------------------------------*/
 
+/*---- DD Monitor -------------------------------------------*/
+static void DD_Monitor( void *pvParameters )
+{
+	dd_task_list *atl_snapshot = NULL;
+
+	while(1)
+	{
+		/* Block until the DDS overwrites the active task list queue */
+		if(xQueuePeek(xDDS_AtlQueue_Handle, &atl_snapshot, portMAX_DELAY) == pdTRUE)
+		{
+			get_active_dd_task_list(atl_snapshot);
+		}
+
+		vTaskDelay(pdMS_TO_TICKS(500));
+	}
+}
+/*-----------------------------------------------------------*/
 
 /*---- User-Defined F-Tasks ---------------------------------*/
 static void DD_Task1(void *pvParameters)
@@ -587,18 +576,15 @@ static void DD_Task1(void *pvParameters)
 	TickType_t execution_ticks = *(uint16_t *)pvParameters;
 	for (;;)
     {
-		// printf("Green LED ON!\n");
 		uint32_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
-		// printf("TickCount1: %u\n", (unsigned int)xTaskGetTickCount());
 		GPIO_SetBits(GPIOD, GPIO_Pin_12);
-		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
-
-		// printf("TickCount1: %u\n", (unsigned int)xTaskGetTickCount());
+		vTaskDelay(pdMS_TO_TICKS(execution_ticks));
 		GPIO_ResetBits(GPIOD, GPIO_Pin_12);
+
 		complete_dd_task(task_identifcation);
-		vTaskSuspend(NULL);
+		/* DDS will suspend this task — do not call vTaskSuspend(NULL) here */
     }
 }
 
@@ -607,18 +593,15 @@ static void DD_Task2(void *pvParameters)
 	TickType_t execution_ticks = *(uint16_t *)pvParameters;
 	for (;;)
     {
-		// printf("Red LED ON!\n");
 		uint32_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
-    	// printf("TickCount2: %u\n", (unsigned int)xTaskGetTickCount());
         GPIO_SetBits(GPIOD, GPIO_Pin_13);
-		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
-
-    	// printf("TickCount2: %u\n", (unsigned int)xTaskGetTickCount());
+		vTaskDelay(pdMS_TO_TICKS(execution_ticks));
 		GPIO_ResetBits(GPIOD, GPIO_Pin_13);
+
         complete_dd_task(task_identifcation);
-		vTaskSuspend(NULL);
+		/* DDS will suspend this task — do not call vTaskSuspend(NULL) here */
     }
 }
 
@@ -627,18 +610,15 @@ static void DD_Task3(void *pvParameters)
 	TickType_t execution_ticks = *(uint16_t *)pvParameters;
 	for (;;)
     {
-		// printf("Blue LED ON!\n");
 		uint32_t task_identifcation;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
-    	// printf("TickCount3: %u\n", (unsigned int)xTaskGetTickCount());
         GPIO_SetBits(GPIOD, GPIO_Pin_15);
-		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
-
-    	// printf("TickCount3: %u\n", (unsigned int)xTaskGetTickCount());
+		vTaskDelay(pdMS_TO_TICKS(execution_ticks));
 		GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+
         complete_dd_task(task_identifcation);
-		vTaskSuspend(NULL);
+		/* DDS will suspend this task — do not call vTaskSuspend(NULL) here */
     }
 }
 /*-----------------------------------------------------------*/
@@ -703,6 +683,5 @@ static void prvSetupHardware( void )
 	/* TODO: Setup the clocks, etc. here, if they were not configured before
 	main() was called. */
 }
-
 /*-----------------------------------------------------------*/
 #pragma GCC diagnostic pop
