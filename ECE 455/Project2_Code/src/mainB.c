@@ -298,7 +298,7 @@ uint32_t gcd(uint32_t a, uint32_t b)
 
 uint32_t lcm(uint32_t a, uint32_t b)
 {
-    if (a == 0 || b == 0) 
+    if (a == 0 || b == 0)
 		return 0;
     uint32_t g = gcd(a, b), r = a / g;
     return (r <= UINT32_MAX / b) ? r * b : UINT32_MAX;
@@ -392,18 +392,18 @@ int main(void)
 
 	static uint32_t (*test_bench_i)[3] = test_bench_1;
 
-	xTaskCreate(DD_Task1, "DD_Task1", configMINIMAL_STACK_SIZE, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
-	xTaskCreate(DD_Task2, "DD_Task2", configMINIMAL_STACK_SIZE, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
-	xTaskCreate(DD_Task3, "DD_Task3", configMINIMAL_STACK_SIZE, &test_bench_i[0][2], PRIORITY_LO, &xDD3_Handle);
+	xTaskCreate(DD_Task1, "DD_Task1", 256, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
+	xTaskCreate(DD_Task2, "DD_Task2", 256, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
+	xTaskCreate(DD_Task3, "DD_Task3", 256, &test_bench_i[0][2], PRIORITY_LO, &xDD3_Handle);
 
 	vTaskSuspend(xDD1_Handle);
 	vTaskSuspend(xDD2_Handle);
 	vTaskSuspend(xDD3_Handle);
 
 	xTaskCreate(DDS, "DDS", 256, NULL, 3, NULL);
-	xTaskCreate(DD_Monitor, "DD_Monitor", configMINIMAL_STACK_SIZE, test_bench_i[1], 3, NULL);
+	// xTaskCreate(DD_Monitor, "DD_Monitor", 256, test_bench_i[1], 3, NULL);
 
-	/* Initialize the timers. */
+	/* Initialize the timers. TODO: TIM_MON */
 	myTIM_GEN_Init(test_bench_i[1]);
 	// myTIM_MON_Init((test_bench_i[1]);
     xTimerStart(TIM_GEN, 0);
@@ -560,13 +560,13 @@ static void DDS( void *pvParameters )
 
 static void DD_Monitor( void *pvParameters )
 {
-	static uint32_t *test_bench_X; 
+	static uint32_t *test_bench_X;
 	static uint32_t xTaskMaxTickCount;
 
-	test_bench_X = (uint32_t *)pvTimerGetTimerID(pvParameters);
+	test_bench_X = (uint32_t *)pvParameters;
 	xTaskMaxTickCount = pdMS_TO_TICKS(lcm(test_bench_X[0], lcm(test_bench_X[1], test_bench_X[2])));
-	
-	while(0 /* 1 */)
+
+	while(1)
 	{
 		taskENTER_CRITICAL();
 
