@@ -385,12 +385,12 @@ int main(void)
 	vQueueAddToRegistry( xDDS_TidQueue_Handle, "Tid Queue" );
 	// vQueueAddToRegistry( xDDS_TidQueue_Handle, "Mon Queue" );
 
-	 static uint32_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
-	// static uint32_t test_bench_2[2][3] = {{ 95, 150, 250}, {250, 500, 750}};
-	// static uint32_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
+	static uint32_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
+	static uint32_t test_bench_2[2][3] = {{ 95, 150, 250}, {250, 500, 750}};
+	static uint32_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
 	static uint32_t test_bench_4[2][3] = {{ 5000, 2000, 3000}, {10999, 10997, 11000}};
 
-	static uint32_t (*test_bench_i)[3] = test_bench_1;
+	static uint32_t (*test_bench_i)[3] = test_bench_2;
 
 	xTaskCreate(DD_Task1, "DD_Task1", 256, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
 	xTaskCreate(DD_Task2, "DD_Task2", 256, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
@@ -593,6 +593,7 @@ static void DD_Task1(void *pvParameters)
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
 		// printf("TickCount1: %u\n", (unsigned int)xTaskGetTickCount());
+		GPIO_ResetBits(GPIOD, GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
 		GPIO_SetBits(GPIOD, GPIO_Pin_12);
 		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
 
@@ -612,6 +613,7 @@ static void DD_Task2(void *pvParameters)
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
     	// printf("TickCount2: %u\n", (unsigned int)xTaskGetTickCount());
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_14 | GPIO_Pin_15);
         GPIO_SetBits(GPIOD, GPIO_Pin_13);
 		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
 
@@ -631,6 +633,7 @@ static void DD_Task3(void *pvParameters)
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identifcation, portMAX_DELAY);
 
     	// printf("TickCount3: %u\n", (unsigned int)xTaskGetTickCount());
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14);
         GPIO_SetBits(GPIOD, GPIO_Pin_15);
 		vTaskDelay(pdMS_TO_TICKS(execution_ticks)); // busy "loop"
 
