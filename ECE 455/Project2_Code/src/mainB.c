@@ -21,6 +21,9 @@
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 /*-----------------------------------------------------------*/
 
+/* Converts a time in ticks to a time in milliseconds. */
+#define pdTICKS_TO_MS( xTicks ) ( ( TickType_t ) ( ( ( TickType_t ) ( xTicks ) * ( TickType_t ) 1000 ) / ( TickType_t ) configTICK_RATE_HZ ) )
+/*-----------------------------------------------------------*/
 
 /*--------Global Variables-----------------------------------*/
 #define HEAP_SIZE (1024 * 16)
@@ -187,7 +190,7 @@ void create_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, uin
 	new_task.t_handle = t_handle;
 	new_task.type = type;
 	new_task.task_id = task_id;
-	new_task.release_time = xTaskGetTickCount() - TIM_DEV;
+	new_task.release_time = pdTICKS_TO_MS(xTaskGetTickCount()) - TIM_DEV;
 	new_task.absolute_deadline = absolute_deadline;
 	new_task.completion_time = 0;
 
@@ -452,17 +455,17 @@ void vGenTimerCallback(TimerHandle_t genTimer)
 	if(task1_interval >= DD_task1_period)
 	{
 		task1_interval = 0;
-		release_dd_task(xDD1_Handle, PERIODIC, task_id_counter++, (uint32_t)xTaskGetTickCount() + DD_task1_period);
+		release_dd_task(xDD1_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task1_period);
 	}
 	if(task2_interval >= DD_task2_period)
 	{
 		task2_interval = 0;
-		release_dd_task(xDD2_Handle, PERIODIC, task_id_counter++, (uint32_t)xTaskGetTickCount() + DD_task2_period);
+		release_dd_task(xDD2_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task2_period);
 	}
 	if(task3_interval >= DD_task3_period)
 	{
 		task3_interval = 0;
-		release_dd_task(xDD3_Handle, PERIODIC, task_id_counter++, (uint32_t)xTaskGetTickCount() + DD_task3_period);
+		release_dd_task(xDD3_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task3_period);
 	}
 
 	task_interval = min(DD_task1_period - task1_interval, min(DD_task2_period - task2_interval, DD_task3_period - task3_interval));
@@ -496,7 +499,7 @@ static void DDS( void *pvParameters )
 						dd_task_list *task_list_curr = active_task_list;
 						while(task_list_curr != NULL)
 						{
-							if(task_list_curr->task.absolute_deadline < xTaskGetTickCount())
+							if(pdMS_TO_TICKS(task_list_curr->task.absolute_deadline) < xTaskGetTickCount())
 							{
 								// Ignore completion time
 								dd_task_list *task_list_next = task_list_curr->next_task;
@@ -527,7 +530,7 @@ static void DDS( void *pvParameters )
 							if(task_list_curr->task.task_id == msg.task_id)
 							{
 								// Update completion time
-								task_list_curr->task.completion_time = xTaskGetTickCount() - TIM_DEV;
+								task_list_curr->task.completion_time = pdTICKS_TO_MS(xTaskGetTickCount()) - TIM_DEV;
 								dd_task_list_add(&completed_task_list, task_list_curr->task);
 
 								// Demote and suspend completed task first before delete
@@ -602,7 +605,7 @@ static void MON( void *pvParameters )
 /*---- User-Defined F-Tasks ---------------------------------*/
 static void DD_Task1(void *pvParameters)
 {
-	TickType_t execution_ticks = *(uint32_t *)pvParameters;
+	TickType_t execution_ticks = pdMS_TO_TICKS(*(uint32_t *)pvParameters);
 	for (;;)
     {
 		// printf("Green LED ON!\n");
@@ -628,7 +631,7 @@ static void DD_Task1(void *pvParameters)
 
 static void DD_Task2(void *pvParameters)
 {
-	TickType_t execution_ticks = *(uint32_t *)pvParameters;
+	TickType_t execution_ticks = pdMS_TO_TICKS(*(uint32_t *)pvParameters);
 	for (;;)
     {
 		// printf("Red LED ON!\n");
@@ -654,7 +657,7 @@ static void DD_Task2(void *pvParameters)
 
 static void DD_Task3(void *pvParameters)
 {
-	TickType_t execution_ticks = *(uint32_t *)pvParameters;
+	TickType_t execution_ticks = pdMS_TO_TICKS(*(uint32_t *)pvParameters);
 	for (;;)
     {
 		// printf("Blue LED ON!\n");
