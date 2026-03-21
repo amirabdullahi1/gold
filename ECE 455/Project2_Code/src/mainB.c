@@ -331,7 +331,7 @@ void myTIM_GEN_Init(uint32_t test_bench[3])
 {
     TIM_GEN = xTimerCreate(
         "DD Task Gen",
-        pdMS_TO_TICKS(5),
+        pdMS_TO_TICKS(1),
         pdFALSE,
         test_bench,
         vGenTimerCallback
@@ -343,7 +343,7 @@ void myTIM_GEN_Init(uint32_t test_bench[3])
 //{
 //    TIM_MON = xTimerCreate(
 //        "DD Task Mon",
-//        pdMS_TO_TICKS(5),
+//        pdMS_TO_TICKS(1),
 //        pdFALSE,
 //        test_bench,
 //        vMonTimerCallback
@@ -355,7 +355,7 @@ void myTIM_GEN_Init(uint32_t test_bench[3])
 //{
 //    TIM_OVR = xTimerCreate(
 //        "DD Task Ovr",
-//        pdMS_TO_TICKS(5),
+//        pdMS_TO_TICKS(1),
 //        pdFALSE,
 //        test_bench,
 //		vOvrTimerCallback
@@ -607,8 +607,6 @@ static void DD_Task1(void *pvParameters)
 		TickType_t completion_ticks = 0;
 		TickType_t initiation_ticks = 0;
 
-		// printf("TickCount1: %u\n", (unsigned int)xTaskGetTickCount());
-
 		while (completion_ticks < execution_ticks)
 		{
 			GPIO_ResetBits(GPIOD, GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
@@ -635,7 +633,6 @@ static void DD_Task2(void *pvParameters)
 		TickType_t completion_ticks = 0;
 		TickType_t initiation_ticks = 0;
 
-    	// printf("TickCount2: %u\n", (unsigned int)xTaskGetTickCount());
 		while (completion_ticks < execution_ticks)
 		{
 			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_14 | GPIO_Pin_15);
@@ -662,7 +659,6 @@ static void DD_Task3(void *pvParameters)
 		TickType_t completion_ticks = 0;
 		TickType_t initiation_ticks = 0;
 
-    	// printf("TickCount3: %u\n", (unsigned int)xTaskGetTickCount());
 		while (completion_ticks < execution_ticks)
 		{
 			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14);
