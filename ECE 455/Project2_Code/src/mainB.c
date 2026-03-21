@@ -31,6 +31,7 @@
 #define PRIORITY_LO  1
 
 #define TIM_DEV 1
+#define MON_RES 1
 
 xQueueHandle xDDS_MsgQueue_Handle = 0;
 xQueueHandle xDDS_TidQueue_Handle = 0;
@@ -319,10 +320,8 @@ uint32_t lcm(uint32_t a, uint32_t b)
 
 /*---- Timer ------------------------------------------------*/
 static TimerHandle_t TIM_GEN;
-//static TimerHandle_t TIM_MON;
 
 void vGenTimerCallback(TimerHandle_t genTimer);
-//void vMonTimerCallback(TimerHandle_t monTimer);
 
 void myTIM_GEN_Init(uint32_t test_bench[3])
 {
@@ -335,23 +334,11 @@ void myTIM_GEN_Init(uint32_t test_bench[3])
     );
     configASSERT(TIM_GEN);
 }
-
-//void myTIM_MON_Init(uint32_t test_bench[3])
-//{
-//    TIM_MON = xTimerCreate(
-//        "DD Task Mon",
-//        pdMS_TO_TICKS(TIM_DEV),
-//        pdFALSE,
-//        test_bench,
-//        vMonTimerCallback
-//    );
-//    configASSERT(TIM_MON);
-//}
 /*-----------------------------------------------------------*/
 
 /*-----------------------------------------------------------*/
 static void DDS( void *pvParameters );
-static void DD_Monitor( void *pvParameters );
+static void MON( void *pvParameters );
 static void DD_Task1( void *pvParameters );
 static void DD_Task2( void *pvParameters );
 static void DD_Task3( void *pvParameters );
@@ -398,15 +385,13 @@ int main(void)
 	vTaskSuspend(xDD3_Handle);
 
 	xTaskCreate(DDS, "DDS", 256, NULL, 3, NULL);
-	// xTaskCreate(DD_Monitor, "DD_Monitor", 256, test_bench_i[1], 3, NULL);
+	// xTaskCreate(MON, "MON", 256, test_bench_i[1], 3, NULL);
 
-	/* Initialize the timers. TODO: TIM_MON */
+	/* Initialize the timers. */
 	myTIM_GEN_Init(test_bench_i[1]);
-	// myTIM_MON_Init(test_bench_i[1]);
     xTimerStart(TIM_GEN, 0);
-    // xTimerStart(TIM_MON, 0);
 
-	/* Start the tasks and timer running. */
+	/* Start the tasks (TODO: MON) and timer running. */
 	vTaskStartScheduler();
 
 	return 0;
@@ -576,7 +561,7 @@ static void DDS( void *pvParameters )
 	}
 }
 
-static void DD_Monitor( void *pvParameters )
+static void MON( void *pvParameters )
 {
 	static uint32_t *test_bench_X;
 	static uint32_t xTaskMaxTickCount;
@@ -586,16 +571,11 @@ static void DD_Monitor( void *pvParameters )
 
 	while(1)
 	{
-		taskENTER_CRITICAL();
-
-		if((uint32_t)xTaskGetTickCount() > xTaskMaxTickCount)
-			NVIC_SystemReset();
-
 		// get_active_dd_task_list();
 		// get_completed_dd_task_list();
 		// get_overdue_dd_task_list();
 
-		taskEXIT_CRITICAL();
+		vTaskDelay(xTaskMaxTickCount / MON_RES);
 	}
 }
 /*-----------------------------------------------------------*/
