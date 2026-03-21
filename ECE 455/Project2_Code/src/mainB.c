@@ -30,6 +30,8 @@
 #define PRIORITY_HI  2
 #define PRIORITY_LO  1
 
+#define TIM_DEV 1
+
 xQueueHandle xDDS_MsgQueue_Handle = 0;
 xQueueHandle xDDS_TidQueue_Handle = 0;
 xQueueHandle xMON_RspQueue_Handle = 0;
@@ -62,7 +64,6 @@ typedef struct {
     TaskHandle_t t_handle;
     task_type dd_t_type;
     uint32_t task_id;
-	uint32_t release_time;
     uint32_t absolute_deadline;
 } dds_msg;
 
@@ -167,7 +168,7 @@ void create_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, uin
 	new_task.t_handle = t_handle;
 	new_task.type = type;
 	new_task.task_id = task_id;
-	new_task.release_time = xTaskGetTickCount();
+	new_task.release_time = xTaskGetTickCount() - TIM_DEV;
 	new_task.absolute_deadline = absolute_deadline;
 	new_task.completion_time = 0;
 
@@ -191,7 +192,6 @@ void release_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, ui
     release_msg.t_handle = t_handle;
 	release_msg.dd_t_type = type;
     release_msg.task_id = task_id;
-    release_msg.release_time = (uint32_t)xTaskGetTickCount();
     release_msg.absolute_deadline = absolute_deadline;
 
     xQueueSend(xDDS_MsgQueue_Handle, &release_msg, portMAX_DELAY);
@@ -331,7 +331,7 @@ void myTIM_GEN_Init(uint32_t test_bench[3])
 {
     TIM_GEN = xTimerCreate(
         "DD Task Gen",
-        pdMS_TO_TICKS(1),
+        pdMS_TO_TICKS(TIM_DEV),
         pdFALSE,
         test_bench,
         vGenTimerCallback
@@ -343,7 +343,7 @@ void myTIM_GEN_Init(uint32_t test_bench[3])
 //{
 //    TIM_MON = xTimerCreate(
 //        "DD Task Mon",
-//        pdMS_TO_TICKS(1),
+//        pdMS_TO_TICKS(TIM_DEV),
 //        pdFALSE,
 //        test_bench,
 //        vMonTimerCallback
@@ -355,7 +355,7 @@ void myTIM_GEN_Init(uint32_t test_bench[3])
 //{
 //    TIM_OVR = xTimerCreate(
 //        "DD Task Ovr",
-//        pdMS_TO_TICKS(1),
+//        pdMS_TO_TICKS(TIM_DEV),
 //        pdFALSE,
 //        test_bench,
 //		vOvrTimerCallback
@@ -525,7 +525,7 @@ static void DDS( void *pvParameters )
 						    break;
 
 						// Completion_time update
-						task_list_curr->task.completion_time = xTaskGetTickCount();
+						task_list_curr->task.completion_time = xTaskGetTickCount() - TIM_DEV;
 						dd_task_list_add(&completed_task_list, task_list_curr->task);
 
 						// Demote and suspend completed task first before delete
