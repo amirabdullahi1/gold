@@ -236,7 +236,8 @@ void update_dd_task(dd_task_list *updater_list)
 	// if (no HI task || HI task demoted) -> promote updater_list head
     if(updater_list != NULL)
 	{
-		xQueueSend(xDDS_TidQueue_Handle, &(updater_list->task.task_id), portMAX_DELAY);
+		// xQueueSend(xDDS_TidQueue_Handle, &(updater_list->task.task_id), portMAX_DELAY);
+    	xQueueOverwrite(xDDS_TidQueue_Handle, &(updater_list->task.task_id));
         vTaskPrioritySet(updater_list->task.t_handle, PRIORITY_HI);
 		vTaskResume(updater_list->task.t_handle);
 	}
