@@ -105,8 +105,9 @@ void myGPIO_Init()
 }
 /*-----------------------------------------------------------*/
 
-/*---- DD Task List Add and Remove --------------------------*/
-void dd_task_list_add(dd_task_list **task_list, dd_task this_task) {
+/*---- DD Task List Add, Remove and Length ------------------*/
+void dd_task_list_add(dd_task_list **task_list, dd_task this_task) 
+{
 	dd_task_list *task_list_this = malloc(sizeof(dd_task_list));
 	if(task_list_this == NULL)
 		return;
@@ -136,7 +137,8 @@ void dd_task_list_add(dd_task_list **task_list, dd_task this_task) {
 		task_list_prev->next_task = task_list_this;
 }
 
-void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id) {
+void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id) 
+{
 	dd_task_list *task_list_prev = NULL;
 	dd_task_list *task_list_curr = *task_list;
 
@@ -159,6 +161,20 @@ void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id) {
 		task_list_prev->next_task = task_list_curr->next_task;
 
 	free(task_list_curr);
+}
+
+void dd_task_list_len(dd_task_list *task_list) 
+{
+	uint32_t len = 0;
+    dd_task_list *task_list_curr = task_list;
+
+    while (task_list_curr != NULL)
+    {
+        len++;
+        task_list_curr = task_list_curr->next_task;
+    }
+
+    printf("%u\n", len);
 }
 /*-----------------------------------------------------------*/
 
@@ -359,20 +375,20 @@ int main(void)
 	/* Create the queues used by the queue send and queue receive tasks.
 	http://www.freertos.org/a00116.html */
 
-    // Used for the DDS scheduler.
+    // Used for the DDS.
     xDDS_MsgQueue_Handle = xQueueCreate(msgQUEUE_LENGTH, sizeof(dds_msg));
 	xDDS_TidQueue_Handle = xQueueCreate(tidQUEUE_LENGTH, sizeof(uint32_t));
-	// xMON_RspQueue_Handle = xQueueCreate(rspQUEUE_LENGTH, sizeof(dd_task_list *));
+	xMON_RspQueue_Handle = xQueueCreate(rspQUEUE_LENGTH, sizeof(dd_task_list *));
 
 	/* Add to the registry, for the benefit of kernel aware debugging. */
 	vQueueAddToRegistry( xDDS_MsgQueue_Handle, "Msg Queue" );
 	vQueueAddToRegistry( xDDS_TidQueue_Handle, "Tid Queue" );
-	// vQueueAddToRegistry( xMON_RspQueue_Handle, "Mon Queue" );
+	vQueueAddToRegistry( xMON_RspQueue_Handle, "Mon Queue" );
 
 	static uint32_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
 	static uint32_t test_bench_2[2][3] = {{ 95, 150, 250}, {250, 500, 750}};
 	static uint32_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
-	static uint32_t test_bench_4[2][3] = {{ 5000, 2000, 3000}, {10999, 10997, 11000}};
+	static uint32_t test_bench_4[2][3] = {{ 45,  45,  45}, {455, 455, 455}};
 
 	static uint32_t (*test_bench_i)[3] = test_bench_2;
 
@@ -384,8 +400,8 @@ int main(void)
 	vTaskSuspend(xDD2_Handle);
 	vTaskSuspend(xDD3_Handle);
 
+	xTaskCreate(MON, "MON", 256, &test_bench_i[1], 3, NULL);
 	xTaskCreate(DDS, "DDS", 256, NULL, 3, NULL);
-	// xTaskCreate(MON, "MON", 256, test_bench_i[1], 3, NULL);
 
 	/* Initialize the timers. */
 	myTIM_GEN_Init(test_bench_i[1]);
@@ -464,7 +480,7 @@ static void DDS( void *pvParameters )
     dd_task_list *overdue_task_list   = NULL;
 
 	dds_msg msg;
-	while(1)
+	for (;;)
 	{
 		if(xQueueReceive(xDDS_MsgQueue_Handle, &msg, portMAX_DELAY) == pdTRUE)
 		{
@@ -528,22 +544,19 @@ static void DDS( void *pvParameters )
 
 					case msg_get_active_dd_task_list:
 					{
-						// xQueueOverwrite(xMON_RspQueue_Handle, &active_task_list);
-						// xQueueOverwriteFromISR(xMON_RspQueue_Handle, &active_task_list, NULL);
+						xQueueOverwrite(xMON_RspQueue_Handle, &active_task_list);
 						break;
 					}
 
 					case msg_get_completed_dd_task_list:
 					{
-						// xQueueOverwrite(xMON_RspQueue_Handle, &completed_task_list);
-						// xQueueOverwriteFromISR(xMON_RspQueue_Handle, &completed_task_list, NULL);
+						xQueueOverwrite(xMON_RspQueue_Handle, &completed_task_list);
 						break;
 					}
 
 					case msg_get_overdue_dd_task_list:
 					{
-						// xQueueOverwrite(xMON_RspQueue_Handle, &overdue_task_list);
-						// xQueueOverwriteFromISR(xMON_RspQueue_Handle, &overdue_task_list, NULL);
+						xQueueOverwrite(xMON_RspQueue_Handle, &overdue_task_list);
 						break;
 					}
 
@@ -569,11 +582,15 @@ static void MON( void *pvParameters )
 	test_bench_X = (uint32_t *)pvParameters;
 	xTaskMaxTickCount = pdMS_TO_TICKS(lcm(test_bench_X[0], lcm(test_bench_X[1], test_bench_X[2])));
 
-	while(1)
+	for (;;)
 	{
-		// get_active_dd_task_list();
-		// get_completed_dd_task_list();
-		// get_overdue_dd_task_list();
+		dd_task_list *active_dd_task_list = get_active_dd_task_list();
+		dd_task_list *completed_dd_task_list = get_completed_dd_task_list();
+		dd_task_list *overdue_dd_task_list = get_overdue_dd_task_list();
+
+		printf("Number of active DD-Tasks "); dd_task_list_len(active_dd_task_list);
+		printf("Number of completed DD-Tasks "); dd_task_list_len(completed_dd_task_list);
+		printf("Number of overdue DD-Tasks "); dd_task_list_len(overdue_dd_task_list);
 
 		vTaskDelay(xTaskMaxTickCount / MON_RES);
 	}
