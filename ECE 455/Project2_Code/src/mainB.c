@@ -23,6 +23,8 @@
 
 
 /*--------Global Variables-----------------------------------*/
+#define HEAP_SIZE (1024 * 16)
+
 #define msgQUEUE_LENGTH 10
 #define tidQUEUE_LENGTH 1
 #define rspQUEUE_LENGTH 1
@@ -363,7 +365,7 @@ static void DD_Task3( void *pvParameters );
 int main(void)
 {
 	/* Disable time slicing. Enable preemption. */
-	if(configUSE_TIME_SLICING || !configUSE_PREEMPTION)
+	if(configUSE_TIME_SLICING || !configUSE_PREEMPTION || configTOTAL_HEAP_SIZE < HEAP_SIZE)
 		return -1;
 
 	myGPIO_Init();
@@ -407,7 +409,7 @@ int main(void)
 	myTIM_GEN_Init(test_bench_i[1]);
     xTimerStart(TIM_GEN, 0);
 
-	/* Start the tasks (TODO: MON) and timer running. */
+	/* Start the tasks (TODO: APERIODIC) and timer running. */
 	vTaskStartScheduler();
 
 	return 0;
