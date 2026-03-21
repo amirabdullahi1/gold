@@ -174,7 +174,7 @@ void dd_task_list_len(dd_task_list *task_list)
         task_list_curr = task_list_curr->next_task;
     }
 
-    printf("%u\n", len);
+	printf("%u\n", (unsigned int)len);
 }
 /*-----------------------------------------------------------*/
 
