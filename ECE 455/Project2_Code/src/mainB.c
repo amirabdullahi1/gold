@@ -505,6 +505,26 @@ static void DDS( void *pvParameters )
 				{
 					case msg_release_task:
 					{
+						dd_task_list *task_list_curr = active_task_list;
+						while(task_list_curr != NULL)
+						{
+							if(task_list_curr->task.absolute_deadline < xTaskGetTickCount())
+								break;
+
+							task_list_curr = task_list_curr->next_task;
+						}
+
+						if (task_list_curr != NULL)
+						{
+							// Ignore completion time
+							dd_task_list_add(&overdue_task_list, task_list_curr->task);
+
+							// Demote and suspend overdue task first before delete
+							vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
+							vTaskSuspend(task_list_curr->task.t_handle);
+							delete_dd_task(msg.task_id, &active_task_list);
+						}
+
 						// Promote and resume incompleted tasks second after create
 						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
 						break;
@@ -521,17 +541,17 @@ static void DDS( void *pvParameters )
 							task_list_curr = task_list_curr->next_task;
 						}
 
-						if (task_list_curr == NULL)
-						    break;
+						if (task_list_curr != NULL) {
+							// Update completion time
+							task_list_curr->task.completion_time = xTaskGetTickCount() - TIM_DEV;
+							dd_task_list_add(&completed_task_list, task_list_curr->task);
 
-						// Completion_time update
-						task_list_curr->task.completion_time = xTaskGetTickCount() - TIM_DEV;
-						dd_task_list_add(&completed_task_list, task_list_curr->task);
+							// Demote and suspend completed task first before delete
+							vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
+							vTaskSuspend(task_list_curr->task.t_handle);
+							delete_dd_task(msg.task_id, &active_task_list);
+						}
 
-						// Demote and suspend completed task first before delete
-						vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
-						vTaskSuspend(task_list_curr->task.t_handle);
-						delete_dd_task(msg.task_id, &active_task_list);
 						break;
 					}
 
