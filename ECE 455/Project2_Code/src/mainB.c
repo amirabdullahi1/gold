@@ -236,7 +236,6 @@ void update_dd_task(dd_task_list *updater_list)
 	// if (no HI task || HI task demoted) -> promote updater_list head
     if(updater_list != NULL)
 	{
-		// xQueueSend(xDDS_TidQueue_Handle, &(updater_list->task.task_id), portMAX_DELAY);
     	xQueueOverwrite(xDDS_TidQueue_Handle, &(updater_list->task.task_id));
         vTaskPrioritySet(updater_list->task.t_handle, PRIORITY_HI);
 		vTaskResume(updater_list->task.t_handle);
@@ -321,11 +320,9 @@ uint32_t lcm(uint32_t a, uint32_t b)
 /*---- Timer ------------------------------------------------*/
 static TimerHandle_t TIM_GEN;
 //static TimerHandle_t TIM_MON;
-//static TimerHandle_t TIM_OVR;
 
 void vGenTimerCallback(TimerHandle_t genTimer);
 //void vMonTimerCallback(TimerHandle_t monTimer);
-//void vOvrTimerCallback(TimerHandle_t ovrTimer);
 
 void myTIM_GEN_Init(uint32_t test_bench[3])
 {
@@ -349,18 +346,6 @@ void myTIM_GEN_Init(uint32_t test_bench[3])
 //        vMonTimerCallback
 //    );
 //    configASSERT(TIM_MON);
-//}
-
-//void myTIM_OVR_Init(uint32_t test_bench[3])
-//{
-//    TIM_OVR = xTimerCreate(
-//        "DD Task Ovr",
-//        pdMS_TO_TICKS(TIM_DEV),
-//        pdFALSE,
-//        test_bench,
-//		vOvrTimerCallback
-//    );
-//    configASSERT(TIM_OVR);
 //}
 /*-----------------------------------------------------------*/
 
@@ -546,7 +531,7 @@ static void DDS( void *pvParameters )
 								vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
 								vTaskSuspend(task_list_curr->task.t_handle);
 								delete_dd_task(msg.task_id, &active_task_list);
-								
+
 								break;
 							}
 
