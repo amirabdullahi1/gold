@@ -207,25 +207,36 @@ void complete_dd_task(uint32_t task_id)
 }
 
 /**
- * if HI task exists -> do nothing
- * if no HI task -> promote updater_list head
+ * if (HI task exists && "HIer" task exists) -> demote HI task, promote HIer task
+ * if (HI task exists && "HIer" task !exists) -> do nothing
+ * if (no HI task || HI task demoted) -> promote updater_list head
  */
 void update_dd_task(dd_task_list *updater_list)
 {
     dd_task_list *task_list_curr = updater_list;
     while (task_list_curr != NULL)
     {
-    	// if HI task exists -> do nothing
         if(uxTaskPriorityGet(task_list_curr->task.t_handle) == PRIORITY_HI)
+		{
+			// if (HI task exists && "HIer" task exists) -> demote HI task, promote HIer task
+			if(updater_list->task.absolute_deadline < task_list_curr->task.absolute_deadline)
+			{
+				vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
+				vTaskSuspend(task_list_curr->task.t_handle);
+				break;
+			}
+
+			// if (HI task exists && "HIer" task !exists) -> do nothing
             return;
+		}
 
         task_list_curr = task_list_curr->next_task;
     }
 
-    // No HI task -> promote within updater_list
+	// if (no HI task || HI task demoted) -> promote updater_list head
     if(updater_list != NULL)
 	{
-		xQueueOverwrite(xDDS_TidQueue_Handle, &(updater_list->task.task_id));
+		xQueueSend(xDDS_TidQueue_Handle, &(updater_list->task.task_id), portMAX_DELAY);
         vTaskPrioritySet(updater_list->task.t_handle, PRIORITY_HI);
 		vTaskResume(updater_list->task.t_handle);
 	}
