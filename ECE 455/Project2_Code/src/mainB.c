@@ -194,7 +194,7 @@ void release_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, ui
     release_msg.release_time = (uint32_t)xTaskGetTickCount();
     release_msg.absolute_deadline = absolute_deadline;
 
-    xQueueSend(xDDS_MsgQueue_Handle, &release_msg, 0);
+    xQueueSend(xDDS_MsgQueue_Handle, &release_msg, portMAX_DELAY);
 }
 
 void complete_dd_task(uint32_t task_id)
@@ -203,7 +203,7 @@ void complete_dd_task(uint32_t task_id)
     complete_msg.dds_msg_type = msg_complete_task;
     complete_msg.task_id = task_id;
 
-    xQueueSend(xDDS_MsgQueue_Handle, &complete_msg, 0);
+    xQueueSend(xDDS_MsgQueue_Handle, &complete_msg, portMAX_DELAY);
 }
 
 /**
