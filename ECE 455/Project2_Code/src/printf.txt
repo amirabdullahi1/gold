@@ -1,0 +1,3 @@
+		printf("Tid %u \n", (unsigned int)(updater_list->task.task_id));
+		printf("Abs %u \n", (unsigned int)(updater_list->task.absolute_deadline));
+		printf("Tix %u \n", (unsigned int)(xTaskGetTickCount()));
