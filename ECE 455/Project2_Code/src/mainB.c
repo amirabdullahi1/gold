@@ -169,6 +169,7 @@ void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id)
 
 void dd_task_list_len(dd_task_list *task_list)
 {
+	// taskENTER_CRITICAL();
 	uint32_t len = 0;
     dd_task_list *task_list_curr = task_list;
 
@@ -179,6 +180,7 @@ void dd_task_list_len(dd_task_list *task_list)
     }
 
 	printf("%u\n", (unsigned int)len);
+	// taskEXIT_CRITICAL();
 }
 /*-----------------------------------------------------------*/
 
@@ -400,7 +402,7 @@ int main(void)
 	static uint32_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
 	static uint32_t test_bench_4[2][3] = {{ 45,  45,  45}, {455, 455, 455}};
 
-	static uint32_t (*test_bench_i)[3] = test_bench_2;
+	static uint32_t (*test_bench_i)[3] = test_bench_3;
 
 	xTaskCreate(DD_Task1, "DD_Task1", 256, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
 	xTaskCreate(DD_Task2, "DD_Task2", 256, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
@@ -428,36 +430,36 @@ void vDdsTimerCallback(TimerHandle_t ddsTimer)
 {
 	/* Initialization. */
 	static uint8_t initialized = 0;
-	
+
 	static uint32_t *test_bench_X;
     static uint32_t DD_task1_period;
     static uint32_t DD_task2_period;
     static uint32_t DD_task3_period;
-	
+
     static uint32_t task1_interval;
     static uint32_t task2_interval;
     static uint32_t task3_interval;
-	
+
 	uint32_t task_interval;
-	
+
     if (initialized == 0)
     {
 		test_bench_X = (uint32_t *)pvTimerGetTimerID(ddsTimer);
 		configASSERT(test_bench_X);
-		
+
         DD_task1_period = test_bench_X[0];
         DD_task2_period = test_bench_X[1];
         DD_task3_period = test_bench_X[2];
-		
+
         task1_interval = DD_task1_period;
         task2_interval = DD_task2_period;
         task3_interval = DD_task3_period;
-		
+
         initialized = 1;
     }
-	
+
 	set_overdue_dd_task_list();
-	
+
 	static uint32_t task_id_counter = 0;
 	if (task1_interval >= DD_task1_period)
 	{
@@ -474,13 +476,13 @@ void vDdsTimerCallback(TimerHandle_t ddsTimer)
 		task3_interval = 0;
 		release_dd_task(xDD3_Handle, PERIODIC, task_id_counter++, xTaskGetTickCount() + DD_task3_period);
 	}
-	
+
 	task_interval = min(DD_task1_period - task1_interval, min(DD_task2_period - task2_interval, DD_task3_period - task3_interval));
 	task1_interval += task_interval;
 	task2_interval += task_interval;
 	task3_interval += task_interval;
-	
-	xTimerChangePeriod(ddsTimer, pdMS_TO_TICKS(task_interval), 0);
+
+	xTimerChangePeriod(ddsTimer, pdMS_TO_TICKS(task_interval), portMAX_DELAY);
 }
 /*-----------------------------------------------------------*/
 
@@ -548,19 +550,15 @@ static void DDS( void *pvParameters )
 						xQueueOverwrite(xMON_RspQueue_Handle, &overdue_task_list);
 						break;
 					}
-					
+
 					case msg_set_overdue_dd_task_list:
 					{
 						dd_task_list *task_list_curr = active_task_list;
 						while (task_list_curr != NULL)
 						{
 
-							if (task_list_curr->task.absolute_deadline < xTaskGetTickCount())
+							if (task_list_curr->task.absolute_deadline <= xTaskGetTickCount())
 							{
-								// printf("Tid %u \n", (unsigned int)task_list_curr->task.task_id);
-								// printf("Abs %u \n", (unsigned int)task_list_curr->task.absolute_deadline);
-								// printf("Tix %u \n", (unsigned int)xTaskGetTickCount());
-
 								// Ignore completion time
 								dd_task_list *task_list_next = task_list_curr->next_task;
 								dd_task_list_add(&overdue_task_list, task_list_curr->task);
@@ -612,7 +610,7 @@ static void MON( void *pvParameters )
 		printf("Number of completed DD-Tasks "); dd_task_list_len(completed_dd_task_list);
 		printf("Number of overdue DD-Tasks "); dd_task_list_len(overdue_dd_task_list);
 
-		vTaskDelay(xTaskMaxTickCount / MON_RES + 1);
+		vTaskDelay(xTaskMaxTickCount / MON_RES);
 	}
 }
 /*-----------------------------------------------------------*/
