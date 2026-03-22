@@ -248,6 +248,15 @@ void update_dd_task(dd_task_list *updater_list)
 				break;
 			}
 
+			printf("Tid %u \n", (unsigned int)task_list_curr->task.task_id);
+			printf("Abs %u \n", (unsigned int)task_list_curr->task.absolute_deadline);
+			printf("Tix %u \n", (unsigned int)xTaskGetTickCount());
+
+			vTaskDelay(1);
+			if(pdMS_TO_TICKS(task_list_curr->task.absolute_deadline) < xTaskGetTickCount()) 
+			{
+				printf("\n");
+			}
 			// if (HI task exists && "HIer" task !exists) -> do nothing
             return;
 		}
@@ -313,8 +322,6 @@ dd_task_list *get_overdue_dd_task_list(void)
 
     return system_dd_task_list;
 }
-/*-----------------------------------------------------------*/
-
 /*-----------------------------------------------------------*/
 
 /*---- Min and geeksforgeeks.org/c/lcm-of-two-numbers-in-c --*/
@@ -455,17 +462,17 @@ void vGenTimerCallback(TimerHandle_t genTimer)
 	if(task1_interval >= DD_task1_period)
 	{
 		task1_interval = 0;
-		release_dd_task(xDD1_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task1_period + 1);
+		release_dd_task(xDD1_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task1_period);
 	}
 	if(task2_interval >= DD_task2_period)
 	{
 		task2_interval = 0;
-		release_dd_task(xDD2_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task2_period + 1);
+		release_dd_task(xDD2_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task2_period);
 	}
 	if(task3_interval >= DD_task3_period)
 	{
 		task3_interval = 0;
-		release_dd_task(xDD3_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task3_period + 1);
+		release_dd_task(xDD3_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task3_period);
 	}
 
 	task_interval = min(DD_task1_period - task1_interval, min(DD_task2_period - task2_interval, DD_task3_period - task3_interval));
@@ -494,6 +501,27 @@ static void DDS( void *pvParameters )
 				{
 					case msg_release_task:
 					{
+						dd_task_list *task_list_curr = active_task_list;
+						while(task_list_curr != NULL)
+						{
+							if(pdMS_TO_TICKS(task_list_curr->task.absolute_deadline) < xTaskGetTickCount())
+							{
+								// Ignore completion time
+								dd_task_list *task_list_next = task_list_curr->next_task;
+								dd_task_list_add(&overdue_task_list, task_list_curr->task);
+
+								// Demote and suspend overdue task first before delete
+								vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
+								vTaskSuspend(task_list_curr->task.t_handle);
+								delete_dd_task(task_list_curr->task.task_id, &active_task_list);
+
+								task_list_curr = task_list_next;
+								continue;
+							}
+
+							task_list_curr = task_list_curr->next_task;
+						}
+
 						// Promote and resume incompleted tasks second after create
 						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
 						break;
@@ -546,33 +574,11 @@ static void DDS( void *pvParameters )
 					{
 						break;
 					}
+
 				}
 			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);
 
 			update_dd_task(active_task_list);
-
-			vTaskDelay(pdMS_TO_TICKS(1));
-
-			dd_task_list *task_list_curr = active_task_list;
-			while(task_list_curr != NULL)
-			{
-				if(pdMS_TO_TICKS(task_list_curr->task.absolute_deadline) < xTaskGetTickCount())
-				{
-					// Ignore completion time
-					dd_task_list *task_list_next = task_list_curr->next_task;
-					dd_task_list_add(&overdue_task_list, task_list_curr->task);
-
-					// Demote and suspend overdue task first before delete
-					vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
-					vTaskSuspend(task_list_curr->task.t_handle);
-					delete_dd_task(task_list_curr->task.task_id, &active_task_list);
-
-					task_list_curr = task_list_next;
-					continue;
-				}
-
-				task_list_curr = task_list_curr->next_task;
-			}
 		}
 	}
 }
