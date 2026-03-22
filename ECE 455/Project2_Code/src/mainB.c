@@ -169,7 +169,6 @@ void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id)
 
 void dd_task_list_len(dd_task_list *task_list)
 {
-	// taskENTER_CRITICAL();
 	uint32_t len = 0;
     dd_task_list *task_list_curr = task_list;
 
@@ -180,7 +179,6 @@ void dd_task_list_len(dd_task_list *task_list)
     }
 
 	printf("%u\n", (unsigned int)len);
-	// taskEXIT_CRITICAL();
 }
 /*-----------------------------------------------------------*/
 
