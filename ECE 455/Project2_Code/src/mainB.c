@@ -111,7 +111,7 @@ void myGPIO_Init()
 /*-----------------------------------------------------------*/
 
 /*---- DD Task List Add, Remove and Length ------------------*/
-void dd_task_list_add(dd_task_list **task_list, dd_task this_task) 
+void dd_task_list_add(dd_task_list **task_list, dd_task this_task)
 {
 	dd_task_list *task_list_this = malloc(sizeof(dd_task_list));
 	if(task_list_this == NULL)
@@ -142,7 +142,7 @@ void dd_task_list_add(dd_task_list **task_list, dd_task this_task)
 		task_list_prev->next_task = task_list_this;
 }
 
-void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id) 
+void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id)
 {
 	dd_task_list *task_list_prev = NULL;
 	dd_task_list *task_list_curr = *task_list;
@@ -168,7 +168,7 @@ void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id)
 	free(task_list_curr);
 }
 
-void dd_task_list_len(dd_task_list *task_list) 
+void dd_task_list_len(dd_task_list *task_list)
 {
 	uint32_t len = 0;
     dd_task_list *task_list_curr = task_list;
@@ -225,7 +225,7 @@ void complete_dd_task(uint32_t task_id)
     complete_msg.dds_msg_type = msg_complete_task;
     complete_msg.task_id = task_id;
 
-    xQueueSend(xDDS_MsgQueue_Handle, &complete_msg, portMAX_DELAY);
+    xQueueSendToFront(xDDS_MsgQueue_Handle, &complete_msg, portMAX_DELAY);
 }
 
 /**
@@ -248,16 +248,6 @@ void update_dd_task(dd_task_list *updater_list)
 				break;
 			}
 
-			printf("Tid %u \n", (unsigned int)task_list_curr->task.task_id);
-			printf("Abs %u \n", (unsigned int)task_list_curr->task.absolute_deadline);
-			printf("Tix %u \n", (unsigned int)xTaskGetTickCount());
-
-			vTaskDelay(1);
-			if(pdMS_TO_TICKS(task_list_curr->task.absolute_deadline) < xTaskGetTickCount()) 
-			{
-				printf("\n");
-			}
-			// if (HI task exists && "HIer" task !exists) -> do nothing
             return;
 		}
 
@@ -412,8 +402,8 @@ int main(void)
 	vTaskSuspend(xDD2_Handle);
 	vTaskSuspend(xDD3_Handle);
 
-	xTaskCreate(MON, "MON", 256, &test_bench_i[1], 3, NULL);
-	xTaskCreate(DDS, "DDS", 256, NULL, 3, NULL);
+	xTaskCreate(DDS, "DDS", 256, NULL, 4, NULL);
+	xTaskCreate(MON, "MON", 256, &test_bench_i[1], 4, NULL);
 
 	/* Initialize the timers. */
 	myTIM_GEN_Init(test_bench_i[1]);
@@ -501,11 +491,25 @@ static void DDS( void *pvParameters )
 				{
 					case msg_release_task:
 					{
+						// Promote and resume incompleted tasks second after create
+						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
+						break;
+					}
+
+					case msg_complete_task:
+					{
+
+
 						dd_task_list *task_list_curr = active_task_list;
 						while(task_list_curr != NULL)
 						{
+
 							if(pdMS_TO_TICKS(task_list_curr->task.absolute_deadline) < xTaskGetTickCount())
 							{
+								printf("Tid %u \n", (unsigned int)task_list_curr->task.task_id);
+								printf("Abs %u \n", (unsigned int)task_list_curr->task.absolute_deadline);
+								printf("Tix %u \n", (unsigned int)xTaskGetTickCount());
+
 								// Ignore completion time
 								dd_task_list *task_list_next = task_list_curr->next_task;
 								dd_task_list_add(&overdue_task_list, task_list_curr->task);
@@ -519,19 +523,6 @@ static void DDS( void *pvParameters )
 								continue;
 							}
 
-							task_list_curr = task_list_curr->next_task;
-						}
-
-						// Promote and resume incompleted tasks second after create
-						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
-						break;
-					}
-
-					case msg_complete_task:
-					{
-						dd_task_list *task_list_curr = active_task_list;
-						while(task_list_curr != NULL)
-						{
 							if(task_list_curr->task.task_id == msg.task_id)
 							{
 								// Update completion time
@@ -601,7 +592,7 @@ static void MON( void *pvParameters )
 		printf("Number of completed DD-Tasks "); dd_task_list_len(completed_dd_task_list);
 		printf("Number of overdue DD-Tasks "); dd_task_list_len(overdue_dd_task_list);
 
-		vTaskDelay(xTaskMaxTickCount / MON_RES);
+		vTaskDelay(xTaskMaxTickCount / MON_RES + 1);
 	}
 }
 /*-----------------------------------------------------------*/
