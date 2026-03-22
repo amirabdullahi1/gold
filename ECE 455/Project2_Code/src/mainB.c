@@ -341,8 +341,10 @@ uint32_t lcm(uint32_t a, uint32_t b)
 
 /*---- Timer ------------------------------------------------*/
 static TimerHandle_t TIM_GEN;
+static TimerHandle_t TIM_OVR;
 
 void vGenTimerCallback(TimerHandle_t genTimer);
+void vOvrTimerCallback(TimerHandle_t ovrTimer);
 
 void myTIM_GEN_Init(uint32_t test_bench[3])
 {
@@ -354,6 +356,18 @@ void myTIM_GEN_Init(uint32_t test_bench[3])
         vGenTimerCallback
     );
     configASSERT(TIM_GEN);
+}
+
+void myTIM_OVR_Init(uint32_t test_bench[3])
+{
+    TIM_OVR = xTimerCreate(
+        "DD Task Ovr",
+        pdMS_TO_TICKS(TIM_DEV),
+        pdFALSE,
+        test_bench,
+        vOvrTimerCallback
+    );
+    configASSERT(TIM_OVR);
 }
 /*-----------------------------------------------------------*/
 
@@ -489,34 +503,11 @@ static void DDS( void *pvParameters )
 	{
 		if(xQueueReceive(xDDS_MsgQueue_Handle, &msg, portMAX_DELAY) == pdTRUE)
 		{
-			// taskENTER_CRITICAL();
-
 			do {
 				switch(msg.dds_msg_type)
 				{
 					case msg_release_task:
 					{
-						dd_task_list *task_list_curr = active_task_list;
-						while(task_list_curr != NULL)
-						{
-							if(pdMS_TO_TICKS(task_list_curr->task.absolute_deadline) < xTaskGetTickCount())
-							{
-								// Ignore completion time
-								dd_task_list *task_list_next = task_list_curr->next_task;
-								dd_task_list_add(&overdue_task_list, task_list_curr->task);
-
-								// Demote and suspend overdue task first before delete
-								vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
-								vTaskSuspend(task_list_curr->task.t_handle);
-								delete_dd_task(task_list_curr->task.task_id, &active_task_list);
-
-								task_list_curr = task_list_next;
-								continue;
-							}
-
-							task_list_curr = task_list_curr->next_task;
-						}
-
 						// Promote and resume incompleted tasks second after create
 						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
 						break;
@@ -569,12 +560,33 @@ static void DDS( void *pvParameters )
 					{
 						break;
 					}
-
 				}
 			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);
 
 			update_dd_task(active_task_list);
-			// taskEXIT_CRITICAL();
+
+			vTaskDelay(pdMS_TO_TICKS(1));
+			
+			dd_task_list *task_list_curr = active_task_list;
+			while(task_list_curr != NULL)
+			{
+				if(pdMS_TO_TICKS(task_list_curr->task.absolute_deadline) < xTaskGetTickCount())
+				{
+					// Ignore completion time
+					dd_task_list *task_list_next = task_list_curr->next_task;
+					dd_task_list_add(&overdue_task_list, task_list_curr->task);
+
+					// Demote and suspend overdue task first before delete
+					vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
+					vTaskSuspend(task_list_curr->task.t_handle);
+					delete_dd_task(task_list_curr->task.task_id, &active_task_list);
+
+					task_list_curr = task_list_next;
+					continue;
+				}
+
+				task_list_curr = task_list_curr->next_task;
+			}
 		}
 	}
 }
