@@ -258,9 +258,6 @@ void update_dd_task(dd_task_list *updater_list)
 	// if (no HI task || HI task demoted) -> promote updater_list head
     if(updater_list != NULL)
 	{
-		printf("Tid %u \n", (unsigned int)(updater_list->task.task_id));
-		printf("Abs %u \n", (unsigned int)(updater_list->task.absolute_deadline));
-		printf("Tix %u \n", (unsigned int)(xTaskGetTickCount()));
     	xQueueOverwrite(xDDS_TidQueue_Handle, &(updater_list->task.task_id));
         vTaskPrioritySet(updater_list->task.t_handle, PRIORITY_HI);
 		vTaskResume(updater_list->task.t_handle);
@@ -458,17 +455,17 @@ void vGenTimerCallback(TimerHandle_t genTimer)
 	if(task1_interval >= DD_task1_period)
 	{
 		task1_interval = 0;
-		release_dd_task(xDD1_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task1_period);
+		release_dd_task(xDD1_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task1_period + 1);
 	}
 	if(task2_interval >= DD_task2_period)
 	{
 		task2_interval = 0;
-		release_dd_task(xDD2_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task2_period);
+		release_dd_task(xDD2_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task2_period + 1);
 	}
 	if(task3_interval >= DD_task3_period)
 	{
 		task3_interval = 0;
-		release_dd_task(xDD3_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task3_period);
+		release_dd_task(xDD3_Handle, PERIODIC, task_id_counter++, pdTICKS_TO_MS(xTaskGetTickCount()) + DD_task3_period + 1);
 	}
 
 	task_interval = min(DD_task1_period - task1_interval, min(DD_task2_period - task2_interval, DD_task3_period - task3_interval));
