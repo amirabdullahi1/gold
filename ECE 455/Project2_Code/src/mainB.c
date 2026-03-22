@@ -341,10 +341,8 @@ uint32_t lcm(uint32_t a, uint32_t b)
 
 /*---- Timer ------------------------------------------------*/
 static TimerHandle_t TIM_GEN;
-static TimerHandle_t TIM_OVR;
 
 void vGenTimerCallback(TimerHandle_t genTimer);
-void vOvrTimerCallback(TimerHandle_t ovrTimer);
 
 void myTIM_GEN_Init(uint32_t test_bench[3])
 {
@@ -356,18 +354,6 @@ void myTIM_GEN_Init(uint32_t test_bench[3])
         vGenTimerCallback
     );
     configASSERT(TIM_GEN);
-}
-
-void myTIM_OVR_Init(uint32_t test_bench[3])
-{
-    TIM_OVR = xTimerCreate(
-        "DD Task Ovr",
-        pdMS_TO_TICKS(TIM_DEV),
-        pdFALSE,
-        test_bench,
-        vOvrTimerCallback
-    );
-    configASSERT(TIM_OVR);
 }
 /*-----------------------------------------------------------*/
 
@@ -566,7 +552,7 @@ static void DDS( void *pvParameters )
 			update_dd_task(active_task_list);
 
 			vTaskDelay(pdMS_TO_TICKS(1));
-			
+
 			dd_task_list *task_list_curr = active_task_list;
 			while(task_list_curr != NULL)
 			{
