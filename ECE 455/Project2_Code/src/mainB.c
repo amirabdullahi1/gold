@@ -16,6 +16,7 @@
 
 /*---- Pragmas ----------------------------------------------*/
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
@@ -174,7 +175,7 @@ void create_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, uin
 	new_task.t_handle = t_handle;
 	new_task.type = type;
 	new_task.task_id = task_id;
-	new_task.release_time = xTaskGetTickCount() - TIM_DEV;
+	new_task.release_time = xTaskGetTickCount();
 	new_task.absolute_deadline = absolute_deadline;
 	new_task.completion_time = 0;
 
@@ -390,7 +391,7 @@ int main(void)
 	static uint32_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
 	static uint32_t test_bench_4[2][3] = {{ 45,  45,  45}, {455, 455, 455}};
 
-	static uint32_t (*test_bench_i)[3] = test_bench_3;
+	static uint32_t (*test_bench_i)[3] = test_bench_1;
 
 	xTaskCreate(DD_Task1, "DD_Task1", 256, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
 	xTaskCreate(DD_Task2, "DD_Task2", 256, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
@@ -489,7 +490,8 @@ static void DDS( void *pvParameters )
 				{
 					case msg_release_task:
 					{
-						// Promote and resume incompleted tasks second after create
+						/* Promote and resume incompleted tasks second after create. */
+						// printf("Task %u released %ums\n", msg.task_id, xTaskGetTickCount());
 						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
 						break;
 					}
@@ -503,10 +505,10 @@ static void DDS( void *pvParameters )
 							{
 								if (task_list_curr->task.absolute_deadline < xTaskGetTickCount())
 								{
-									// Ignore completion time
+									/* Ignore completion time. */
 									dd_task_list_add(&overdue_task_list, task_list_curr->task);
 
-									// Demote and suspend overdue task first before delete
+									/* Demote and suspend overdue task first before delete. */
 									vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
 									vTaskSuspend(task_list_curr->task.t_handle);
 									delete_dd_task(task_list_curr->task.task_id, &active_task_list);
@@ -514,11 +516,12 @@ static void DDS( void *pvParameters )
 									break;
 								}
 
-								// Update completion time
-								task_list_curr->task.completion_time = xTaskGetTickCount() - TIM_DEV;
+								/* Update completion time. */
+								// printf("Task %u complete %ums\n", msg.task_id, xTaskGetTickCount());
+								task_list_curr->task.completion_time = xTaskGetTickCount();
 								dd_task_list_add(&completed_task_list, task_list_curr->task);
 
-								// Demote and suspend completed task first before delete
+								/* Demote and suspend completed task first before delete. */
 								vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
 								vTaskSuspend(task_list_curr->task.t_handle);
 								delete_dd_task(msg.task_id, &active_task_list);
@@ -580,12 +583,7 @@ static void MON( void *pvParameters )
 		uint32_t len_cmp = len(completed_dd_task_list);
 		uint32_t len_due = len(overdue_dd_task_list);
 
-		printf(
-		    "Number of active DD-Tasks %u \n"
-		    "Number of completed DD-Tasks %u \n"
-		    "Number of overdue DD-Tasks %u \n",
-			len_act, len_cmp, len_due
-		);
+		printf(" # active %u \n # completed %u \n # overdue %u \n\n", len_act, len_cmp, len_due);
 
 		vTaskDelay(xTaskMaxTickCount / MON_RES);
 	}
