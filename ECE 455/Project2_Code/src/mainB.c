@@ -3,10 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "stm32f4_discovery.h"
-/* Kernel includes. */
+/* Other includes. */
+#include "misc.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_gpio.h"
+#include "stm32f4xx_exti.h"
+#include "stm32f4xx_syscfg.h"
 #include "../FreeRTOS_Source/include/FreeRTOS.h"
 #include "../FreeRTOS_Source/include/queue.h"
 #include "../FreeRTOS_Source/include/semphr.h"
@@ -44,6 +47,9 @@ xQueueHandle xMON_RspQueue_Handle = 0;
 TaskHandle_t xDD1_Handle = NULL;
 TaskHandle_t xDD2_Handle = NULL;
 TaskHandle_t xDD3_Handle = NULL;
+TaskHandle_t xDDA_Handle = NULL;
+
+static volatile uint32_t task_ids_aperiodic = 8000;
 /*-----------------------------------------------------------*/
 
 /*
@@ -88,7 +94,7 @@ typedef struct dd_task_list {
 } dd_task_list;
 /*-----------------------------------------------------------*/
 
-/*---- LED Init ---------------------------------------------*/
+/*---- LED and User Init ------------------------------------*/
 void myGPIO_Init()
 {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
@@ -106,6 +112,80 @@ void myGPIO_Init()
 	GPIO_LED_InitStruct.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
 	GPIO_Init(GPIOD, &GPIO_LED_InitStruct);
 	GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+	GPIO_InitTypeDef GPIO_EXTI_InitStruct = {0};
+
+	GPIO_EXTI_InitStruct.GPIO_Mode = GPIO_Mode_IN;
+
+	GPIO_EXTI_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
+
+	GPIO_EXTI_InitStruct.GPIO_Pin = GPIO_Pin_0;
+
+	GPIO_Init(GPIOA, &GPIO_EXTI_InitStruct);
+}
+
+void myEXTI_Init()
+{
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
+
+	EXTI_InitTypeDef EXTI_InitStruct = {0};
+	EXTI_InitStruct.EXTI_Line = EXTI_Line0;
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
+	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitStruct);
+
+	EXTI_ClearITPendingBit(EXTI_Line0);
+
+}
+
+void myNVIC_Init()
+{
+	NVIC_InitTypeDef NVIC_InitStruct = {0};
+	NVIC_InitStruct.NVIC_IRQChannel = EXTI0_IRQn;
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY;
+	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStruct);
+
+	NVIC_ClearPendingIRQ(EXTI0_IRQn);
+
+	NVIC_SetPriority(EXTI0_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
+	NVIC_EnableIRQ(EXTI0_IRQn);
+}
+/*-----------------------------------------------------------*/
+
+/*-----------------------------------------------------------*/
+void EXTI0_IRQHandler(void)
+{
+	EXTI_ClearITPendingBit(EXTI_Line0);
+	NVIC_ClearPendingIRQ(EXTI0_IRQn);
+
+	static TickType_t last_press_time = 0;
+	TickType_t curr_press_time = xTaskGetTickCountFromISR();
+
+	if(curr_press_time - last_press_time < pdMS_TO_TICKS(200))
+		return;
+
+    last_press_time = curr_press_time;
+
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+	dds_msg release_msg = {0};
+	release_msg.dds_msg_type = msg_release_task;
+	release_msg.t_handle = xDDA_Handle;
+	release_msg.dd_t_type = APERIODIC;
+	release_msg.task_id = task_ids_aperiodic++;
+	release_msg.absolute_deadline = xTaskGetTickCountFromISR() + 1000;
+
+	GPIO_SetBits(GPIOD, GPIO_Pin_14);
+	xQueueSendFromISR(xDDS_MsgQueue_Handle, &release_msg, &xHigherPriorityTaskWoken);
+
+	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 /*-----------------------------------------------------------*/
 
@@ -233,6 +313,7 @@ void update_dd_task(dd_task_list *updater_list)
 				break;
 			}
 
+			// if (HI task exists && "HIer" task !exists) -> do nothing
             return;
 		}
 
@@ -343,7 +424,7 @@ void vDdsTimerCallback(TimerHandle_t ddsTimer);
 void myTIM_DDS_Init(uint32_t test_bench[3])
 {
 	TIM_DDS = xTimerCreate(
-		"DD Task DDS",
+		"DD Task TIM",
 		pdMS_TO_TICKS(TIM_DEV),
 		pdFALSE,
 		test_bench,
@@ -368,6 +449,8 @@ int main(void)
 		return -1;
 
 	myGPIO_Init();
+	myEXTI_Init();
+	myNVIC_Init();
 
 	/* Configure the system ready to run the demo.  The clock configuration
 	can be done here if it was not done before main() was called. */
@@ -396,6 +479,7 @@ int main(void)
 	xTaskCreate(DD_Task1, "DD_Task1", 256, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
 	xTaskCreate(DD_Task2, "DD_Task2", 256, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
 	xTaskCreate(DD_Task3, "DD_Task3", 256, &test_bench_i[0][2], PRIORITY_LO, &xDD3_Handle);
+	xTaskCreate(DD_TaskA, "DD_TaskA", 256, NULL, PRIORITY_LO, &xDDA_Handle);
 
 	vTaskSuspend(xDD1_Handle);
 	vTaskSuspend(xDD2_Handle);
@@ -665,6 +749,32 @@ static void DD_Task3(void *pvParameters)
 		}
 
 		GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+        complete_dd_task(task_identification);
+    }
+}
+
+static void DD_TaskA(void *pvParameters)
+{
+	TickType_t execution_ticks = 100;
+	for (;;)
+    {
+		// printf("Blue LEDs ON!\n");
+		uint32_t task_identification;
+		xQueueReceive(xDDS_TidQueue_Handle, &task_identification, portMAX_DELAY);
+
+		TickType_t completion_ticks = 0;
+		TickType_t initiation_ticks = 0;
+
+		while (completion_ticks < execution_ticks)
+		{
+			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_15);
+        	GPIO_SetBits(GPIOD, GPIO_Pin_14 | GPIO_Pin_15);
+			initiation_ticks = xTaskGetTickCount();
+			while (xTaskGetTickCount() == initiation_ticks);
+			completion_ticks++;
+		}
+
+		GPIO_ResetBits(GPIOD, GPIO_Pin_14 | GPIO_Pin_15);
         complete_dd_task(task_identification);
     }
 }
