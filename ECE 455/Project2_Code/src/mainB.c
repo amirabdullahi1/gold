@@ -60,8 +60,7 @@ typedef enum {
 	msg_complete_task,
 	msg_get_active_dd_task_list,
 	msg_get_completed_dd_task_list,
-	msg_get_overdue_dd_task_list,
-	msg_set_overdue_dd_task_list
+	msg_get_overdue_dd_task_list
 } msg_type;
 
 typedef struct {
@@ -165,20 +164,6 @@ void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id)
 		task_list_prev->next_task = task_list_curr->next_task;
 
 	free(task_list_curr);
-}
-
-void dd_task_list_len(dd_task_list *task_list)
-{
-	uint32_t len = 0;
-    dd_task_list *task_list_curr = task_list;
-
-    while (task_list_curr != NULL)
-    {
-        len++;
-        task_list_curr = task_list_curr->next_task;
-    }
-
-	printf("%u\n", (unsigned int)len);
 }
 /*-----------------------------------------------------------*/
 
@@ -312,22 +297,27 @@ dd_task_list *get_overdue_dd_task_list(void)
     return system_dd_task_list;
 }
 /*-----------------------------------------------------------*/
-void set_overdue_dd_task_list(void)
-{
-    dds_msg set_msg = {0};
-    set_msg.dds_msg_type = msg_set_overdue_dd_task_list;
 
-    if (xQueueSend(xDDS_MsgQueue_Handle, &set_msg, 0) != pdPASS)
-        return;
-}
-/*-----------------------------------------------------------*/
-
-/*---- Min and geeksforgeeks.org/c/lcm-of-two-numbers-in-c --*/
+/*---- Min, Len, GCD and LCM --------------------------------*/
 uint32_t min(uint32_t a, uint32_t b)
 {
 	return a < b ? a : b;
 }
 
+uint32_t len(dd_task_list *task_list)
+{
+	uint32_t len = 0;
+    dd_task_list *task_list_curr = task_list;
+
+    while (task_list_curr != NULL)
+    {
+        len++;
+        task_list_curr = task_list_curr->next_task;
+    }
+
+    return len;
+}
+/*---- geeksforgeeks.org/c/lcm-of-two-numbers-in-c ----------*/
 uint32_t gcd(uint32_t a, uint32_t b)
 {
     if (b == 0)
@@ -456,8 +446,6 @@ void vDdsTimerCallback(TimerHandle_t ddsTimer)
         initialized = 1;
     }
 
-	set_overdue_dd_task_list();
-
 	static uint32_t task_id_counter = 0;
 	if (task1_interval >= DD_task1_period)
 	{
@@ -513,6 +501,19 @@ static void DDS( void *pvParameters )
 						{
 							if (task_list_curr->task.task_id == msg.task_id)
 							{
+								if (task_list_curr->task.absolute_deadline < xTaskGetTickCount())
+								{
+									// Ignore completion time
+									dd_task_list_add(&overdue_task_list, task_list_curr->task);
+
+									// Demote and suspend overdue task first before delete
+									vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
+									vTaskSuspend(task_list_curr->task.t_handle);
+									delete_dd_task(task_list_curr->task.task_id, &active_task_list);
+
+									break;
+								}
+
 								// Update completion time
 								task_list_curr->task.completion_time = xTaskGetTickCount() - TIM_DEV;
 								dd_task_list_add(&completed_task_list, task_list_curr->task);
@@ -521,7 +522,6 @@ static void DDS( void *pvParameters )
 								vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
 								vTaskSuspend(task_list_curr->task.t_handle);
 								delete_dd_task(msg.task_id, &active_task_list);
-
 								break;
 							}
 
@@ -546,34 +546,6 @@ static void DDS( void *pvParameters )
 					case msg_get_overdue_dd_task_list:
 					{
 						xQueueOverwrite(xMON_RspQueue_Handle, &overdue_task_list);
-						break;
-					}
-
-					case msg_set_overdue_dd_task_list:
-					{
-						dd_task_list *task_list_curr = active_task_list;
-						while (task_list_curr != NULL)
-						{
-
-							if (task_list_curr->task.absolute_deadline <= xTaskGetTickCount())
-							{
-								// Ignore completion time
-								dd_task_list *task_list_next = task_list_curr->next_task;
-								dd_task_list_add(&overdue_task_list, task_list_curr->task);
-
-								// Demote and suspend overdue task first before delete
-								vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
-								vTaskSuspend(task_list_curr->task.t_handle);
-								delete_dd_task(task_list_curr->task.task_id, &active_task_list);
-								delete_dd_task(task_list_curr->task.task_id, &completed_task_list);
-
-								task_list_curr = task_list_next;
-								continue;
-							}
-
-							task_list_curr = task_list_curr->next_task;
-						}
-
 						break;
 					}
 
@@ -604,9 +576,16 @@ static void MON( void *pvParameters )
 		dd_task_list *completed_dd_task_list = get_completed_dd_task_list();
 		dd_task_list *overdue_dd_task_list = get_overdue_dd_task_list();
 
-		printf("Number of active DD-Tasks "); dd_task_list_len(active_dd_task_list);
-		printf("Number of completed DD-Tasks "); dd_task_list_len(completed_dd_task_list);
-		printf("Number of overdue DD-Tasks "); dd_task_list_len(overdue_dd_task_list);
+		uint32_t len_act = len(active_dd_task_list);
+		uint32_t len_cmp = len(completed_dd_task_list);
+		uint32_t len_due = len(overdue_dd_task_list);
+
+		printf(
+		    "Number of active DD-Tasks %u \n"
+		    "Number of completed DD-Tasks %u \n"
+		    "Number of overdue DD-Tasks %u \n",
+			len_act, len_cmp, len_due
+		);
 
 		vTaskDelay(xTaskMaxTickCount / MON_RES);
 	}
