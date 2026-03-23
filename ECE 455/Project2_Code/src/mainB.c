@@ -182,7 +182,6 @@ void EXTI0_IRQHandler(void)
 	release_msg.task_id = task_ids_aperiodic++;
 	release_msg.absolute_deadline = xTaskGetTickCountFromISR() + 1000;
 
-	GPIO_SetBits(GPIOD, GPIO_Pin_14);
 	xQueueSendFromISR(xDDS_MsgQueue_Handle, &release_msg, &xHigherPriorityTaskWoken);
 
 	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
@@ -440,6 +439,7 @@ static void MON( void *pvParameters );
 static void DD_Task1( void *pvParameters );
 static void DD_Task2( void *pvParameters );
 static void DD_Task3( void *pvParameters );
+static void DD_TaskA( void *pvParameters );
 /*-----------------------------------------------------------*/
 
 int main(void)
@@ -472,9 +472,9 @@ int main(void)
 	static uint32_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
 	static uint32_t test_bench_2[2][3] = {{ 95, 150, 250}, {250, 500, 750}};
 	static uint32_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
-	static uint32_t test_bench_4[2][3] = {{ 45,  45,  45}, {455, 455, 455}};
+	static uint32_t test_bench_A[2][3] = {{ 45,  45,  45}, {455, 455, 455}};
 
-	static uint32_t (*test_bench_i)[3] = test_bench_1;
+	static uint32_t (*test_bench_i)[3] = test_bench_3;
 
 	xTaskCreate(DD_Task1, "DD_Task1", 256, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
 	xTaskCreate(DD_Task2, "DD_Task2", 256, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
@@ -689,14 +689,14 @@ static void DD_Task1(void *pvParameters)
 
 		while (completion_ticks < execution_ticks)
 		{
-			GPIO_ResetBits(GPIOD, GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
 			GPIO_SetBits(GPIOD, GPIO_Pin_12);
 			initiation_ticks = xTaskGetTickCount();
 			while (xTaskGetTickCount() == initiation_ticks);
 			completion_ticks++;
 		}
 
-		GPIO_ResetBits(GPIOD, GPIO_Pin_12);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
 		complete_dd_task(task_identification);
     }
 }
@@ -706,7 +706,7 @@ static void DD_Task2(void *pvParameters)
 	TickType_t execution_ticks = pdMS_TO_TICKS(*(uint32_t *)pvParameters);
 	for (;;)
     {
-		// printf("Red LED ON!\n");
+		// printf("Orange LED ON!\n");
 		uint32_t task_identification;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identification, portMAX_DELAY);
 
@@ -715,14 +715,14 @@ static void DD_Task2(void *pvParameters)
 
 		while (completion_ticks < execution_ticks)
 		{
-			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_14 | GPIO_Pin_15);
+			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
 			GPIO_SetBits(GPIOD, GPIO_Pin_13);
 			initiation_ticks = xTaskGetTickCount();
 			while (xTaskGetTickCount() == initiation_ticks);
 			completion_ticks++;
 		}
 
-		GPIO_ResetBits(GPIOD, GPIO_Pin_13);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
         complete_dd_task(task_identification);
     }
 }
@@ -741,24 +741,24 @@ static void DD_Task3(void *pvParameters)
 
 		while (completion_ticks < execution_ticks)
 		{
-			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14);
+			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
         	GPIO_SetBits(GPIOD, GPIO_Pin_15);
 			initiation_ticks = xTaskGetTickCount();
 			while (xTaskGetTickCount() == initiation_ticks);
 			completion_ticks++;
 		}
 
-		GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
         complete_dd_task(task_identification);
     }
 }
 
 static void DD_TaskA(void *pvParameters)
 {
-	TickType_t execution_ticks = 100;
+	TickType_t execution_ticks = 500;
 	for (;;)
     {
-		// printf("Blue LEDs ON!\n");
+		// printf("All LEDs ON!\n");
 		uint32_t task_identification;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identification, portMAX_DELAY);
 
@@ -767,14 +767,14 @@ static void DD_TaskA(void *pvParameters)
 
 		while (completion_ticks < execution_ticks)
 		{
-			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_15);
-        	GPIO_SetBits(GPIOD, GPIO_Pin_14 | GPIO_Pin_15);
+			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+        	GPIO_SetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
 			initiation_ticks = xTaskGetTickCount();
 			while (xTaskGetTickCount() == initiation_ticks);
 			completion_ticks++;
 		}
 
-		GPIO_ResetBits(GPIOD, GPIO_Pin_14 | GPIO_Pin_15);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
         complete_dd_task(task_identification);
     }
 }
