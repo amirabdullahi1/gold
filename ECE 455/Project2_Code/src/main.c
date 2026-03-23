@@ -3,10 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "stm32f4_discovery.h"
-/* Kernel includes. */
+/* Other includes. */
+#include "misc.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_gpio.h"
+#include "stm32f4xx_exti.h"
+#include "stm32f4xx_syscfg.h"
 #include "../FreeRTOS_Source/include/FreeRTOS.h"
 #include "../FreeRTOS_Source/include/queue.h"
 #include "../FreeRTOS_Source/include/semphr.h"
@@ -16,21 +19,26 @@
 
 /*---- Pragmas ----------------------------------------------*/
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 /*-----------------------------------------------------------*/
 
-
 /*--------Global Variables-----------------------------------*/
+#define HEAP_SIZE (1024 * 16)
+#define TICK_RATE 1000
+
 #define msgQUEUE_LENGTH 10
 #define tidQUEUE_LENGTH 1
 #define rspQUEUE_LENGTH 1
 
+#define PRIORITY_HD  4
 #define PRIORITY_HI  2
 #define PRIORITY_LO  1
 
 #define TIM_DEV 1
+#define MON_RES 1
 
 xQueueHandle xDDS_MsgQueue_Handle = 0;
 xQueueHandle xDDS_TidQueue_Handle = 0;
@@ -39,6 +47,9 @@ xQueueHandle xMON_RspQueue_Handle = 0;
 TaskHandle_t xDD1_Handle = NULL;
 TaskHandle_t xDD2_Handle = NULL;
 TaskHandle_t xDD3_Handle = NULL;
+TaskHandle_t xDDA_Handle = NULL;
+
+static volatile uint32_t task_ids_aperiodic = 8000;
 /*-----------------------------------------------------------*/
 
 /*
@@ -83,7 +94,7 @@ typedef struct dd_task_list {
 } dd_task_list;
 /*-----------------------------------------------------------*/
 
-/*---- LED Init ---------------------------------------------*/
+/*---- LED and User Init ------------------------------------*/
 void myGPIO_Init()
 {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
@@ -101,13 +112,87 @@ void myGPIO_Init()
 	GPIO_LED_InitStruct.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
 	GPIO_Init(GPIOD, &GPIO_LED_InitStruct);
 	GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+	GPIO_InitTypeDef GPIO_EXTI_InitStruct = {0};
+
+	GPIO_EXTI_InitStruct.GPIO_Mode = GPIO_Mode_IN;
+
+	GPIO_EXTI_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
+
+	GPIO_EXTI_InitStruct.GPIO_Pin = GPIO_Pin_0;
+
+	GPIO_Init(GPIOA, &GPIO_EXTI_InitStruct);
+}
+
+void myEXTI_Init()
+{
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
+
+	EXTI_InitTypeDef EXTI_InitStruct = {0};
+	EXTI_InitStruct.EXTI_Line = EXTI_Line0;
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
+	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitStruct);
+
+	EXTI_ClearITPendingBit(EXTI_Line0);
+
+}
+
+void myNVIC_Init()
+{
+	NVIC_InitTypeDef NVIC_InitStruct = {0};
+	NVIC_InitStruct.NVIC_IRQChannel = EXTI0_IRQn;
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY;
+	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStruct);
+
+	NVIC_ClearPendingIRQ(EXTI0_IRQn);
+
+	NVIC_SetPriority(EXTI0_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
+	NVIC_EnableIRQ(EXTI0_IRQn);
 }
 /*-----------------------------------------------------------*/
 
-/*---- DD Task List Add and Remove --------------------------*/
-void dd_task_list_add(dd_task_list **task_list, dd_task this_task) {
+/*-----------------------------------------------------------*/
+void EXTI0_IRQHandler(void)
+{
+	EXTI_ClearITPendingBit(EXTI_Line0);
+	NVIC_ClearPendingIRQ(EXTI0_IRQn);
+
+	static TickType_t last_press_time = 0;
+	TickType_t curr_press_time = xTaskGetTickCountFromISR();
+
+	if(curr_press_time - last_press_time < pdMS_TO_TICKS(200))
+		return;
+
+    last_press_time = curr_press_time;
+
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+	dds_msg release_msg = {0};
+	release_msg.dds_msg_type = msg_release_task;
+	release_msg.t_handle = xDDA_Handle;
+	release_msg.dd_t_type = APERIODIC;
+	release_msg.task_id = task_ids_aperiodic++;
+	release_msg.absolute_deadline = xTaskGetTickCountFromISR() + 1000;
+
+	xQueueSendFromISR(xDDS_MsgQueue_Handle, &release_msg, &xHigherPriorityTaskWoken);
+
+	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+/*-----------------------------------------------------------*/
+
+/*---- DD Task List Add, Remove and Length ------------------*/
+void dd_task_list_add(dd_task_list **task_list, dd_task this_task)
+{
 	dd_task_list *task_list_this = malloc(sizeof(dd_task_list));
-	if(task_list_this == NULL)
+	if (task_list_this == NULL)
 		return;
 
 	task_list_this->task = this_task;
@@ -117,10 +202,10 @@ void dd_task_list_add(dd_task_list **task_list, dd_task this_task) {
 	dd_task_list *task_list_curr = *task_list;
 
 	dd_task curr_task = {0};
-	while(task_list_curr != NULL)
+	while (task_list_curr != NULL)
 	{
 		curr_task = task_list_curr->task;
-		if(this_task.absolute_deadline < curr_task.absolute_deadline)
+		if (this_task.absolute_deadline < curr_task.absolute_deadline)
 			break;
 
 		task_list_prev = task_list_curr;
@@ -129,30 +214,31 @@ void dd_task_list_add(dd_task_list **task_list, dd_task this_task) {
 
 	task_list_this->next_task = task_list_curr;
 
-	if(task_list_prev == NULL)
+	if (task_list_prev == NULL)
 		*task_list = task_list_this;
 	else
 		task_list_prev->next_task = task_list_this;
 }
 
-void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id) {
+void dd_task_list_rmv(dd_task_list **task_list, uint32_t this_task_id)
+{
 	dd_task_list *task_list_prev = NULL;
 	dd_task_list *task_list_curr = *task_list;
 
 	dd_task curr_task = {0};
-	while(task_list_curr != NULL)
+	while (task_list_curr != NULL)
 	{
 		curr_task = task_list_curr->task;
-		if(this_task_id == curr_task.task_id)
+		if (this_task_id == curr_task.task_id)
 			break;
 
 		task_list_prev = task_list_curr;
 		task_list_curr = task_list_curr->next_task;
 	}
 
-	if(task_list_curr == NULL)
+	if (task_list_curr == NULL)
 		return;
-	if(task_list_prev == NULL)
+	if (task_list_prev == NULL)
 		*task_list = task_list_curr->next_task;
 	else
 		task_list_prev->next_task = task_list_curr->next_task;
@@ -168,7 +254,7 @@ void create_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, uin
 	new_task.t_handle = t_handle;
 	new_task.type = type;
 	new_task.task_id = task_id;
-	new_task.release_time = xTaskGetTickCount() - TIM_DEV;
+	new_task.release_time = xTaskGetTickCount();
 	new_task.absolute_deadline = absolute_deadline;
 	new_task.completion_time = 0;
 
@@ -177,7 +263,7 @@ void create_dd_task(TaskHandle_t t_handle, task_type type, uint32_t task_id, uin
 
 void delete_dd_task(uint32_t task_id, dd_task_list **deleter_list)
 {
-	if(*deleter_list == NULL)
+	if (*deleter_list == NULL)
 		return;
 
 	dd_task_list_rmv(deleter_list, task_id);
@@ -203,7 +289,7 @@ void complete_dd_task(uint32_t task_id)
     complete_msg.dds_msg_type = msg_complete_task;
     complete_msg.task_id = task_id;
 
-    xQueueSend(xDDS_MsgQueue_Handle, &complete_msg, portMAX_DELAY);
+    xQueueSendToFront(xDDS_MsgQueue_Handle, &complete_msg, portMAX_DELAY);
 }
 
 /**
@@ -216,10 +302,10 @@ void update_dd_task(dd_task_list *updater_list)
     dd_task_list *task_list_curr = updater_list;
     while (task_list_curr != NULL)
     {
-        if(uxTaskPriorityGet(task_list_curr->task.t_handle) == PRIORITY_HI)
+        if (uxTaskPriorityGet(task_list_curr->task.t_handle) == PRIORITY_HI)
 		{
 			// if (HI task exists && "HIer" task exists) -> demote HI task, promote HIer task
-			if(updater_list->task.absolute_deadline < task_list_curr->task.absolute_deadline)
+			if (updater_list->task.absolute_deadline < task_list_curr->task.absolute_deadline)
 			{
 				vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
 				vTaskSuspend(task_list_curr->task.t_handle);
@@ -234,9 +320,8 @@ void update_dd_task(dd_task_list *updater_list)
     }
 
 	// if (no HI task || HI task demoted) -> promote updater_list head
-    if(updater_list != NULL)
+    if (updater_list != NULL)
 	{
-		// xQueueSend(xDDS_TidQueue_Handle, &(updater_list->task.task_id), portMAX_DELAY);
     	xQueueOverwrite(xDDS_TidQueue_Handle, &(updater_list->task.task_id));
         vTaskPrioritySet(updater_list->task.t_handle, PRIORITY_HI);
 		vTaskResume(updater_list->task.t_handle);
@@ -294,14 +379,26 @@ dd_task_list *get_overdue_dd_task_list(void)
 }
 /*-----------------------------------------------------------*/
 
-/*-----------------------------------------------------------*/
-
-/*---- Min and geeksforgeeks.org/c/lcm-of-two-numbers-in-c --*/
+/*---- Min, Len, GCD and LCM --------------------------------*/
 uint32_t min(uint32_t a, uint32_t b)
 {
 	return a < b ? a : b;
 }
 
+uint32_t len(dd_task_list *task_list)
+{
+	uint32_t len = 0;
+    dd_task_list *task_list_curr = task_list;
+
+    while (task_list_curr != NULL)
+    {
+        len++;
+        task_list_curr = task_list_curr->next_task;
+    }
+
+    return len;
+}
+/*---- geeksforgeeks.org/c/lcm-of-two-numbers-in-c ----------*/
 uint32_t gcd(uint32_t a, uint32_t b)
 {
     if (b == 0)
@@ -319,66 +416,41 @@ uint32_t lcm(uint32_t a, uint32_t b)
 /*-----------------------------------------------------------*/
 
 /*---- Timer ------------------------------------------------*/
-static TimerHandle_t TIM_GEN;
-//static TimerHandle_t TIM_MON;
-//static TimerHandle_t TIM_OVR;
+static TimerHandle_t TIM_DDS;
 
-void vGenTimerCallback(TimerHandle_t genTimer);
-//void vMonTimerCallback(TimerHandle_t monTimer);
-//void vOvrTimerCallback(TimerHandle_t ovrTimer);
+void vDdsTimerCallback(TimerHandle_t ddsTimer);
 
-void myTIM_GEN_Init(uint32_t test_bench[3])
+void myTIM_DDS_Init(uint32_t test_bench[3])
 {
-    TIM_GEN = xTimerCreate(
-        "DD Task Gen",
-        pdMS_TO_TICKS(TIM_DEV),
-        pdFALSE,
-        test_bench,
-        vGenTimerCallback
-    );
-    configASSERT(TIM_GEN);
+	TIM_DDS = xTimerCreate(
+		"DD Task TIM",
+		pdMS_TO_TICKS(TIM_DEV),
+		pdFALSE,
+		test_bench,
+		vDdsTimerCallback
+	);
+	configASSERT(TIM_DDS);
 }
-
-//void myTIM_MON_Init(uint32_t test_bench[3])
-//{
-//    TIM_MON = xTimerCreate(
-//        "DD Task Mon",
-//        pdMS_TO_TICKS(TIM_DEV),
-//        pdFALSE,
-//        test_bench,
-//        vMonTimerCallback
-//    );
-//    configASSERT(TIM_MON);
-//}
-
-//void myTIM_OVR_Init(uint32_t test_bench[3])
-//{
-//    TIM_OVR = xTimerCreate(
-//        "DD Task Ovr",
-//        pdMS_TO_TICKS(TIM_DEV),
-//        pdFALSE,
-//        test_bench,
-//		vOvrTimerCallback
-//    );
-//    configASSERT(TIM_OVR);
-//}
 /*-----------------------------------------------------------*/
 
 /*-----------------------------------------------------------*/
 static void DDS( void *pvParameters );
-static void DD_Monitor( void *pvParameters );
+static void MON( void *pvParameters );
 static void DD_Task1( void *pvParameters );
 static void DD_Task2( void *pvParameters );
 static void DD_Task3( void *pvParameters );
+static void DD_TaskA( void *pvParameters );
 /*-----------------------------------------------------------*/
 
 int main(void)
 {
-	/* Disable time slicing. Enable preemption. */
-	if(configUSE_TIME_SLICING || !configUSE_PREEMPTION)
+	/* Disable time slicing. Enable preemption. Configure heap size. Configure tick rate. Configure priority. */
+	if (configUSE_TIME_SLICING || !configUSE_PREEMPTION || configTOTAL_HEAP_SIZE < HEAP_SIZE || configTICK_RATE_HZ != TICK_RATE || configTIMER_TASK_PRIORITY >= PRIORITY_HD)
 		return -1;
 
 	myGPIO_Init();
+	myEXTI_Init();
+	myNVIC_Init();
 
 	/* Configure the system ready to run the demo.  The clock configuration
 	can be done here if it was not done before main() was called. */
@@ -387,7 +459,7 @@ int main(void)
 	/* Create the queues used by the queue send and queue receive tasks.
 	http://www.freertos.org/a00116.html */
 
-    // Used for the DDS scheduler.
+    // Used for the DDS.
     xDDS_MsgQueue_Handle = xQueueCreate(msgQUEUE_LENGTH, sizeof(dds_msg));
 	xDDS_TidQueue_Handle = xQueueCreate(tidQUEUE_LENGTH, sizeof(uint32_t));
 	xMON_RspQueue_Handle = xQueueCreate(rspQUEUE_LENGTH, sizeof(dd_task_list *));
@@ -400,35 +472,34 @@ int main(void)
 	static uint32_t test_bench_1[2][3] = {{ 95, 150, 250}, {500, 500, 750}};
 	static uint32_t test_bench_2[2][3] = {{ 95, 150, 250}, {250, 500, 750}};
 	static uint32_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
-	static uint32_t test_bench_4[2][3] = {{ 5000, 2000, 3000}, {10999, 10997, 11000}};
+	static uint32_t test_bench_A[2][3] = {{ 45,  45,  45}, {455, 455, 455}};
 
-	static uint32_t (*test_bench_i)[3] = test_bench_2;
+	static uint32_t (*test_bench_i)[3] = test_bench_3;
 
 	xTaskCreate(DD_Task1, "DD_Task1", 256, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
 	xTaskCreate(DD_Task2, "DD_Task2", 256, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
 	xTaskCreate(DD_Task3, "DD_Task3", 256, &test_bench_i[0][2], PRIORITY_LO, &xDD3_Handle);
+	xTaskCreate(DD_TaskA, "DD_TaskA", 256, NULL, PRIORITY_LO, &xDDA_Handle);
 
 	vTaskSuspend(xDD1_Handle);
 	vTaskSuspend(xDD2_Handle);
 	vTaskSuspend(xDD3_Handle);
 
-	xTaskCreate(DDS, "DDS", 256, NULL, 3, NULL);
-	xTaskCreate(DD_Monitor, "DD_Monitor", 256, test_bench_i[1], 3, NULL);
+	xTaskCreate(DDS, "DDS", 256, NULL, PRIORITY_HD, NULL);
+	xTaskCreate(MON, "MON", 256, &test_bench_i[1], PRIORITY_HD, NULL);
 
-	/* Initialize the timers. TODO: TIM_MON */
-	myTIM_GEN_Init(test_bench_i[1]);
-	// myTIM_MON_Init(test_bench_i[1]);
-    xTimerStart(TIM_GEN, 0);
-    // xTimerStart(TIM_MON, 0);
+	/* Initialize the timer. */
+	myTIM_DDS_Init(test_bench_i[1]);
+    xTimerStart(TIM_DDS, 0);
 
-	/* Start the tasks and timer running. */
+	/* Start the tasks (TODO: APERIODIC) and timer running. */
 	vTaskStartScheduler();
 
 	return 0;
 }
 
 /*-----------------------------------------------------------*/
-void vGenTimerCallback(TimerHandle_t genTimer)
+void vDdsTimerCallback(TimerHandle_t ddsTimer)
 {
 	/* Initialization. */
 	static uint8_t initialized = 0;
@@ -444,9 +515,9 @@ void vGenTimerCallback(TimerHandle_t genTimer)
 
 	uint32_t task_interval;
 
-    if(initialized == 0)
+    if (initialized == 0)
     {
-        test_bench_X = (uint32_t *)pvTimerGetTimerID(genTimer);
+		test_bench_X = (uint32_t *)pvTimerGetTimerID(ddsTimer);
 		configASSERT(test_bench_X);
 
         DD_task1_period = test_bench_X[0];
@@ -461,20 +532,20 @@ void vGenTimerCallback(TimerHandle_t genTimer)
     }
 
 	static uint32_t task_id_counter = 0;
-	if(task1_interval >= DD_task1_period)
+	if (task1_interval >= DD_task1_period)
 	{
 		task1_interval = 0;
-		release_dd_task(xDD1_Handle, PERIODIC, task_id_counter++, (uint32_t)xTaskGetTickCount() + DD_task1_period);
+		release_dd_task(xDD1_Handle, PERIODIC, task_id_counter++, xTaskGetTickCount() + DD_task1_period);
 	}
-	if(task2_interval >= DD_task2_period)
+	if (task2_interval >= DD_task2_period)
 	{
 		task2_interval = 0;
-		release_dd_task(xDD2_Handle, PERIODIC, task_id_counter++, (uint32_t)xTaskGetTickCount() + DD_task2_period);
+		release_dd_task(xDD2_Handle, PERIODIC, task_id_counter++, xTaskGetTickCount() + DD_task2_period);
 	}
-	if(task3_interval >= DD_task3_period)
+	if (task3_interval >= DD_task3_period)
 	{
 		task3_interval = 0;
-		release_dd_task(xDD3_Handle, PERIODIC, task_id_counter++, (uint32_t)xTaskGetTickCount() + DD_task3_period);
+		release_dd_task(xDD3_Handle, PERIODIC, task_id_counter++, xTaskGetTickCount() + DD_task3_period);
 	}
 
 	task_interval = min(DD_task1_period - task1_interval, min(DD_task2_period - task2_interval, DD_task3_period - task3_interval));
@@ -482,7 +553,7 @@ void vGenTimerCallback(TimerHandle_t genTimer)
 	task2_interval += task_interval;
 	task3_interval += task_interval;
 
-	xTimerChangePeriod(genTimer, pdMS_TO_TICKS(task_interval), 0);
+	xTimerChangePeriod(ddsTimer, pdMS_TO_TICKS(task_interval), portMAX_DELAY);
 }
 /*-----------------------------------------------------------*/
 
@@ -494,60 +565,56 @@ static void DDS( void *pvParameters )
     dd_task_list *overdue_task_list   = NULL;
 
 	dds_msg msg;
-	while(1)
+	for (;;)
 	{
-		if(xQueueReceive(xDDS_MsgQueue_Handle, &msg, portMAX_DELAY) == pdTRUE)
+		if (xQueueReceive(xDDS_MsgQueue_Handle, &msg, portMAX_DELAY) == pdTRUE)
 		{
-			// taskENTER_CRITICAL();
-
 			do {
 				switch(msg.dds_msg_type)
 				{
 					case msg_release_task:
 					{
-						// Promote and resume incompleted tasks second after create
+						/* Promote and resume incompleted tasks second after create. */
+						// printf("Task %u released %ums\n", msg.task_id, xTaskGetTickCount());
 						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
-
-                        // Handles overdue tasks and places them within the overdue task list
-                        dd_task_list *curr = active_task_list;
-                        while(curr != NULL)
-                        {
-                        	dd_task_list *next_task = curr->next_task;
-                            if(curr->task.absolute_deadline < (uint32_t)xTaskGetTickCount())
-                            {
-                            	dd_task_list_add(&overdue_task_list, curr->task);
-                                vTaskPrioritySet(curr->task.t_handle, PRIORITY_LO);
-                                vTaskSuspend(curr->task.t_handle);
-                                delete_dd_task(curr->task.task_id, &active_task_list);
-                            }
-                            curr = next_task;
-                        }
-
 						break;
 					}
 
 					case msg_complete_task:
 					{
 						dd_task_list *task_list_curr = active_task_list;
-						while(task_list_curr != NULL)
+						while (task_list_curr != NULL)
 						{
-							if(task_list_curr->task.task_id == msg.task_id)
+							if (task_list_curr->task.task_id == msg.task_id)
+							{
+								if (task_list_curr->task.absolute_deadline < xTaskGetTickCount())
+								{
+									/* Ignore completion time. */
+									dd_task_list_add(&overdue_task_list, task_list_curr->task);
+
+									/* Demote and suspend overdue task first before delete. */
+									vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
+									vTaskSuspend(task_list_curr->task.t_handle);
+									delete_dd_task(task_list_curr->task.task_id, &active_task_list);
+
+									break;
+								}
+
+								/* Update completion time. */
+								// printf("Task %u complete %ums\n", msg.task_id, xTaskGetTickCount());
+								task_list_curr->task.completion_time = xTaskGetTickCount();
+								dd_task_list_add(&completed_task_list, task_list_curr->task);
+
+								/* Demote and suspend completed task first before delete. */
+								vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
+								vTaskSuspend(task_list_curr->task.t_handle);
+								delete_dd_task(msg.task_id, &active_task_list);
 								break;
+							}
 
 							task_list_curr = task_list_curr->next_task;
 						}
 
-						if (task_list_curr == NULL)
-						    break;
-
-						// Completion_time update
-						task_list_curr->task.completion_time = xTaskGetTickCount() - TIM_DEV;
-						dd_task_list_add(&completed_task_list, task_list_curr->task);
-
-						// Demote and suspend completed task first before delete
-						vTaskPrioritySet(task_list_curr->task.t_handle, PRIORITY_LO);
-						vTaskSuspend(task_list_curr->task.t_handle);
-						delete_dd_task(msg.task_id, &active_task_list);
 						break;
 					}
 
@@ -575,15 +642,14 @@ static void DDS( void *pvParameters )
 					}
 
 				}
-			} while(xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);
+			} while (xQueueReceive(xDDS_MsgQueue_Handle, &msg, 0) == pdTRUE);
 
 			update_dd_task(active_task_list);
-			// taskEXIT_CRITICAL();
 		}
 	}
 }
 
-static void DD_Monitor( void *pvParameters )
+static void MON( void *pvParameters )
 {
 	static uint32_t *test_bench_X;
 	static uint32_t xTaskMaxTickCount;
@@ -591,33 +657,19 @@ static void DD_Monitor( void *pvParameters )
 	test_bench_X = (uint32_t *)pvParameters;
 	xTaskMaxTickCount = pdMS_TO_TICKS(lcm(test_bench_X[0], lcm(test_bench_X[1], test_bench_X[2])));
 
-	while(1)
+	for (;;)
 	{
-//		taskENTER_CRITICAL(); // Could cause a deadlock...
+		dd_task_list *active_dd_task_list = get_active_dd_task_list();
+		dd_task_list *completed_dd_task_list = get_completed_dd_task_list();
+		dd_task_list *overdue_dd_task_list = get_overdue_dd_task_list();
 
-		if((uint32_t)xTaskGetTickCount() > xTaskMaxTickCount)
-			NVIC_SystemReset();
+		uint32_t len_act = len(active_dd_task_list);
+		uint32_t len_cmp = len(completed_dd_task_list);
+		uint32_t len_due = len(overdue_dd_task_list);
 
-			dd_task_list *active = get_active_dd_task_list();
-			dd_task_list *completed = get_completed_dd_task_list();
-			dd_task_list *overdue = get_overdue_dd_task_list();
+		printf(" # active %u \n # completed %u \n # overdue %u \n\n", len_act, len_cmp, len_due);
 
-            uint32_t active_count = 0;
-            uint32_t completed_count = 0;
-            uint32_t overdue_count = 0;
-
-            dd_task_list *curr = active;
-            while(curr != NULL) { active_count++; curr = curr->next_task; }
-            curr = completed;
-            while(curr != NULL) { completed_count++; curr = curr->next_task; }
-            curr = overdue;
-            while(curr != NULL) { overdue_count++; curr = curr->next_task; }
-
-            printf("Active: %lu  Completed: %lu  Overdue: %lu\n", active_count, completed_count, overdue_count);
-
-            vTaskDelay(pdMS_TO_TICKS(1000)); // Give it time for the prinf to register before moving on...
-
-//		taskEXIT_CRITICAL();
+		vTaskDelay(xTaskMaxTickCount / MON_RES);
 	}
 }
 /*-----------------------------------------------------------*/
@@ -625,7 +677,7 @@ static void DD_Monitor( void *pvParameters )
 /*---- User-Defined F-Tasks ---------------------------------*/
 static void DD_Task1(void *pvParameters)
 {
-	TickType_t execution_ticks = *(uint32_t *)pvParameters;
+	TickType_t execution_ticks = pdMS_TO_TICKS(*(uint32_t *)pvParameters);
 	for (;;)
     {
 		// printf("Green LED ON!\n");
@@ -637,24 +689,24 @@ static void DD_Task1(void *pvParameters)
 
 		while (completion_ticks < execution_ticks)
 		{
-			GPIO_ResetBits(GPIOD, GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
 			GPIO_SetBits(GPIOD, GPIO_Pin_12);
 			initiation_ticks = xTaskGetTickCount();
 			while (xTaskGetTickCount() == initiation_ticks);
 			completion_ticks++;
 		}
 
-		GPIO_ResetBits(GPIOD, GPIO_Pin_12);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
 		complete_dd_task(task_identification);
     }
 }
 
 static void DD_Task2(void *pvParameters)
 {
-	TickType_t execution_ticks = *(uint32_t *)pvParameters;
+	TickType_t execution_ticks = pdMS_TO_TICKS(*(uint32_t *)pvParameters);
 	for (;;)
     {
-		// printf("Red LED ON!\n");
+		// printf("Orange LED ON!\n");
 		uint32_t task_identification;
 		xQueueReceive(xDDS_TidQueue_Handle, &task_identification, portMAX_DELAY);
 
@@ -663,21 +715,21 @@ static void DD_Task2(void *pvParameters)
 
 		while (completion_ticks < execution_ticks)
 		{
-			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_14 | GPIO_Pin_15);
+			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
 			GPIO_SetBits(GPIOD, GPIO_Pin_13);
 			initiation_ticks = xTaskGetTickCount();
 			while (xTaskGetTickCount() == initiation_ticks);
 			completion_ticks++;
 		}
 
-		GPIO_ResetBits(GPIOD, GPIO_Pin_13);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
         complete_dd_task(task_identification);
     }
 }
 
 static void DD_Task3(void *pvParameters)
 {
-	TickType_t execution_ticks = *(uint32_t *)pvParameters;
+	TickType_t execution_ticks = pdMS_TO_TICKS(*(uint32_t *)pvParameters);
 	for (;;)
     {
 		// printf("Blue LED ON!\n");
@@ -689,14 +741,40 @@ static void DD_Task3(void *pvParameters)
 
 		while (completion_ticks < execution_ticks)
 		{
-			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14);
+			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
         	GPIO_SetBits(GPIOD, GPIO_Pin_15);
 			initiation_ticks = xTaskGetTickCount();
 			while (xTaskGetTickCount() == initiation_ticks);
 			completion_ticks++;
 		}
 
-		GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+        complete_dd_task(task_identification);
+    }
+}
+
+static void DD_TaskA(void *pvParameters)
+{
+	TickType_t execution_ticks = 500;
+	for (;;)
+    {
+		// printf("All LEDs ON!\n");
+		uint32_t task_identification;
+		xQueueReceive(xDDS_TidQueue_Handle, &task_identification, portMAX_DELAY);
+
+		TickType_t completion_ticks = 0;
+		TickType_t initiation_ticks = 0;
+
+		while (completion_ticks < execution_ticks)
+		{
+			GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+        	GPIO_SetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+			initiation_ticks = xTaskGetTickCount();
+			while (xTaskGetTickCount() == initiation_ticks);
+			completion_ticks++;
+		}
+
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
         complete_dd_task(task_identification);
     }
 }
@@ -743,7 +821,7 @@ volatile size_t xFreeStackSpace;
 	remains unallocated. */
 	xFreeStackSpace = xPortGetFreeHeapSize();
 
-	if( xFreeStackSpace > 100 )
+	if ( xFreeStackSpace > 100 )
 	{
 		/* By now, the kernel has allocated everything it is going to, so
 		if there is a lot of heap remaining unallocated then
