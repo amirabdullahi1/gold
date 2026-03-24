@@ -474,7 +474,7 @@ int main(void)
 	static uint32_t test_bench_3[2][3] = {{100, 200, 200}, {500, 500, 500}};
 	static uint32_t test_bench_A[2][3] = {{ 45,  45,  45}, {455, 455, 455}};
 
-	static uint32_t (*test_bench_i)[3] = test_bench_3;
+	static uint32_t (*test_bench_i)[3] = test_bench_A;
 
 	xTaskCreate(DD_Task1, "DD_Task1", 256, &test_bench_i[0][0], PRIORITY_LO, &xDD1_Handle);
 	xTaskCreate(DD_Task2, "DD_Task2", 256, &test_bench_i[0][1], PRIORITY_LO, &xDD2_Handle);
@@ -576,6 +576,7 @@ static void DDS( void *pvParameters )
 					{
 						/* Promote and resume incompleted tasks second after create. */
 						// printf("Task %u released %ums\n", msg.task_id, xTaskGetTickCount());
+						uint32_t curr_ms = xTaskGetTickCount(); uint32_t task_id =  msg.task_id;
 						create_dd_task(msg.t_handle, msg.dd_t_type, msg.task_id, msg.absolute_deadline, &active_task_list);
 						break;
 					}
@@ -602,6 +603,7 @@ static void DDS( void *pvParameters )
 
 								/* Update completion time. */
 								// printf("Task %u complete %ums\n", msg.task_id, xTaskGetTickCount());
+								uint32_t curr_ms = xTaskGetTickCount(); uint32_t task_id =  msg.task_id;
 								task_list_curr->task.completion_time = xTaskGetTickCount();
 								dd_task_list_add(&completed_task_list, task_list_curr->task);
 
