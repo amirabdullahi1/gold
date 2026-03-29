@@ -31,16 +31,18 @@ Xd_train, Xd_test, yd_train, yd_test = train_test_split(
 # the predictions over Xd_test in yd_predict 
 
 # YOUR CODE GOES HERE
-
+clf = GaussianNB()
+clf.fit(Xd_train, yd_train)
+yd_predict = clf.predict(Xd_test)
 
 
 # print(
 #    f"Classification report for classifier {clf}:\n"
 #    f"{classification_report(yd_test, yd_predict)}\n"
 #)
-# gaussian_digits_report = classification_report(yd_test, yd_predict,output_dict=True)
+gaussian_digits_report = classification_report(yd_test, yd_predict,output_dict=True)
 # Find the gaussian_accuracy rounding to two digits 
-# gaussian_accuracy = np.round(gaussian_digits_report["accuracy"],2)
+gaussian_accuracy = np.round(gaussian_digits_report["accuracy"],2)
 
 
 # Based on the classification report calculate a list of digits sorted by f1-score 
@@ -49,11 +51,20 @@ Xd_train, Xd_test, yd_train, yd_test = train_test_split(
 digits = []
 
 # YOUR CODE GOES HERE
-
+for i in range(10):
+    digits.append((i, gaussian_digits_report[str(i)]["f1-score"]))
+digits.sort(key=lambda x: x[1], reverse=False)
+sorted_digits = [digit[0] for digit in digits]
 
 # Repeat the process for a SVM classifier
 
 # YOUR CODE GOES HERE
+svc = svm.SVC()
+svc.fit(Xd_train, yd_train)
+yd_predict = svc.predict(Xd_test)
+
+svm_digits_report = classification_report(yd_test, yd_predict,output_dict=True)
+svm_accuracy = np.round(svm_digits_report["accuracy"],2)
 
 
 # print(sorted_digits) 
