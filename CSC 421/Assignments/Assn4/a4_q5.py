@@ -67,6 +67,8 @@ marginals = X_train_cap["cap-shape"].value_counts(normalize=True).to_dict()
 for c in classes:
     class_data = X_train_cap[X_train_cap["class"] == c]
     # YOUR CODE GOES HERE 
+    likelihood = class_data["cap-shape"].value_counts(normalize=True).reindex(cap_shapes, fill_value=0).to_dict()
+    likelihoods[c] = likelihood
 
 
 print("Likelihoods ",likelihoods)
@@ -84,7 +86,7 @@ for a in cap_shapes:
     posteriors[a] = {} 
     for c in classes:
         # YOUR CODE GOES BELOW AND REPLACE THE 0.0 
-        posteriors[a][c] = 0.0 
+        posteriors[a][c] = likelihoods[c][a] * priors[c] / marginals[a]
 print("Posteriors", posteriors)
 
 
@@ -96,7 +98,7 @@ prior_edible = np.round(priors['e'],2)
 posterior_edible_if_bell = (np.round(posteriors['b']['e'],2))
 posterior_edible_if_flat = (np.round(posteriors['x']['e'],2))
 
-# print('Prior probability the mushroom is edible : ', prior_edible)
-# print('Posterior probability the mushroom is edible if it has a flat cap_shape :', posterior_edible_if_flat)
-# print('Posterior probability the mushroom is edible if it has a bell cap_shape :', posterior_edible_if_bell)
+print('Prior probability the mushroom is edible : ', prior_edible)
+print('Posterior probability the mushroom is edible if it has a flat cap_shape :', posterior_edible_if_flat)
+print('Posterior probability the mushroom is edible if it has a bell cap_shape :', posterior_edible_if_bell)
 
