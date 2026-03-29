@@ -54,12 +54,19 @@ print(f"y_test shape: {y_test.shape}")
 
 
 # YOUR CODE GOES HERE 
+categoricalNB = CategoricalNB()
+categoricalNB.fit(X_train, y_train)
+y_pred = categoricalNB.predict(X_test)
+cl_report = classification_report(y_test, y_pred, output_dict=True)
 
 
 # Create training and testing datasets with just the cap-shape
 
 # YOUR CODE GOES HERE 
+X_cap = data[["cap-shape"]]
+y_cap = y         
 
+X_cap_train, X_cap_test, y_cap_train, y_cap_test = train_test_split(X_cap, y_cap, test_size=0.2, random_state=42)
 
 # print(X_train[0:10])
 # print(X_train_cap[0:10]) 
@@ -69,13 +76,16 @@ print(f"y_test shape: {y_test.shape}")
 
 
 # YOUR CODE GOES HERE 
-
+categoricalNB_cap = CategoricalNB()
+categoricalNB_cap.fit(X_cap_train, y_cap_train)
+y_cap_pred = categoricalNB_cap.predict(X_cap_test)
+cl_cap_report = classification_report(y_cap_test, y_cap_pred, output_dict=True)
 
 # Uncomment the lines below when you have the classifiers trained
 
-# cb_accuracy = np.round(cl_report["accuracy"],2)
-# cb_cap_accuracy = np.round(cl_cap_report["accuracy"],2)
-# cb_drop = np.round(cb_accuracy - cb_cap_accuracy, 2)
+cb_accuracy = np.round(cl_report["accuracy"],2)
+cb_cap_accuracy = np.round(cl_cap_report["accuracy"],2)
+cb_drop = np.round(cb_accuracy - cb_cap_accuracy, 2)
 # print("Naive Bayes Categorical Accuracy drop: ", cb_accuracy, " - ", cb_cap_accuracy, " = ", cb_drop)
 
 
@@ -86,11 +96,20 @@ print(f"y_test shape: {y_test.shape}")
 # for the whole dataset as well as just the cap_shape
 
 # YOUR CODE GOES HERE
+dt = tree.DecisionTreeClassifier(max_depth=2, random_state=0)
+dt.fit(X_train, y_train)
+y_pred = dt.predict(X_test)
+cl_report = classification_report(y_test, y_pred, output_dict=True)
+
+dt_cap = tree.DecisionTreeClassifier(max_depth=2, random_state=0)
+dt_cap.fit(X_cap_train, y_cap_train)
+y_cap_pred = dt_cap.predict(X_cap_test)
+cl_cap_report = classification_report(y_cap_test, y_cap_pred, output_dict=True)
 
 # Uncomment the lines below when you have the classifiers trained
 
-# dt_accuracy = np.round(cl_report["accuracy"],2)
-# dt_cap_accuracy = np.round(cl_cap_report["accuracy"],2)
-# dt_drop = np.round(dt_accuracy - dt_cap_accuracy, 2)
+dt_accuracy = np.round(cl_report["accuracy"],2)
+dt_cap_accuracy = np.round(cl_cap_report["accuracy"],2)
+dt_drop = np.round(dt_accuracy - dt_cap_accuracy, 2)
 # print("Decision Tree Accuracy drop: ", dt_accuracy, " - ", dt_cap_accuracy, " = ", dt_drop)
 
