@@ -1,0 +1,16 @@
+2020-07-22: linux-image-4.15.0-109-generic
+2020-07-22: linux-modules-4.15.0-109-generic
+2020-07-22: libpython2.7-minimal
+2020-07-22: libpython2.7-stdlib
+2020-07-22: python2.7-minimal
+2020-07-22: python2.7
+2020-07-22: mime-support
+2020-07-22: man-db
+2020-07-22: libpython3.6-minimal
+2020-07-22: libpython3.6-stdlib
+2020-07-22: python3.6-minimal
+2020-07-22: libpython3.6
+2020-07-22: python3.6
+2020-07-22: libc-bin
+2020-07-22: man-db
+2020-07-22: mime-support

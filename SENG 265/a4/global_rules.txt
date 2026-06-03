@@ -1,0 +1,1 @@
+Although global variables are discouraged, it is because their value may change state over time. That written, Python uses a convention called "named constants" which look like global variables but are not used as mutable state. These variables are (a) almost always global and (b) always names as AS_SHOUTING_ALLCAPS_VARIABLE_NAMES.

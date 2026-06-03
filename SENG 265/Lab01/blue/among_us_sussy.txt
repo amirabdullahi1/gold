@@ -1,0 +1,6 @@
+In this course we use a command-line interface; this gives us a better understanding of aspects of
+the development process which might be hidden inside an IDE
+	– compilation
+	– source code management
+	– profiling
+	– testing, etc.

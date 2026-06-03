@@ -1,0 +1,11 @@
+commit 11fdd9077ef9b4186478367475c95ac81dde6b2a
+Author: Amir Abdullahi <amirabdullahi1@uvic.ca>
+Date:   Thu Sep 22 11:55:02 2022 -0700
+
+    adding the commit_log.txt file
+
+commit d0d00bbdea91c974f2258e59ab026d358ebd6703
+Author: Lynn Palmer <lpalmer@uvic.ca>
+Date:   Fri Sep 9 11:26:52 2022 -0700
+
+    initial
