@@ -1,0 +1,470 @@
+2025/10/01 23:01:19 [testMake] Testing Makefile exists and can compile ssi, 0.25
+2025/10/01 23:01:19 [COMMAND]: /usr/bin/make -C . clean
+2025/10/01 23:01:19 rm -f ssi
+2025/10/01 23:01:19 [COMMAND]: /usr/bin/make -C .
+2025/10/01 23:01:24 gcc -g -Wall -Wextra -std=c11 -Iinclude src/ssi.c -lreadline -ltermcap -o ssi
+src/ssi.c:21:22: warning: unused parameter 'signum' [-Wunused-parameter]
+   21 | void int_handler(int signum) {
+      |                      ^
+src/ssi.c:29:22: warning: unused parameter 'signum' [-Wunused-parameter]
+   29 | void kid_handler(int signum) {
+      |                      ^
+2 warnings generated.
+2025/10/01 23:01:24 ==== Test name: testMake, Mark received: 0.25 ====
+
+2025/10/01 23:01:25 [testREADME] Testing README file exists, 0.25
+2025/10/01 23:01:25 [testREADME] README content: 
+# p1
+
+
+
+## Getting started
+
+To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+
+Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+
+## Add your files
+
+- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
+- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+
+```
+cd existing_repo
+git remote add origin https://gitlab.csc.uvic.ca/courses/2025091/CSC360_COSI/assignments/amirabdullahi1/p1.git
+git branch -M main
+git push -uf origin main
+```
+
+## Integrate with your tools
+
+- [ ] [Set up project integrations](https://gitlab.csc.uvic.ca/courses/2025091/CSC360_COSI/assignments/amirabdullahi1/p1/-/settings/integrations)
+
+## Collaborate with your team
+
+- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
+- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
+- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
+- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
+- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+
+## Test and Deploy
+
+Use the built-in continuous integration in GitLab.
+
+- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
+- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
+- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
+- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
+- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+
+***
+
+# Editing this README
+
+When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+
+## Suggestions for a good README
+
+Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+
+## Name
+Choose a self-explaining name for your project.
+
+## Description
+Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+
+## Badges
+On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+
+## Visuals
+Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+
+## Installation
+Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+
+## Usage
+Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+
+## Support
+Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+
+## Roadmap
+If you have ideas for releases in the future, it is a good idea to list them in the README.
+
+## Contributing
+State if you are open to contributions and what your requirements are for accepting them.
+
+For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+
+You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+
+## Authors and acknowledgment
+Show your appreciation to those who have contributed to the project.
+
+## License
+For open source projects, say how it is licensed.
+
+## Project status
+If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+
+2025/10/01 23:01:25 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.25]): 
+2025/10/01 23:01:56 Mark received: y
+2025/10/01 23:01:56 ==== Test name: testREADME, Mark received: 0.25 ====
+
+2025/10/01 23:01:57 [testExecSSI] Testing your ssi can be executed without additional parameter, shows the correct prompt, and exit on EOF, 0.50
+2025/10/01 23:01:57 [COMMAND]: /Users/aabdul/Desktop/CSC360/p1/ssi
+2025/10/01 23:01:57 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:01:57 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.50]): 
+2025/10/01 23:02:07 Mark received: y
+2025/10/01 23:02:07 ==== Test name: testExecSSI, Mark received: 0.50 ====
+
+2025/10/01 23:02:08 [testExec] Testing exec commands without parameters, 1.00
+2025/10/01 23:02:08 [COMMAND]: /Users/aabdul/Desktop/CSC360/p1/ssi
+2025/10/01 23:02:08 Sending command to SSI: ls  
+2025/10/01 23:02:08 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > include
+Makefile
+marking-macos-amd64
+README.md
+self-marking.log
+src
+ssi
+ssi.dSYM
+temp
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:02:08 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:02:23 Mark received: y
+2025/10/01 23:02:23 [COMMAND]: /Users/aabdul/Desktop/CSC360/p1/ssi
+2025/10/01 23:02:23 Sending command to SSI: whoami  
+2025/10/01 23:02:24 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > aabdul
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:02:24 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:02:40 Mark received: y
+2025/10/01 23:02:40 [COMMAND]: /Users/aabdul/Desktop/CSC360/p1/ssi
+2025/10/01 23:02:40 Sending command to SSI: uname  
+2025/10/01 23:02:40 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > Darwin
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:02:40 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:02:50 Mark received: y
+2025/10/01 23:02:50 [COMMAND]: /Users/aabdul/Desktop/CSC360/p1/ssi
+2025/10/01 23:02:50 Sending command to SSI: date  
+2025/10/01 23:02:50 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > Wed Oct  1 23:02:50 PDT 2025
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:02:50 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:03:05 Mark received: y
+2025/10/01 23:03:05 [COMMAND]: /Users/aabdul/Desktop/CSC360/p1/ssi
+2025/10/01 23:03:05 Sending command to SSI: hostname  
+2025/10/01 23:03:05 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > Mac.hitronhub.home
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:03:05 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:03:09 Mark received: y
+2025/10/01 23:03:09 ==== Test name: testExec, Mark received: 1.00 ====
+
+2025/10/01 23:03:10 [testExecWithParameters] Testing exec with parameters, 1.00
+2025/10/01 23:03:10 Sending command to SSI: 
+ls temp
+
+2025/10/01 23:03:10 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > A
+B
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:03:10 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:03:42 Mark received: y
+2025/10/01 23:03:42 Sending command to SSI: 
+ls -alh
+
+2025/10/01 23:03:43 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > total 4128
+drwxr-xr-x@ 13 aabdul  staff   416B Oct  1 23:02 .
+drwxr-xr-x@  5 aabdul  staff   160B Sep 28 11:06 ..
+drwxr-xr-x@ 15 aabdul  staff   480B Oct  1 16:24 .git
+-rw-r--r--@  1 aabdul  staff    57B Oct  1 17:50 .gitignore
+drwxr-xr-x@  2 aabdul  staff    64B Oct  1 19:05 include
+-rw-r--r--@  1 aabdul  staff   154B Oct  1 19:05 Makefile
+-rwxrwxrwx@  1 aabdul  staff   2.0M Sep 30 18:34 marking-macos-amd64
+-rw-r--r--@  1 aabdul  staff   6.1K Sep 27 12:16 README.md
+-rw-r--r--@  1 aabdul  staff    23K Oct  1 23:03 self-marking.log
+drwxr-xr-x@  3 aabdul  staff    96B Oct  1 19:05 src
+-rwxr-xr-x@  1 aabdul  staff    15K Oct  1 23:01 ssi
+drwxr-xr-x@  3 aabdul  staff    96B Oct  1 14:33 ssi.dSYM
+drwxr-xr-x@  4 aabdul  staff   128B Oct  1 23:02 temp
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:03:43 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:03:45 Mark received: y
+2025/10/01 23:03:45 Sending command to SSI: 
+ls temp/A/C
+
+2025/10/01 23:03:45 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > AC.txt
+D
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:03:45 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:03:51 Mark received: y
+2025/10/01 23:03:51 Sending command to SSI: 
+cat temp/A/C/AC.txt
+
+2025/10/01 23:03:51 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > This is the content for AC.txt
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:03:51 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:04:09 Mark received: y
+2025/10/01 23:04:09 Sending command to SSI: 
+echo hello
+
+2025/10/01 23:04:10 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > hello
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:04:10 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:04:14 Mark received: y
+2025/10/01 23:04:14 ==== Test name: testExecWithParameters, Mark received: 1.00 ====
+
+2025/10/01 23:04:15 [testNotExistCommand] Testing non-existent command, 1.00
+2025/10/01 23:04:15 Sending command to SSI: 
+nonexistent 
+
+
+2025/10/01 23:04:16 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:04:16 nonexistent: No such file or directory
+
+2025/10/01 23:04:16 Do you want to award mark for this test? (y/n or input a floating number between [0, 1.00]): 
+2025/10/01 23:04:23 Mark received: y
+2025/10/01 23:04:23 ==== Test name: testNotExistCommand, Mark received: 1.00 ====
+
+2025/10/01 23:04:24 [testExecLongRunning] Testing exec with long running command, 1.00
+2025/10/01 23:04:24 [COMMAND]: ./ssi
+2025/10/01 23:04:24 Waiting 5 seconds before sending Ctrl-C signal
+2025/10/01 23:04:29 Sending interrupt signal Ctrl-C
+2025/10/01 23:04:29 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > PING 1.1.1.1 (1.1.1.1): 56 data bytes
+64 bytes from 1.1.1.1: icmp_seq=0 ttl=60 time=20.661 ms
+64 bytes from 1.1.1.1: icmp_seq=1 ttl=60 time=19.813 ms
+64 bytes from 1.1.1.1: icmp_seq=2 ttl=60 time=14.266 ms
+64 bytes from 1.1.1.1: icmp_seq=3 ttl=60 time=13.648 ms
+64 bytes from 1.1.1.1: icmp_seq=4 ttl=60 time=17.872 ms
+2025/10/01 23:04:29 
+2025/10/01 23:04:29 --- 1.1.1.1 ping statistics ---
+5 packets transmitted, 5 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 13.648/17.252/20.661/2.845 ms
+2025/10/01 23:04:29 
+
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+2025/10/01 23:04:29 
+2025/10/01 23:04:29 Do you want to award mark for this test? (y/n or input a floating number between [0, 1.00]): 
+2025/10/01 23:04:37 Mark received: y
+2025/10/01 23:04:37 ==== Test name: testExecLongRunning, Mark received: 1.00 ====
+
+2025/10/01 23:04:38 [testPwd] Testing printing current working directory, 1.00
+2025/10/01 23:04:38 Sending command to SSI: 
+pwd 
+
+2025/10/01 23:04:38 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > /Users/aabdul/Desktop/CSC360/p1
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:04:38 pwd should output: 
+/Users/aabdul/Desktop/CSC360/p1
+2025/10/01 23:04:38 Do you want to award mark for this test? (y/n or input a floating number between [0, 1.00]): 
+2025/10/01 23:06:51 Mark received: y
+2025/10/01 23:06:51 ==== Test name: testPwd, Mark received: 1.00 ====
+
+2025/10/01 23:06:52 [testChangeRelativeDir] Testing changing relative directory, 1.00
+2025/10/01 23:06:52 Sending command to SSI: 
+cd ./temp
+pwd
+
+2025/10/01 23:06:52 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1/temp > /Users/aabdul/Desktop/CSC360/p1/temp
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1/temp > 
+
+2025/10/01 23:06:52 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.25]): 
+2025/10/01 23:07:55 Mark received: y
+2025/10/01 23:07:55 Sending command to SSI: 
+cd ./A
+pwd
+
+2025/10/01 23:07:56 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1/temp > root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1/temp/A > /Users/aabdul/Desktop/CSC360/p1/temp/A
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1/temp/A > 
+
+2025/10/01 23:07:56 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.25]): 
+2025/10/01 23:08:16 Mark received: y
+2025/10/01 23:08:16 Sending command to SSI: 
+cd ../..
+pwd
+
+2025/10/01 23:08:16 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1/temp/A/C > root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1/temp > /Users/aabdul/Desktop/CSC360/p1/temp
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1/temp > 
+
+2025/10/01 23:08:16 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.25]): 
+2025/10/01 23:08:40 Mark received: y
+2025/10/01 23:08:40 Sending command to SSI: 
+cd ./D/../..
+pwd
+
+2025/10/01 23:08:40 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1/temp/A/C > root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1/temp/A > /Users/aabdul/Desktop/CSC360/p1/temp/A
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1/temp/A > 
+
+2025/10/01 23:08:40 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.25]): 
+2025/10/01 23:08:47 Mark received: y
+2025/10/01 23:08:47 ==== Test name: testChangeRelativeDir, Mark received: 1.00 ====
+
+2025/10/01 23:08:48 [testChangeAbsDir] Testing changing absolute directory, 1.00
+2025/10/01 23:08:48 Sending command to SSI: 
+cd /tmp
+pwd
+
+2025/10/01 23:08:48 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: /private/tmp > /private/tmp
+root@Mac.hitronhub.home: /private/tmp > 
+
+2025/10/01 23:08:48 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:09:01 Mark received: y
+2025/10/01 23:09:01 Sending command to SSI: 
+cd /tmp/../tmp/../tmp/
+pwd
+
+2025/10/01 23:09:01 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: /private/tmp > /private/tmp
+root@Mac.hitronhub.home: /private/tmp > 
+
+2025/10/01 23:09:01 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:09:04 Mark received: y
+2025/10/01 23:09:04 Sending command to SSI: 
+cd /
+pwd
+
+2025/10/01 23:09:04 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: / > /
+root@Mac.hitronhub.home: / > 
+
+2025/10/01 23:09:04 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:09:06 Mark received: y
+2025/10/01 23:09:06 Sending command to SSI: 
+cd /.././
+pwd
+
+2025/10/01 23:09:06 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: / > /
+root@Mac.hitronhub.home: / > 
+
+2025/10/01 23:09:06 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:09:08 Mark received: y
+2025/10/01 23:09:08 Sending command to SSI: 
+cd /tmp/nonexisit/
+pwd
+
+2025/10/01 23:09:08 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > /Users/aabdul/Desktop/CSC360/p1
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:09:08 chdir: No such file or directory
+
+2025/10/01 23:09:08 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:09:15 Mark received: y
+2025/10/01 23:09:15 ==== Test name: testChangeAbsDir, Mark received: 1.00 ====
+
+2025/10/01 23:09:16 [testChangeHomeDir] Testing changing home directory, 1.00
+2025/10/01 23:09:16 Sending command to SSI: 
+cd /tmp
+pwd
+
+2025/10/01 23:09:16 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: /private/tmp > /private/tmp
+root@Mac.hitronhub.home: /private/tmp > 
+
+2025/10/01 23:09:16 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:09:19 Mark received: y
+2025/10/01 23:09:19 Sending command to SSI: 
+cd ~
+pwd
+
+2025/10/01 23:09:19 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: /Users/aabdul > /Users/aabdul
+root@Mac.hitronhub.home: /Users/aabdul > 
+
+2025/10/01 23:09:19 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:09:28 Mark received: y
+2025/10/01 23:09:28 Sending command to SSI: 
+cd ~/
+pwd
+
+2025/10/01 23:09:28 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: /Users/aabdul > /Users/aabdul
+root@Mac.hitronhub.home: /Users/aabdul > 
+
+2025/10/01 23:09:28 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:10:27 Mark received: y
+2025/10/01 23:10:27 Sending command to SSI: 
+cd ~/../../
+pwd
+
+2025/10/01 23:10:27 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: / > /
+root@Mac.hitronhub.home: / > 
+
+2025/10/01 23:10:27 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:11:05 Mark received: y
+2025/10/01 23:11:05 Sending command to SSI: 
+cd 
+pwd
+
+2025/10/01 23:11:05 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > root@Mac.hitronhub.home: /Users/aabdul > /Users/aabdul
+root@Mac.hitronhub.home: /Users/aabdul > 
+
+2025/10/01 23:11:05 Do you want to award mark for this test? (y/n or input a floating number between [0, 0.20]): 
+2025/10/01 23:11:12 Mark received: y
+2025/10/01 23:11:12 ==== Test name: testChangeHomeDir, Mark received: 1.00 ====
+
+2025/10/01 23:11:13 [testPromptCorrect] Testing prompt is correct, 1.00
+2025/10/01 23:11:13 Among all the above changing directory tests, does the prompt always show the correct cwd after each `cd` command?
+2025/10/01 23:11:13 Do you want to award mark for this test? (y/n or input a floating number between [0, 1.00]): 
+2025/10/01 23:11:20 Mark received: y
+2025/10/01 23:11:20 ==== Test name: testPromptCorrect, Mark received: 1.00 ====
+
+2025/10/01 23:11:21 [testBgPing] Testing `bg` command with `ping`, 5.00
+2025/10/01 23:11:21 Please wait for around 15 seconds
+2025/10/01 23:11:21 [COMMAND]: /Users/aabdul/Desktop/CSC360/p1/ssi
+2025/10/01 23:11:21 Sending command to SSI: bg ping -c 5 1.1.1.1
+2025/10/01 23:11:21 Sending command to SSI: bg ping -c 10 8.8.8.8
+2025/10/01 23:11:21 Sending command to SSI: bglist  
+2025/10/01 23:11:21 Sending command to SSI: sleep 5 
+2025/10/01 23:11:21 Sending command to SSI: bglist  
+2025/10/01 23:11:21 Sending command to SSI: sleep 5 
+2025/10/01 23:11:21 Sending command to SSI: bglist  
+2025/10/01 23:11:32 root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > PING 1.1.1.1 (1.1.1.1): 56 data bytes
+64 bytes from 1.1.1.1: icmp_seq=0 ttl=60 time=20.989 ms
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > PING 8.8.8.8 (8.8.8.8): 56 data bytes
+64 bytes from 8.8.8.8: icmp_seq=0 ttl=119 time=16.714 ms
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 2947: bg ping -c 5 1.1.1.1 
+2948: bg ping -c 10 8.8.8.8 
+Total Background jobs: 2
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 64 bytes from 1.1.1.1: icmp_seq=1 ttl=60 time=18.456 ms
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=119 time=15.527 ms
+64 bytes from 1.1.1.1: icmp_seq=2 ttl=60 time=16.254 ms
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=119 time=12.790 ms
+64 bytes from 1.1.1.1: icmp_seq=3 ttl=60 time=16.863 ms
+64 bytes from 8.8.8.8: icmp_seq=3 ttl=119 time=12.995 ms
+64 bytes from 1.1.1.1: icmp_seq=4 ttl=60 time=17.329 ms
+
+--- 1.1.1.1 ping statistics ---
+5 packets transmitted, 5 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 16.254/17.978/20.989/1.669 ms
+64 bytes from 8.8.8.8: icmp_seq=4 ttl=119 time=12.420 ms
+64 bytes from 8.8.8.8: icmp_seq=5 ttl=119 time=17.988 ms
+
+2947: bg ping -c 5 1.1.1.1 has terminated.
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 2948: bg ping -c 10 8.8.8.8 
+Total Background jobs: 1
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 64 bytes from 8.8.8.8: icmp_seq=6 ttl=119 time=17.520 ms
+64 bytes from 8.8.8.8: icmp_seq=7 ttl=119 time=17.640 ms
+64 bytes from 8.8.8.8: icmp_seq=8 ttl=119 time=16.790 ms
+64 bytes from 8.8.8.8: icmp_seq=9 ttl=119 time=17.254 ms
+
+--- 8.8.8.8 ping statistics ---
+10 packets transmitted, 10 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 12.420/15.764/17.988/2.085 ms
+
+2948: bg ping -c 10 8.8.8.8 has terminated.
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > Total Background jobs: 0
+root@Mac.hitronhub.home: /Users/aabdul/Desktop/CSC360/p1 > 
+
+2025/10/01 23:11:32 Do you want to award mark for this test? (y/n or input a floating number between [0, 5.00]): 
+2025/10/01 23:12:05 Mark received: y
+2025/10/01 23:12:05 ==== Test name: testBgPing, Mark received: 5.00 ====
+
+2025/10/01 23:12:06 
+==== Final Grade: 15.000000====
